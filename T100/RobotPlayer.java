@@ -14,9 +14,9 @@ public class RobotPlayer {
 	static RobotController rc;
 	static Random rand;
 	public static void run(RobotController SkyNet) {
-		rand = new Random(rc.getID());
 		BaseBot myself = null;
 		rc = SkyNet;
+		rand = new Random(rc.getID());
 		RobotType type = rc.getType();
 
 		if(type == RobotType.HQ){
