@@ -13,6 +13,9 @@ import java.util.*;
 public class RobotPlayer {
 	static RobotController rc;
 	static Random rand;
+	static int numBEAVERS=2, numMINERS=3, numSOLDIERS=4,
+			numBASHERS=5, numBARRACKS=6, numMINERFACTORY=7,
+			numTANKFACTORY=8, numTANKS=9;
 	public static void run(RobotController SkyNet) {
 		BaseBot myself = null;
 		rc = SkyNet;
@@ -96,6 +99,11 @@ public class RobotPlayer {
 								toTarget.rotateRight().rotateRight()};
 			return dirs;
 		}
+		
+		public Direction getDirectionAwayFrom(MapLocation target) {
+			Direction toTarget = rc.getLocation().directionTo(target);
+			return toTarget.opposite();
+		}
 
 		public Direction getMoveDir(MapLocation target){
 			Direction[] dirs = getDirectionToward(target);
@@ -107,7 +115,22 @@ public class RobotPlayer {
 			return null;
 		}
 		/**
-		 * Attempts to return a direction to enemy HQ, then tries the other direction.
+		 * Attempt to spawn a robot of type.
+		 * 
+		 * @param type The type of robot to spawn
+		 * @throws GameActionException
+		 */
+		public void tryToSpawn(RobotType type) throws GameActionException {
+			if (type != null) {
+				Direction newDir = getSpawnDirection(type);
+				if (newDir != null) {
+					rc.spawn(newDir, type);
+				}
+			}
+		}
+		
+		/**
+		 * Attempts to return a direction to enemy HQ, then tries the other directions.
 		 * @param type
 		 * @return Direction to spawn to or null if all is occupied.
 		 */
@@ -120,25 +143,13 @@ public class RobotPlayer {
 				dir = dir.rotateRight();
 			}
 			return null;
-//			Direction[] dirs = getDirectionToward(this.theirHQ);
-//			for(Direction d : dirs){
-//				if(rc.canSpawn(d, type)){
-//					return d;
-//				}			
-//			}
-//			
-//			for(Direction d : dirs){
-//				if(rc.canSpawn(d.opposite(), type)){
-//					return d.opposite();
-//				}			
-//			}
-//			
-//			return null;
 		}
 
 		public Direction getBuildDirection(RobotType type){
 			Direction[] dirs = getDirectionToward(this.myHQ);
 			for(Direction d : dirs){
+				System.out.println("type: "+type);
+				System.out.println("d: "+d);
 				if(rc.canBuild(d, type)){
 					return d;
 				}
@@ -202,27 +213,80 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
-			int numBeavers = rc.readBroadcast(2);
+			countRobots();
 			
-			if (rc.isCoreReady() && rc.getTeamOre() >= 100  && numBeavers < 10) {
-				Direction spawnDirection = getSpawnDirection(RobotType.BEAVER);
-				if (spawnDirection != null) {
-					rc.spawn(spawnDirection, RobotType.BEAVER);
-					rc.broadcast(2,	 numBeavers+1);
-				}
+			int numBeavers = rc.readBroadcast(numBEAVERS);
+			if (rc.isCoreReady() && rc.getTeamOre() >= 100  && numBeavers < 3) {
+				tryToSpawn(RobotType.BEAVER);
 			}
 			
+			assignRallyPoints();
+			
+			rc.yield();
+		}
+		
+		/**
+		 * Here we decide where to rally our troops
+		 * @throws GameActionException
+		 */
+		private void assignRallyPoints() throws GameActionException {
+			// Decide the rally point
 			MapLocation rallyPoint;
-			if ( Clock.getRoundNum() < 600 ) {
-				rallyPoint = new MapLocation( (this.myHQ.x + this.theirHQ.x ) / 2 ,
-											 (this.myHQ.y + this.theirHQ.y ) /2);
+			if ( Clock.getRoundNum() < 1600 ) {
+				rallyPoint = new MapLocation( (3*this.myHQ.x + this.theirHQ.x ) / 4 ,
+											 (3*this.myHQ.y + this.theirHQ.y ) / 4);
 			} else {
 				rallyPoint = this.theirHQ;
 			}
 			rc.broadcast(0, rallyPoint.x);
 			rc.broadcast(1, rallyPoint.y);
-			
-			rc.yield();
+		}
+		
+		/**
+		 * Counts the number of robots and broadcasts them for others to use.
+		 * @throws GameActionException
+		 */
+		private void countRobots() throws GameActionException {
+			RobotInfo[] myRobots = rc.senseNearbyRobots(999999, myTeam);
+			int numSoldiers = 0;
+			int numBashers = 0;
+			int numBeavers = 0;
+			int numBarracks = 0;
+			int numMiners = 0;
+			int numMinerFactory = 0;
+			int numTankFactory = 0;
+			int numTanks = 0;
+			for (RobotInfo r : myRobots) {
+				RobotType type = r.type;
+				if (type == RobotType.SOLDIER) {
+					numSoldiers++;
+				} else if (type == RobotType.BASHER) {
+					numBashers++;
+				} else if (type == RobotType.BEAVER) {
+					numBeavers++;
+				} else if (type == RobotType.BARRACKS) {
+					numBarracks++;
+				} else if (type == RobotType.MINER) {
+					numMiners++;
+				} else if (type == RobotType.MINER) {
+					numMiners++;
+				} else if (type == RobotType.MINERFACTORY) {
+					numMinerFactory++;
+				} else if (type == RobotType.TANKFACTORY) {
+					numTankFactory++;
+				} else if (type == RobotType.TANK) {
+					numTanks++;
+				} 
+			}
+			rc.broadcast(numBEAVERS, numBeavers);
+			rc.broadcast(numSOLDIERS, numSoldiers);
+			rc.broadcast(numBASHERS, numBashers);
+			rc.broadcast(numBARRACKS, numBarracks);
+			rc.broadcast(numMINERS, numMiners);
+			rc.broadcast(numMINERFACTORY, numMinerFactory);
+			rc.broadcast(numTANKFACTORY, numTankFactory);
+			rc.broadcast(numTANKS, numTanks);
+
 		}
 	}
 
@@ -236,23 +300,44 @@ public class RobotPlayer {
 				if (rc.getTeamOre() < 500 ) {
 					// mine
 					if (rc.senseOre(rc.getLocation()) > 7) {
-						System.out.println("mined, ore: "+ rc.senseOre(rc.getLocation()));
+//						System.out.println("mined, ore: "+ rc.senseOre(rc.getLocation()));
 						rc.mine();
-					} else { 
-						Direction dir = getMoveDir(this.theirHQ);
+					} else {
+						// move away from HQ
+//						Direction dir = getDirectionAwayFrom(this.myHQ); 
+						Direction dir = getRandomDirection();
+						dir = getMoveDir(rc.getLocation().add(dir));
 						if (dir != null) {
 							rc.move(dir);
 						}
 					}
 				} else {
-					// build Barracks
-					Direction newDir = getBuildDirection(RobotType.BARRACKS);
-					if (newDir != null) {
-						rc.build(newDir,  RobotType.BARRACKS);
+					// build
+					RobotType building = getNextBuilding();
+					if (building == null) {
+						// TODO: do something
+					} else {
+						Direction newDir = getBuildDirection(building);
+						if (newDir != null) {
+							rc.build(newDir,  building);
+						}
 					}
 				}
 			} 
 			rc.yield();
+		}
+		
+		private RobotType getNextBuilding() throws GameActionException {
+			RobotType type = null;;
+//			System.out.println("numOfMINERFACTORIES: "+rc.readBroadcast(numMINERFACTORY));
+			if (rc.readBroadcast(numMINERFACTORY) < 1) {
+				type = RobotType.MINERFACTORY;
+			} else if (rc.readBroadcast(numBARRACKS) < 3) {
+				type = RobotType.BARRACKS;
+			} else if (rc.readBroadcast(numTANKFACTORY) < 1) {
+				type = RobotType.TANKFACTORY;
+			}
+			return type;
 		}
 	}
 
@@ -263,10 +348,14 @@ public class RobotPlayer {
 
 		public void execute() throws GameActionException{
 			if (rc.isCoreReady() && rc.getTeamOre() > 200){
-				Direction newDir = getSpawnDirection(RobotType.SOLDIER);
-				if (newDir != null) {
-					rc.spawn(newDir, RobotType.SOLDIER);
+				RobotType type = null;
+				if ( rc.readBroadcast(numSOLDIERS) < 20 ) {
+					type = RobotType.SOLDIER;
+				} 
+				else if ( rc.readBroadcast(numBASHERS) < 20 ) {
+					type = RobotType.BASHER;
 				}
+				tryToSpawn(type);
 			}
 				
 			rc.yield();
@@ -305,6 +394,16 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
+			if ( rc.isCoreReady()) {
+				int rallyX = rc.readBroadcast(0);
+				int rallyY = rc.readBroadcast(1);
+				MapLocation rallyPoint = new MapLocation(rallyX, rallyY);
+				
+				Direction newDir = getMoveDir(rallyPoint);
+				if (newDir != null) {
+					rc.move(newDir);
+				}
+			}
 			rc.yield();
 		}
 	}
@@ -315,6 +414,13 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
+			if (rc.isCoreReady() && rc.getTeamOre() > 250){
+				RobotType type = null;
+				if ( rc.readBroadcast(numTANKS) < 20 ) {
+					type = RobotType.TANK;
+				}
+				tryToSpawn(type);
+			}
 			rc.yield();
 		}
 	}
@@ -325,6 +431,22 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
+			RobotInfo[] enemies = getEnemiesInAttackingRange();
+			if ( enemies.length > 0 ) {
+				if (rc.isWeaponReady()) {
+					attackLeastHealthEnemies(enemies);
+				}
+			} else if ( rc.isCoreReady()) {
+				int rallyX = rc.readBroadcast(0);
+				int rallyY = rc.readBroadcast(1);
+				MapLocation rallyPoint = new MapLocation(rallyX, rallyY);
+				
+				Direction newDir = getMoveDir(rallyPoint);
+				
+				if (newDir != null) {
+					rc.move(newDir);
+				}
+			}
 			rc.yield();
 		}
 	}
@@ -375,6 +497,11 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
+			int numMiners = rc.readBroadcast(numMINERS);
+//			System.out.println("executes minerfactory");
+			if (rc.isCoreReady() && rc.getTeamOre() >= 60  && numMiners < 20) {
+				tryToSpawn(RobotType.MINER);
+			}
 			rc.yield();
 		}
 	}
@@ -385,7 +512,22 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
+			mine();
 			rc.yield();
+		}
+		
+		private void mine() throws GameActionException {
+			if ( rc.isCoreReady() ) {
+				if (rc.senseOre(rc.getLocation()) > 1) {
+					rc.mine();
+				} else {
+					Direction dir = getRandomDirection();
+					dir = getMoveDir(rc.getLocation().add(dir));
+					if (dir != null) {
+						rc.move(dir);
+					}
+				}
+			}
 		}
 	}
 
@@ -435,6 +577,12 @@ public class RobotPlayer {
 		}
 
 		public void execute() throws GameActionException{
+			if (rc.isWeaponReady()) {
+				RobotInfo[] enemies = getEnemiesInAttackingRange();
+				if ( enemies.length > 0 ) {
+					attackLeastHealthEnemies(enemies);
+				}
+			}
 			rc.yield();
 		}
 	}
