@@ -13,9 +13,15 @@ import java.util.*;
 public class RobotPlayer {
 	static RobotController rc;
 	static Random rand;
+	// COMMUNICATION CHANNELS:
 	static int numBEAVERS=2, numMINERS=3, numSOLDIERS=4,
 			numBASHERS=5, numBARRACKS=6, numMINERFACTORY=7,
 			numTANKFACTORY=8, numTANKS=9;
+	
+	// MAXIMUM AMOUNT OF UNITS OF A SPECIFIC TYPE:
+	static int MAXSOLDIERS=20, MAXBASHERS=20, MAXMINERS=15,
+			MAXBEAVERS=3, MAXTANKS=30;
+	
 	public static void run(RobotController SkyNet) {
 		BaseBot myself = null;
 		rc = SkyNet;
@@ -216,7 +222,7 @@ public class RobotPlayer {
 			countRobots();
 			
 			int numBeavers = rc.readBroadcast(numBEAVERS);
-			if (rc.isCoreReady() && rc.getTeamOre() >= 100  && numBeavers < 3) {
+			if (rc.isCoreReady() && rc.getTeamOre() >= 100  && numBeavers < MAXBEAVERS) {
 				tryToSpawn(RobotType.BEAVER);
 			}
 			
@@ -349,10 +355,10 @@ public class RobotPlayer {
 		public void execute() throws GameActionException{
 			if (rc.isCoreReady() && rc.getTeamOre() > 200){
 				RobotType type = null;
-				if ( rc.readBroadcast(numSOLDIERS) < 20 ) {
+				if ( rc.readBroadcast(numSOLDIERS) < MAXSOLDIERS ) {
 					type = RobotType.SOLDIER;
 				} 
-				else if ( rc.readBroadcast(numBASHERS) < 20 ) {
+				else if ( rc.readBroadcast(numBASHERS) < MAXBASHERS ) {
 					type = RobotType.BASHER;
 				}
 				tryToSpawn(type);
@@ -416,7 +422,7 @@ public class RobotPlayer {
 		public void execute() throws GameActionException{
 			if (rc.isCoreReady() && rc.getTeamOre() > 250){
 				RobotType type = null;
-				if ( rc.readBroadcast(numTANKS) < 20 ) {
+				if ( rc.readBroadcast(numTANKS) < MAXTANKS ) {
 					type = RobotType.TANK;
 				}
 				tryToSpawn(type);
@@ -499,7 +505,7 @@ public class RobotPlayer {
 		public void execute() throws GameActionException{
 			int numMiners = rc.readBroadcast(numMINERS);
 //			System.out.println("executes minerfactory");
-			if (rc.isCoreReady() && rc.getTeamOre() >= 60  && numMiners < 20) {
+			if (rc.isCoreReady() && rc.getTeamOre() >= 60  && numMiners < MAXMINERS) {
 				tryToSpawn(RobotType.MINER);
 			}
 			rc.yield();
