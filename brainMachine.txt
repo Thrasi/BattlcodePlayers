@@ -1,0 +1,2 @@
+* Transfer supplies from dying units and not to dying units.  To do this
+we need an estimation of when a unit is as good as dead.
