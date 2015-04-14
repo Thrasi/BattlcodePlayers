@@ -140,13 +140,11 @@ public class BaseBot {
 		if (rc.senseEnemyHQLocation() != null) {
 			this.theirHQ = rc.senseEnemyHQLocation();
 		}
-		transferSupplies();
+		transferSuppliesTolowest();
 
-		//			int supplyLevel = rc.getSupplyLevel();
-		//			if (rc.)
 	}
 
-	private void transferSupplies() throws GameActionException {
+	private void transferSuppliesTolowest() throws GameActionException {
 		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(),
 				GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, rc.getTeam());
 		double lowestSupply = rc.getSupplyLevel();

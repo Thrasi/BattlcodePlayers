@@ -174,7 +174,7 @@ public class RobotPlayer {
 		}
 
 		public void attackLeastHealthEnemies(RobotInfo[] enemies) throws GameActionException{
-			if(enemies.length == 0){
+			if(enemies.length == 0 ){
 				return;
 			}
 			double minHealth = Integer.MAX_VALUE;

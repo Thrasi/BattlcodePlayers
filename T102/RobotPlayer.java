@@ -8,7 +8,9 @@ package T102;
  * 
  * */
 
+
 import battlecode.common.*;
+
 import java.util.*;
 
 public class RobotPlayer {
@@ -16,9 +18,35 @@ public class RobotPlayer {
 	static Random rand;
 	
 	// COMMUNICATION CHANNELS:
-	static int numBEAVERS = 2, numMINERS = 3, numSOLDIERS = 4, numBASHERS = 5,
-			numBARRACKS = 6, numMINERFACTORY = 7, numTANKFACTORY = 8, numTANKS = 9,
-			numSUPPLYDEPOT = 10;
+	public static int numBEAVERS = 2, 
+			numMINERS = 3, 
+			numSOLDIERS = 4, 
+			numBASHERS = 5,
+			numBARRACKS = 6, 
+			numMINERFACTORY = 7, 
+			numTANKFACTORY = 8, 
+			numTANKS = 9,
+			numSUPPLYDEPOT = 10, 
+			numAEROSPACELAB = 11, 
+			numCOMMANDER = 12, 
+			numCOMPUTER = 13,
+			numDRONE = 14, 
+			numHELIPAD = 15, 
+			numLAUNCHERS = 16, 
+			numMISSILE = 17,
+			numTECHNOLOGYINSTITUTE = 18, 
+			numTOWER = 19, 
+			numTRAININGFIED = 20,
+	// SUPPLY QUEUE:
+			SUPPLIERID = 296, //199
+			numSUPPLIERS = 297,//200
+			SUPPLYQSTART = 298,
+			SUPPLYQEND = 299
+			
+			
+			;
+	
+			
 
 	// MAXIMUM AMOUNT OF UNITS OF A SPECIFIC TYPE:
 	static int MAXSOLDIERS = 20, MAXBASHERS = 20, MAXMINERS = 15, MAXBEAVERS = 3,
@@ -46,6 +74,16 @@ public class RobotPlayer {
 		} else if (type == RobotType.COMPUTER) {
 			myself = new Computer(rc);
 		} else if (type == RobotType.DRONE) {
+			try {
+				if (rc.getType() == RobotType.DRONE && needsSupplier(rc)) {
+					myself = new Supplier(rc);
+					rc.broadcast(numSUPPLIERS, rc.readBroadcast(numSUPPLIERS) + 1);
+				    rc.broadcast(SUPPLIERID, rc.getID());
+				}
+			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			myself = new Drone(rc);
 		} else if (type == RobotType.HELIPAD) {
 			myself = new Helipad(rc);
@@ -80,6 +118,13 @@ public class RobotPlayer {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public static boolean needsSupplier(RobotController rc) throws GameActionException {
+		if (rc.readBroadcast(numSUPPLIERS) == 0) {
+			return true;
+		}
+		return false;
 	}
 
 	
