@@ -10,12 +10,12 @@ package T102;
 
 
 import battlecode.common.*;
-
 import java.util.*;
 
 public class RobotPlayer {
-	static RobotController rc;
-	static Random rand;
+	
+	private static RobotController rc;
+	private static Random rand;
 	
 	// COMMUNICATION CHANNELS:
 	public static int numBEAVERS = 2, 
@@ -37,13 +37,12 @@ public class RobotPlayer {
 			numTECHNOLOGYINSTITUTE = 18, 
 			numTOWER = 19, 
 			numTRAININGFIED = 20,
-	// SUPPLY QUEUE:
-			SUPPLIERID = 296, //199
-			numSUPPLIERS = 297,//200
+	
+		// SUPPLY QUEUE:
+			SUPPLIERID = 296, 
+			numSUPPLIERS = 297,
 			SUPPLYQSTART = 298,
 			SUPPLYQEND = 299
-			
-			
 			;
 	
 			
@@ -52,6 +51,10 @@ public class RobotPlayer {
 	static int MAXSOLDIERS = 20, MAXBASHERS = 20, MAXMINERS = 15, MAXBEAVERS = 3,
 			MAXTANKS = 30;
 
+	/**
+	 * Main run function
+	 * @param SkyNet killer robots
+	 */
 	public static void run(RobotController SkyNet) {
 		BaseBot myself = null;
 		rc = SkyNet;
