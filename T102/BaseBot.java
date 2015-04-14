@@ -1,5 +1,8 @@
 package T102;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 import battlecode.common.Direction;
@@ -14,10 +17,11 @@ import battlecode.common.Team;
 public class BaseBot {
 
 	// All 8 directions in one place
-	protected static final Direction[] directions = { Direction.NORTH,
-			Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH,
-			Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
-
+	protected static final Direction[] directions = {
+		Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
+		Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST
+	};
+	
 	
 	// Current robot
 	protected RobotController rc;
@@ -29,12 +33,12 @@ public class BaseBot {
 	protected Team myTeam, theirTeam;
 	
 	// Random number generator
-	private Random rand;
+	protected Random rand;
 
 	
 	/**
 	 * Sets HQ locations, teams and initializes random generator.
-	 * @param rc
+	 * @param rc this robot's controller
 	 */
 	public BaseBot(RobotController rc) {
 		this.rc = rc;
@@ -44,6 +48,7 @@ public class BaseBot {
 		this.theirTeam = this.myTeam.opponent();
 		this.rand = new Random(rc.getID());
 	}
+	
 	
 	
 	// BLOCK FOR SHORT FUNCTIONS TO MAKE ACTIONS EASIER TO PERFORM
@@ -65,12 +70,12 @@ public class BaseBot {
 	}
 	
 	/**
-	 * Tries to shoot the given location. Helps to avoid performing check every time.
+	 * Tries to attack the given location. Helps to avoid performing check every time.
 	 * @param location location to shoot
 	 * @return true if shot, false otherwise
 	 * @throws GameActionException should not be thrown
 	 */
-	protected boolean tryShoot(MapLocation location) throws GameActionException {
+	protected boolean tryAttack(MapLocation location) throws GameActionException {
 		if (rc.isWeaponReady() && rc.canAttackLocation(location)) {
 			rc.attackLocation(location);
 			return true;
@@ -129,7 +134,7 @@ public class BaseBot {
 	 * Random direction generator.
 	 * @return random direction
 	 */
-	public Direction getRandomDirection() {
+	protected Direction getRandomDirection() {
 		return directions[rand.nextInt(8)];
 	}
 
@@ -138,7 +143,7 @@ public class BaseBot {
 	 * @param target target location
 	 * @return direction away
 	 */
-	public Direction getDirectionAwayFrom(MapLocation target) {
+	protected Direction getDirectionAwayFrom(MapLocation target) {
 		return rc.getLocation().directionTo(target).opposite();
 	}
 	
@@ -149,7 +154,7 @@ public class BaseBot {
 	 * @param target target location
 	 * @return array of 8 directions
 	 */
-	protected Direction[] getAllDirectionTowards(MapLocation target) {
+	protected Direction[] getAllDirectionsTowards(MapLocation target) {
 		Direction toTarget = rc.getLocation().directionTo(target);
 		Direction dirs[] = {
 				toTarget,
@@ -169,7 +174,7 @@ public class BaseBot {
 	 * @param target target location
 	 * @return array of 5 directions
 	 */
-	protected Direction[] getDirectionTowards(MapLocation target) {
+	protected Direction[] getDirectionsTowards(MapLocation target) {
 		Direction toTarget = rc.getLocation().directionTo(target);
 		Direction dirs[] = {
 				toTarget,
@@ -183,7 +188,7 @@ public class BaseBot {
 
 	
 	
-	// SPECIFIC DIRECTION BLOCK
+	// ACTIONS BLOCK
 	
 	/**
 	 * Returns direction towards the target that is possible to perform.
@@ -191,7 +196,7 @@ public class BaseBot {
 	 * @return direction if possible to move, null otherwise
 	 */
 	public Direction getMoveDirection(MapLocation target) {
-		Direction[] dirs = getDirectionTowards(target);
+		Direction[] dirs = getDirectionsTowards(target);
 		for (Direction d : dirs) {
 			if (rc.canMove(d)) {
 				return d;
@@ -206,7 +211,7 @@ public class BaseBot {
 	 * @return Direction to spawn to or null if all is occupied.
 	 */
 	public Direction getSpawnDirection(RobotType type) {
-		for (Direction dir : getAllDirectionTowards(theirHQ)) {
+		for (Direction dir : getAllDirectionsTowards(theirHQ)) {
 			if (rc.canSpawn(dir, type)) {
 				return dir;
 			}
@@ -220,7 +225,7 @@ public class BaseBot {
 	 * @return Direction to build or null if everything is occupied.
 	 */
 	public Direction getBuildDirection(RobotType type) {
-		for (Direction dir : getAllDirectionTowards(myHQ)) {
+		for (Direction dir : getAllDirectionsTowards(myHQ)) {
 			if (rc.canBuild(dir, type)) {
 				return dir;
 			}
@@ -231,7 +236,6 @@ public class BaseBot {
 	/**
 	 * Attempt to spawn a robot of given type.
 	 * @param type The type of robot to spawn
-	 * @throws GameActionException
 	 */
 	public void tryToSpawn(RobotType type) throws GameActionException {
 		if (type != null) {
@@ -242,6 +246,36 @@ public class BaseBot {
 		}
 	}
 	
+	/**
+	 * Tries to move in any direction but checking the ones that are towards
+	 * the target first.
+	 * @param loc target location
+	 * @return true if moved, false if everything is occupied
+	 */
+	public boolean tryMoveTo(MapLocation loc) throws GameActionException {
+		for (Direction dir : getAllDirectionsTowards(loc)) {
+			if (tryMove(dir)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Tries to spawn robot no matter what in any direction.
+	 * @param type robot type to spawn
+	 * @return true if spawned, false if everything is occupied
+	 */
+	public boolean trySpawn(RobotType type) throws GameActionException {
+		for (Direction dir : directions) {
+			if (trySpawn(dir, type)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+
 	
 	// SENSING ROBOTS
 
@@ -276,6 +310,15 @@ public class BaseBot {
 	public RobotInfo[] getNearbyEnemies() {
 		return rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, theirTeam);
 	}
+	
+	/**
+	 * Senses all ally robots in given squared range.
+	 * @param sqrRange squared range
+	 * @return array of ally robots
+	 */
+	public RobotInfo[] getAlliesInRange(int sqrRange) {
+		return rc.senseNearbyRobots(sqrRange, myTeam);
+	}
 
 	
 	
@@ -302,14 +345,45 @@ public class BaseBot {
 		}
 		rc.attackLocation(toAttack);
 	}
+	
+	/**
+	 * Shoots the weakest enemy in range. Finds all enemies in sensing range and
+	 * tries to attack the one with lowest health.
+	 */
+	public void tryShootWeakest() throws GameActionException {
+		RobotInfo[] nearbyEnemies = getNearbyEnemies();
+		if (nearbyEnemies.length > 0) {
+			
+			// Find weakest robot
+			RobotInfo weakestRobot = Collections.min(
+					Arrays.asList(nearbyEnemies),
+					new Comparator<RobotInfo>() {
 
+				@Override
+				public int compare(RobotInfo o1, RobotInfo o2) {
+					return (int) (o1.health - o2.health);
+				}
+			});
+			
+			tryAttack(weakestRobot.location);
+		}
+	}
+
+	/**
+	 * I have to admit, I have no idea what this is.
+	 */
 	public void moveAround() {
 
 	}
-	
-	private void transferSuppliesTolowest() throws GameActionException {
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(),
-				GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, rc.getTeam());
+
+	/**
+	 * Sends supply to the ally robot in range which has lowest supply. After transfer
+	 * is done, both robots have the same amount of supplies.
+	 */
+	public void transferSuppliesTolowest() throws GameActionException {
+		RobotInfo[] nearbyAllies =
+				getAlliesInRange(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED); 
+		
 		double lowestSupply = rc.getSupplyLevel();
 		double transferAmount = 0;
 		MapLocation supplyTarget = null;
@@ -320,10 +394,10 @@ public class BaseBot {
 				supplyTarget = ri.location;
 			}
 		}
+
 		if (supplyTarget != null) {
 			rc.transferSupplies((int) transferAmount, supplyTarget);
 		}
-
 	}
 	
 	
@@ -331,16 +405,15 @@ public class BaseBot {
 	// RUN
 
 	/**
-	 * Called at the beginning of the turn
+	 * Called at the beginning of the turn. Just transfers supplies to the robot
+	 * with lowest amount of supplies.
 	 * @throws GameActionException
 	 */
 	public void beginingOfTurn() throws GameActionException {
-
 		if (rc.senseEnemyHQLocation() != null) {
 			this.theirHQ = rc.senseEnemyHQLocation();
 		}
 		transferSuppliesTolowest();
-
 	}
 
 
