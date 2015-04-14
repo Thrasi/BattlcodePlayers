@@ -15,7 +15,6 @@ import java.util.*;
 public class RobotPlayer {
 	
 	private static RobotController rc;
-	private static Random rand;
 	
 	// COMMUNICATION CHANNELS:
 	public static int numBEAVERS = 2, 
@@ -59,7 +58,6 @@ public class RobotPlayer {
 		BaseBot myself = null;
 		rc = SkyNet;
 
-		rand = new Random(rc.getID());
 		RobotType type = rc.getType();
 
 		if (type == RobotType.HQ) {
