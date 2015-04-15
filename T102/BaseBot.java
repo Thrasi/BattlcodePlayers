@@ -233,7 +233,7 @@ public class BaseBot {
 		return dirs;
 	}
 
-	
+
 	
 	// ACTIONS BLOCK
 	
@@ -322,6 +322,11 @@ public class BaseBot {
 		return false;
 	}
 	
+	/**
+	 * Tries to build robot no matter what in any direction.
+	 * @param type robot type to build
+	 * @return true if built, false otherwise
+	 */
 	public boolean tryBuild(RobotType type) throws GameActionException {
 		for (Direction dir : directions) {
 			if (tryBuild(dir, type)) {
@@ -435,6 +440,25 @@ public class BaseBot {
 		}
 	}
 	
+	/**
+	 * Check whether a location is taken by a robot.
+	 * @param loc location to check
+	 * @return true if it taken, false otherwise
+	 * @throws GameActionException
+	 */
+	public boolean isTaken(MapLocation loc) throws GameActionException {
+		return rc.senseRobotAtLocation(loc) != null;
+	}
+	
+	/**
+	 * Checks whether a location is a normal tile.
+	 * @param loc location to check
+	 * @return true if it is a normal tile, false otherwise
+	 */
+	public boolean isNormal(MapLocation loc) {
+		return rc.senseTerrainTile(loc) == TerrainTile.NORMAL;
+	}
+	
 	
 	
 	// MAP BLOCK
@@ -521,6 +545,46 @@ public class BaseBot {
 			
 			tryAttack(weakestRobot.location);
 		}
+	}
+	
+	public Direction[] bugPlanning(MapLocation target) throws GameActionException {
+		MapLocation loc = rc.getLocation();
+		Direction dir = loc.directionTo(target);
+		for (int i = 0; i < 8; i++) {
+			if (!rc.canMove(dir)) {
+				dir.rotateLeft();
+			} else {
+				break;
+			}
+		}
+		List<Direction> moves = new LinkedList<>();
+		
+		int d = 0;
+		
+		
+		while (true) {
+			if (dir == loc.directionTo(target) || dir == null || d > 8) {
+				break;
+			}
+			moves.add(dir);
+			
+			
+			loc = loc.add(dir);
+			
+			Direction right = dir.rotateRight().rotateRight();
+			while (true) {
+				MapLocation newLoc = loc.add(right);
+				TerrainTile tile = rc.senseTerrainTile(loc);
+				if (isTaken(newLoc) || tile == TerrainTile.OFF_MAP) {
+					right.rotateLeft();
+				} else {
+					break;
+				}
+			}
+			dir = right;//directionLeftTowards(tloc);
+			d++;
+		}
+		return moves.toArray(new Direction[moves.size()]);
 	}
 
 	/**

@@ -183,7 +183,20 @@ public class Drone extends BaseBot {
 					return l;
 				}
 			}
-			tryMoveTo(loc);
+			if (!rc.canMove(rc.getLocation().directionTo(loc))) {
+				//rc.setIndicatorString(0, bugPlanning(loc).toString());
+				
+			}
+			if (!tryMoveTo(loc)) {
+				rc.setIndicatorString(2, "nisam uspio");
+				Direction[] ds = bugPlanning(loc);
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < ds.length; i++) {
+					sb.append(" " + ds[i]);
+				}
+				rc.setIndicatorString(0, ds.length + "");
+				rc.setIndicatorString(1, sb.toString());
+			}
 			rc.yield();
 		}
 	}
