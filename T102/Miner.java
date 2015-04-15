@@ -1,12 +1,34 @@
 package T102;
 
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class Miner extends BaseBot {
 
+	private MapLocation oreLoc;
+	
 	public Miner(RobotController rc) {
 		super(rc);
-		// TODO Auto-generated constructor stub
+		this.oreLoc = null;
+	}
+	
+	@Override
+	public void execute() throws GameActionException {
+		if (rc.senseOre(rc.getLocation()) > 0) {
+			oreLoc = null;
+			tryMine();
+		} else {
+			if (oreLoc == null) {
+				oreLoc = closestOre();
+				if (oreLoc == null) {
+					tryMoveTo(rc.getLocation().add(getRandomDirection()));
+				}
+			} else {
+				tryMoveTo(oreLoc);
+			}
+		}
+		rc.yield();
 	}
 
 }

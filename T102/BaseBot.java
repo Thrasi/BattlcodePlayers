@@ -3,8 +3,11 @@ package T102;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -13,6 +16,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 public class BaseBot {
 
@@ -48,6 +52,47 @@ public class BaseBot {
 		this.theirTeam = this.myTeam.opponent();
 		this.rand = new Random(rc.getID());
 	}
+	
+	
+	
+	// RUN
+
+		/**
+		 * Called at the beginning of the turn. Just transfers supplies to the robot
+		 * with lowest amount of supplies.
+		 * @throws GameActionException
+		 */
+		public void beginingOfTurn() throws GameActionException {
+			if (rc.senseEnemyHQLocation() != null) {
+				this.theirHQ = rc.senseEnemyHQLocation();
+			}
+			transferSuppliesTolowest();
+		}
+
+
+		/**
+		 * Executes main actions
+		 * @throws GameActionException
+		 */
+		public void execute() throws GameActionException {
+			rc.yield();
+		}
+
+		/**
+		 * Called at the end of the turn
+		 */
+		public void endOfTurn() {
+		}
+
+		/**
+		 * Called to perform actions of this robot.
+		 * @throws GameActionException if anything weird happens
+		 */
+		public void go() throws GameActionException {
+			beginingOfTurn();
+			execute();
+			endOfTurn();
+		}
 	
 	
 	
@@ -275,6 +320,15 @@ public class BaseBot {
 		return false;
 	}
 	
+	public boolean tryBuild(RobotType type) throws GameActionException {
+		for (Direction dir : directions) {
+			if (tryBuild(dir, type)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 
 	
 	// SENSING ROBOTS
@@ -380,6 +434,10 @@ public class BaseBot {
 	 * is done, both robots have the same amount of supplies.
 	 */
 	public void transferSuppliesTolowest() throws GameActionException {
+		if (Clock.getRoundNum() % 10 != 0) {
+			return;
+		}
+		
 		RobotInfo[] nearbyAllies =
 				getAlliesInRange(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED); 
 		
@@ -387,7 +445,7 @@ public class BaseBot {
 		double transferAmount = 0;
 		MapLocation supplyTarget = null;
 		for (RobotInfo ri : nearbyAllies) {
-			if (ri.supplyLevel < lowestSupply) {
+			if (ri.supplyLevel < lowestSupply && ri.type != RobotType.HQ) {
 				lowestSupply = ri.supplyLevel;
 				transferAmount = (rc.getSupplyLevel() - lowestSupply) / 2;
 				supplyTarget = ri.location;
@@ -395,48 +453,63 @@ public class BaseBot {
 		}
 
 		if (supplyTarget != null) {
+			//System.out.println(rc.getSupplyLevel() + " " + lowestSupply);
 			rc.transferSupplies((int) transferAmount, supplyTarget);
 		}
 	}
 	
-	
-	
-	// RUN
-
-	/**
-	 * Called at the beginning of the turn. Just transfers supplies to the robot
-	 * with lowest amount of supplies.
-	 * @throws GameActionException
-	 */
-	public void beginingOfTurn() throws GameActionException {
-		if (rc.senseEnemyHQLocation() != null) {
-			this.theirHQ = rc.senseEnemyHQLocation();
+	protected MapLocation closestOre() throws GameActionException {
+		//System.out.println("before " + Clock.getBytecodeNum());
+		MapLocation[] locations = MapLocation.getAllMapLocationsWithinRadiusSq(
+				rc.getLocation(),
+				rc.getType().sensorRadiusSquared
+		);
+		
+		MapLocation oreLoc = null;
+		int dist = Integer.MAX_VALUE;
+		for (MapLocation loc : locations) {
+			if (rc.senseTerrainTile(loc) == TerrainTile.NORMAL && rc.senseOre(loc) > 0
+					&& rc.getLocation().distanceSquaredTo(loc) < dist
+					&& rc.senseRobotAtLocation(loc) == null) {
+				oreLoc = loc;
+			}
 		}
-		transferSuppliesTolowest();
+		//System.out.println("after " + Clock.getBytecodeNum());
+		return oreLoc;
+		
+		/*System.out.println(Clock.getBytecodeNum());
+		final MapLocation curr = rc.getLocation();
+		Set<MapLocation> visited = new HashSet<>();
+		List<MapLocation> open = new LinkedList<>();
+		open.add(curr);
+		
+		int i = 0;
+		while (!open.isEmpty()) {
+			i++;
+			MapLocation loc = open.remove(0);
+			visited.add(loc);
+			if (rc.senseOre(loc) > 0.5) {
+				System.out.println(i + " " + Clock.getBytecodeNum());
+				return loc;
+			}
+			for (MapLocation l : succ(loc)) {
+				if (visited.contains(l)) {
+					continue;
+				}
+				open.add(l);
+			}
+		}*/
 	}
-
-
-	/**
-	 * Executes main actions
-	 * @throws GameActionException
-	 */
-	public void execute() throws GameActionException {
-		rc.yield();
+	
+	protected List<MapLocation> succ(MapLocation loc) {
+		List<MapLocation> adjacent = new LinkedList<>();
+		for (Direction dir : directions) {
+			MapLocation adj = loc.add(dir);
+			if (rc.senseTerrainTile(adj) == TerrainTile.NORMAL) {
+				adjacent.add(loc.add(dir));
+			}
+		}
+		return adjacent;
 	}
-
-	/**
-	 * Called at the end of the turn
-	 */
-	public void endOfTurn() {
-	}
-
-	/**
-	 * Called to perform actions of this robot.
-	 * @throws GameActionException if anything weird happens
-	 */
-	public void go() throws GameActionException {
-		beginingOfTurn();
-		execute();
-		endOfTurn();
-	}
+	
 }

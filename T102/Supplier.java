@@ -31,7 +31,6 @@ public class Supplier extends BaseBot {
                         }
                         else {
                             boolean moved = tryMoveTo( allies[i].location );
-
                             if (!moved) {
                                 // do something?
                             }
@@ -42,7 +41,6 @@ public class Supplier extends BaseBot {
             }
             if (rc.getSupplyLevel() <= 1000) {
             	boolean moved = tryMoveTo( this.myHQ );
-
                 if (!moved) {
                     // do something?
                 }

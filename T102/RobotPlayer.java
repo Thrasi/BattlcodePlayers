@@ -41,7 +41,10 @@ public class RobotPlayer {
 			SUPPLIERID = 296, 
 			numSUPPLIERS = 297,
 			SUPPLYQSTART = 298,
-			SUPPLYQEND = 299
+			SUPPLYQEND = 299,
+			
+		// EXPLORING ROBOTS
+			CORNERBEAVER = 800
 			;
 	
 			
