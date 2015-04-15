@@ -49,7 +49,13 @@ public class RobotPlayer {
 			expDRONE1 = 801,
 			expDRONE2 = 802,
 			expDRONE3 = 803,
-			expDRONE4 = 804
+			expDRONE4 = 804,
+			
+		// MAP
+			MAPWIDTH = 900,
+			MAPHEIGHT = 901,
+			TOPLEFTX = 902,
+			TOPLEFTY = 903
 			;
 	
 	public static Map<RobotType, Integer> countChannels = new HashMap<>();

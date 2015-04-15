@@ -417,7 +417,8 @@ public class BaseBot {
 		boolean e = rc.senseTerrainTile(loc.add(Direction.EAST)) == TerrainTile.OFF_MAP;
 		boolean w = rc.senseTerrainTile(loc.add(Direction.WEST)) == TerrainTile.OFF_MAP;
 		
-		return n && e || n && w || s && e || s && w;
+		return (n && e || n && w || s && e || s && w)
+				&& rc.senseTerrainTile(loc) == TerrainTile.NORMAL;
 	}
 	
 	public boolean isRotationSym() {
