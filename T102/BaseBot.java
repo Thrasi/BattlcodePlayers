@@ -521,7 +521,7 @@ public class BaseBot {
 	 * is done, both robots have the same amount of supplies.
 	 */
 	public void transferSuppliesTolowest() throws GameActionException {
-		if (Clock.getRoundNum() % 10 != 0 || rc.getType().isBuilding) {
+		if (Clock.getRoundNum() % 10 != 0 || !isInSupplyChain(rc.getType())) {
 			return;
 		}
 		
@@ -532,7 +532,7 @@ public class BaseBot {
 		double transferAmount = 0;
 		MapLocation supplyTarget = null;
 		for (RobotInfo ri : nearbyAllies) {
-			if (ri.supplyLevel < lowestSupply && !ri.type.isBuilding) {
+			if (ri.supplyLevel < lowestSupply && isInSupplyChain(ri.type)) {
 				lowestSupply = ri.supplyLevel;
 				transferAmount = (rc.getSupplyLevel() - lowestSupply) / 2;
 				supplyTarget = ri.location;
@@ -543,6 +543,10 @@ public class BaseBot {
 			//System.out.println(rc.getSupplyLevel() + " " + lowestSupply);
 			rc.transferSupplies((int) transferAmount, supplyTarget);
 		}
+	}
+	
+	private boolean isInSupplyChain(RobotType type) {
+		return !type.isBuilding || type == RobotType.TOWER;
 	}
 	
 	protected MapLocation closestOre() throws GameActionException {

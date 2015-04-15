@@ -141,12 +141,16 @@ public class HQ extends BaseBot {
 		} else {
 			// TODO other shit
 		}
-		
+
+		System.out.println("ovdje");
 		for (int y = ys; y < ys + height; y += 3) {
 			for (int x = xs; x < xs + width; x+= 3) {
-				
+				MapLocation loc = new MapLocation(x, y);
+				if (loc.distanceSquaredTo(myHQ) < loc.distanceSquaredTo(theirHQ))
+					rc.setIndicatorDot(loc, 200, 60, 90);
 			}
 		}
+		rc.yield();
 	}
 
 
@@ -155,7 +159,7 @@ public class HQ extends BaseBot {
 	 * @throws GameActionException
 	 */
 	public void transferToSupplier() throws GameActionException {
-		RobotInfo[] allies = rc.senseNearbyRobots(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, 
+		/*RobotInfo[] allies = rc.senseNearbyRobots(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, 
 				myTeam);
 		
 		int idToLook = rc.readBroadcast(RobotPlayer.SUPPLIERID);
@@ -166,6 +170,12 @@ public class HQ extends BaseBot {
 			if (k.ID == idToLook) {
 				rc.transferSupplies(100000, allies[i].location);
 			}
+		}*/
+		int idToLook = rc.readBroadcast(RobotPlayer.SUPPLIERID);
+		RobotInfo supplier = rc.senseRobot(idToLook); 
+		if (supplier != null && rc.getLocation().distanceSquaredTo(supplier.location)
+				<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+			rc.transferSupplies((int) (rc.getSupplyLevel() / 2), supplier.location);
 		}
 	}
 
