@@ -1,5 +1,6 @@
 package T102;
 
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -12,19 +13,37 @@ public class Beaver extends BaseBot {
 		super(rc);
 	}
 	
+	
+	
 	@Override
 	public void execute() throws GameActionException {
 		if (rc.getID() == rc.readBroadcast(RobotPlayer.CORNERBEAVER)) {
 			cornerBeaver();
 		}
+		boolean hasBuilt = false;
 		
 		//if (rc.readBroadcast(RobotType.MINERFACTORY.ordinal()) < 1) {
 		if (rc.readBroadcast(RobotPlayer.numMINERFACTORY) < 1) {
-			tryBuild(RobotType.MINERFACTORY);
-		} else //if (rc.readBroadcast(RobotType.HELIPAD.ordinal()) < 1) {
-			if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
-			tryBuild(RobotType.HELIPAD);
+			hasBuilt = tryBuild(RobotType.MINERFACTORY);
+		} 
+		else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
+			hasBuilt = tryBuild(RobotType.HELIPAD);
 		}
+		else if (rc.readBroadcast(RobotPlayer.numBARRACKS) < 2) {
+			hasBuilt = tryBuild(RobotType.BARRACKS);
+		}
+		else if (rc.readBroadcast(RobotPlayer.numTANKFACTORY) < 2) {
+			hasBuilt = tryBuild(RobotType.TANKFACTORY);
+		}
+		
+		// If you don't build anything we want the beaver to move.
+		if ( !hasBuilt ) {
+			boolean didMine = tryMine();
+			if ( !didMine ) {
+				tryMove( getRandomDirection() );
+			}
+		}
+		
 		
 		rc.yield();
 	}
