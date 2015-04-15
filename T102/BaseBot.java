@@ -422,6 +422,19 @@ public class BaseBot {
 		);
 	}
 	
+	/**
+	 * Senses robot with given ID.
+	 * @param id ID of the robot
+	 * @return robot with given ID if it exists and is in sensing range, null otherwise
+	 */
+	public RobotInfo getRobot(int id) {
+		try {
+			return rc.senseRobot(id);
+		} catch (GameActionException e) {
+			return null;
+		}
+	}
+	
 	
 	
 	// MAP BLOCK
@@ -436,9 +449,10 @@ public class BaseBot {
 		boolean s = rc.senseTerrainTile(loc.add(Direction.SOUTH)) == TerrainTile.OFF_MAP;
 		boolean e = rc.senseTerrainTile(loc.add(Direction.EAST)) == TerrainTile.OFF_MAP;
 		boolean w = rc.senseTerrainTile(loc.add(Direction.WEST)) == TerrainTile.OFF_MAP;
+		TerrainTile curr = rc.senseTerrainTile(loc);
 		
 		return (n && e || n && w || s && e || s && w)
-				&& rc.senseTerrainTile(loc) == TerrainTile.NORMAL;
+				&& (curr == TerrainTile.NORMAL || curr == TerrainTile.VOID);
 	}
 	
 	public boolean isRotationSym() {
@@ -446,11 +460,11 @@ public class BaseBot {
 	}
 	
 	public boolean isHorizontalSym() {
-		return myHQ.y == theirHQ.y;
+		return myHQ.x == theirHQ.x;
 	}
 	
 	public boolean isVerticalSym() {
-		return myHQ.x == theirHQ.x;
+		return myHQ.y == theirHQ.y;
 	}
 	
 	public MapLocation[] corners(int height, int width, int tlx, int tly) {

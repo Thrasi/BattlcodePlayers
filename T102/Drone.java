@@ -1,5 +1,6 @@
 package T102;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -10,7 +11,12 @@ public class Drone extends BaseBot {
 	// Explore until target location is at this distance
 	private static int EXPLORE_DIST = 15;
 
+	// Exploring tag, -1 means it is not used for exploring
+	// since only 4 drones are used for exploring, numbers 1, 2, 3, 4
+	// are tags for drones and each tag means that the drone will explore
+	// some part of the map
 	private int explore = -1;
+	
 	
 	/**
 	 * Decide if the drone is supposed to explore or do something else
@@ -19,6 +25,8 @@ public class Drone extends BaseBot {
 	 */
 	public Drone(RobotController rc) throws GameActionException {
 		super(rc);
+		
+		// Decide which of the exploring drones this is
 		if (rc.readBroadcast(RobotPlayer.expDRONE1) == 0) {
 			explore = 1;
 			rc.broadcast(RobotPlayer.expDRONE1, rc.getID());
@@ -36,7 +44,11 @@ public class Drone extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
-		if (explore != -1) {
+		if (explore != -1) {		// Drone is exploring one
+			
+			// Before exploring the whole map, these functions are called
+			// and they are used to decide some parameters such as map size
+			// and upper left corner
 			if (isVerticalSym()) {
 				exploreVertical();
 			} else if (isHorizontalSym()) {
@@ -44,6 +56,40 @@ public class Drone extends BaseBot {
 			} else {
 				exploreRotational();
 			}
+			
+			// Wait until the points are ready, it wont take more than 2-3 turns
+			while (rc.readBroadcast(RobotPlayer.expSTARTED) == 0) {
+				// TODO this time can be spend to do something else
+				rc.yield();
+			}
+			
+			// After some parameters of the map are known, drones are set to
+			// explore their parts of the map
+			if (explore == 1) {
+				exploreAll(
+						rc.readBroadcast(RobotPlayer.expOFFSET1),
+						rc.readBroadcast(RobotPlayer.expOFFSET2)
+				);
+			} else if (explore == 2) {
+				exploreAll(
+						rc.readBroadcast(RobotPlayer.expOFFSET2),
+						rc.readBroadcast(RobotPlayer.expOFFSET3)
+				);
+			} else if (explore == 3) {
+				exploreAll(
+						rc.readBroadcast(RobotPlayer.expOFFSET3),
+						rc.readBroadcast(RobotPlayer.expOFFSET4)
+				);
+			} else if (explore == 4) {
+				exploreAll(
+						rc.readBroadcast(RobotPlayer.expOFFSET4),
+						RobotPlayer.expLOCFIRST + rc.readBroadcast(RobotPlayer.expLOCCOUNT) * 2
+				);
+			}
+			
+			// Disable exploring role, this drone will continue to do whatever its
+			// role is to do afterwards
+			explore = -1;
 		}
 		
 		rc.yield();
@@ -54,31 +100,44 @@ public class Drone extends BaseBot {
 	 * @throws GameActionException
 	 */
 	private void exploreRotational() throws GameActionException {
-		if (explore == 1) {
+		if (explore == 1 && rc.readBroadcast(RobotPlayer.MAPSET) == 0) {
 			Direction dir = myHQ.directionTo(theirHQ).opposite();
 			
+			// Calculating parameters (size and top left corner)
 			MapLocation corner = exploreCorner(dir);
 			double xc = (myHQ.x + theirHQ.x) / 2.0;
 			double yc = (myHQ.y + theirHQ.y) / 2.0;
 			int w = (int) (Math.abs(xc - corner.x) * 2) + 1;
 			int h = (int) (Math.abs(yc - corner.y) * 2) + 1;
+			int tlx = (int) (xc - w / 2.0 + 1);
+			tlx = tlx < 0 ? tlx - 1 : tlx;
+			int tly = (int) (yc - h / 2.0 + 1);
+			tly = tly < 0 ? tly - 1 : tly;
 			
+			// Broadcast map parameters
 			rc.broadcast(RobotPlayer.MAPWIDTH, w);
 			rc.broadcast(RobotPlayer.MAPHEIGHT, h);
-			rc.broadcast(RobotPlayer.TOPLEFTX, (int) (xc - w / 2.0 + 1));
-			rc.broadcast(RobotPlayer.TOPLEFTY, (int) (yc - h / 2.0 + 1));
+			rc.broadcast(RobotPlayer.TOPLEFTX, tlx);
+			rc.broadcast(RobotPlayer.TOPLEFTY, tly);
 			rc.broadcast(RobotPlayer.MAPSET, 1);
-		} else if (explore == 2) {
-			int xc = (myHQ.x + theirHQ.x) / 2;
-			int yc = (myHQ.y + theirHQ.y) / 2;
-			MapLocation loc = new MapLocation(xc, yc);
-			explore(loc);
-		} else if (explore == 3) {
-			exploreLeft();
-		} else if (explore == 4) {
-			exploreRight();
 		}
 	}
+	
+	private void exploreVertical() throws GameActionException {
+		boolean mapSet = rc.readBroadcast(RobotPlayer.MAPSET) == 0;
+		Direction dir = myHQ.directionTo(theirHQ).opposite();
+		if (explore == 1 && mapSet) {
+			System.out.println("drone 1");
+			MapLocation corner = exploreCorner(dir.rotateLeft());
+			System.out.println(corner);
+		} else if (explore == 2 && mapSet) {
+			System.out.println("drone 2");
+			MapLocation corner = exploreCorner(dir.rotateRight());
+			System.out.println(corner);
+		}
+		
+	}
+
 	
 	/**
 	 * Drone explores way to given location.
@@ -94,6 +153,17 @@ public class Drone extends BaseBot {
 			rc.yield();
 		}
 	}
+	
+	/**
+	 * Explores all points that were previously broadcasted at given channels.
+	 * @param offset offset of the channel to start exploring
+	 * @param limit upper bound on the channel
+	 */
+	private void exploreAll(int offset, int limit) throws GameActionException {
+		for (int i = offset; i < limit; i += 2) {
+			explore(new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1)));
+		}
+	}
 
 	/**
 	 * Explores one corner of the map and calculates the size of the map. Drone tries to
@@ -105,7 +175,7 @@ public class Drone extends BaseBot {
 	 * @throws GameActionException
 	 */
 	private MapLocation exploreCorner(Direction dir) throws GameActionException {
-		MapLocation loc = myHQ.add(dir, 200);
+		MapLocation loc = myHQ.add(dir, 400);
 		while (true) {
 			for (MapLocation l : getSurroundingLocations()) {
 				if (isCorner(l)) {
@@ -123,20 +193,4 @@ public class Drone extends BaseBot {
 		
 	}
 
-	private void exploreVertical() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void exploreRight() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void exploreLeft() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
 }

@@ -50,6 +50,14 @@ public class RobotPlayer {
 			expDRONE2 = 802,
 			expDRONE3 = 803,
 			expDRONE4 = 804,
+			expOFFSET1 = 1000,
+			expOFFSET2 = 1001,
+			expOFFSET3 = 1002,
+			expOFFSET4 = 1003,
+			expLOCCOUNT = 1004,
+			expSTARTED = 1005,
+			expLOCFIRST = 1010,
+			expLOCLAST = 5000,
 			
 		// MAP
 			MAPWIDTH = 900,

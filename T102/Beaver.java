@@ -44,7 +44,6 @@ public class Beaver extends BaseBot {
 			}
 		}
 		
-		
 		rc.yield();
 	}
 

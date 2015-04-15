@@ -3,6 +3,8 @@ package T102;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import battlecode.common.Clock;
@@ -13,6 +15,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.world.Robot;
 import T102.RobotPlayer;
 
 public class HQ extends BaseBot {
@@ -25,11 +28,11 @@ public class HQ extends BaseBot {
 		}
 	}
 	
-	private static final Map<RobotType, Tuple> hqSupplies;
+	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();
 	static {
-		hqSupplies = new HashMap<>();
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 2000));
+		hqSupplies.put(RobotType.DRONE, new Tuple(400, 3000));
 	}
 
 	public HQ(RobotController rc) {
@@ -89,7 +92,7 @@ public class HQ extends BaseBot {
 	public void execute() throws GameActionException {
 		countRobots();
 		
-		if (rc.readBroadcast(RobotPlayer.MAPSET) == 1) {
+		if (rc.readBroadcast(RobotPlayer.MAPSET) == 1 && rc.readBroadcast(RobotPlayer.expSTARTED) == 0) {
 			decideExploringPoints();
 		}
 		
@@ -112,7 +115,7 @@ public class HQ extends BaseBot {
 				rc.broadcast(RobotPlayer.CORNERBEAVER, firstBeaver.ID);
 			}
 		}
-		transferToSupplier();
+		//transferToSupplier();
 		rc.yield();
 	}
 	
@@ -122,7 +125,7 @@ public class HQ extends BaseBot {
 		int width = rc.readBroadcast(RobotPlayer.MAPWIDTH);
 		int xs = rc.readBroadcast(RobotPlayer.TOPLEFTX);
 		int ys = rc.readBroadcast(RobotPlayer.TOPLEFTY);
-		
+		/*
 		MapLocation pointA = null;
 		MapLocation pointB = null;
 		
@@ -141,15 +144,60 @@ public class HQ extends BaseBot {
 		} else {
 			// TODO other shit
 		}
-
-		System.out.println("ovdje");
-		for (int y = ys; y < ys + height; y += 3) {
+*/
+		//System.out.println(height + " " + width + " " + xs + " " + ys);
+		List<MapLocation> exploreLocations = new LinkedList<>();
+		//rc.setIndicatorDot(new MapLocation(xs, ys), 0, 200, 0);
+		for (int y = ys; y < ys + height; y += 6) {
 			for (int x = xs; x < xs + width; x+= 3) {
 				MapLocation loc = new MapLocation(x, y);
-				if (loc.distanceSquaredTo(myHQ) < loc.distanceSquaredTo(theirHQ))
-					rc.setIndicatorDot(loc, 200, 60, 90);
+				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
+					exploreLocations.add(loc);
+				}
+				
+			}
+			for (int x = xs + width; x >= xs; x -= 3) {
+				MapLocation loc = new MapLocation(x, y+3);
+				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
+					exploreLocations.add(loc);
+				}
 			}
 		}
+		int offset = 0;
+		for (MapLocation loc : exploreLocations) {
+			if (RobotPlayer.expLOCFIRST + offset < RobotPlayer.expLOCLAST) {
+				rc.broadcast(RobotPlayer.expLOCFIRST + offset, loc.x);
+				rc.broadcast(RobotPlayer.expLOCFIRST + offset + 1, loc.y);
+				offset += 2;
+			}
+		}
+		int diff = (exploreLocations.size() / 4) << 1;
+		rc.broadcast(RobotPlayer.expOFFSET1, RobotPlayer.expLOCFIRST);
+		rc.broadcast(RobotPlayer.expOFFSET2, RobotPlayer.expLOCFIRST + diff);
+		rc.broadcast(RobotPlayer.expOFFSET3, RobotPlayer.expLOCFIRST + 2*diff);
+		rc.broadcast(RobotPlayer.expOFFSET4, RobotPlayer.expLOCFIRST + 3*diff);
+		rc.broadcast(RobotPlayer.expLOCCOUNT, exploreLocations.size());
+		rc.broadcast(RobotPlayer.expSTARTED, 1);
+		
+		/*
+		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET1); i < rc.readBroadcast(RobotPlayer.expOFFSET2); i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 20, 100, 20);
+		}
+		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET2); i < rc.readBroadcast(RobotPlayer.expOFFSET3); i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 100, 20, 20);
+		}
+		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET3); i < rc.readBroadcast(RobotPlayer.expOFFSET4); i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 20, 200, 100);
+		}
+		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET4);
+				i < RobotPlayer.expLOCFIRST + rc.readBroadcast(RobotPlayer.expLOCCOUNT) * 2; i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 20, 20, 100);
+		}*/
+		
 		rc.yield();
 	}
 
@@ -172,7 +220,7 @@ public class HQ extends BaseBot {
 			}
 		}*/
 		int idToLook = rc.readBroadcast(RobotPlayer.SUPPLIERID);
-		RobotInfo supplier = rc.senseRobot(idToLook); 
+		RobotInfo supplier = getRobot(idToLook); 
 		if (supplier != null && rc.getLocation().distanceSquaredTo(supplier.location)
 				<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
 			rc.transferSupplies((int) (rc.getSupplyLevel() / 2), supplier.location);
