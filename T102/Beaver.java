@@ -12,17 +12,33 @@ public class Beaver extends BaseBot {
 		super(rc);
 	}
 	
+	
+	
 	@Override
 	public void execute() throws GameActionException {
 		if (rc.getID() == rc.readBroadcast(RobotPlayer.CORNERBEAVER)) {
 			cornerBeaver();
 		}
+		boolean hasBuilt = false;
 		
 		if (rc.readBroadcast(RobotPlayer.numMINERFACTORY) < 1) {
-			tryBuild(RobotType.MINERFACTORY);
-		} else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
-			tryBuild(RobotType.HELIPAD);
+			hasBuilt = tryBuild(RobotType.MINERFACTORY);
+		} 
+		else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
+			hasBuilt = tryBuild(RobotType.HELIPAD);
 		}
+		else if (rc.readBroadcast(RobotPlayer.numBARRACKS) < 2) {
+			hasBuilt = tryBuild(RobotType.BARRACKS);
+		}
+		else if (rc.readBroadcast(RobotPlayer.numTANKFACTORY) < 2) {
+			hasBuilt = tryBuild(RobotType.TANKFACTORY);
+		}
+		
+		// If you don't build anything we want the beaver to move.
+		if ( !hasBuilt ) {
+			tryMove( getRandomDirection() );
+		}
+		
 		
 		rc.yield();
 	}
