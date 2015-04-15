@@ -16,7 +16,7 @@ public class Supplier extends BaseBot {
 
         if (rc.isCoreReady()) {
             if (queueStart != queueEnd && rc.getSupplyLevel() > 1000) {
-                RobotInfo[] allies = getAllies();
+                RobotInfo[] allies = getAllAllies();
 
                 int target = rc.readBroadcast(queueStart);
 
@@ -27,7 +27,7 @@ public class Supplier extends BaseBot {
                             rc.broadcast(RobotPlayer.SUPPLYQSTART, queueStart+1);
                         }
                         else {
-                            Direction toGoDir = getMoveDir(allies[i].location);
+                            Direction toGoDir = getMoveDirection(allies[i].location);
 
                             if (toGoDir != null) {
                                 rc.move(toGoDir);
@@ -38,7 +38,7 @@ public class Supplier extends BaseBot {
                 }
             }
             if (rc.getSupplyLevel() <= 1000) {
-                Direction toGoDir = getMoveDir(this.myHQ);
+                Direction toGoDir = getMoveDirection(this.myHQ);
 
                 if (toGoDir != null) {
                     rc.move(toGoDir);
