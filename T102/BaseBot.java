@@ -354,16 +354,15 @@ public class BaseBot {
 		RobotInfo[] nearbyEnemies = getNearbyEnemies();
 		if (nearbyEnemies.length > 0) {
 			
+			double minHealth = Integer.MAX_VALUE;
+			RobotInfo weakestRobot = null;
 			// Find weakest robot
-			RobotInfo weakestRobot = Collections.min(
-					Arrays.asList(nearbyEnemies),
-					new Comparator<RobotInfo>() {
-
-				@Override
-				public int compare(RobotInfo o1, RobotInfo o2) {
-					return (int) (o1.health - o2.health);
+			for (RobotInfo info : nearbyEnemies) {
+				if (info.health < minHealth) {
+					weakestRobot = info;
+					minHealth = info.health;
 				}
-			});
+			}
 			
 			tryAttack(weakestRobot.location);
 		}
