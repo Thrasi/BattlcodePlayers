@@ -358,11 +358,29 @@ public class BaseBot {
 	}
 	
 	/**
-	 * Senses all enemy robots in radius of this robot.
+	 * Senses all enemy robots in sensing radius of this robot.
 	 * @return array of enemy robots
 	 */
 	public RobotInfo[] getNearbyEnemies() {
 		return rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, theirTeam);
+	}
+	
+	/**
+	 * Senses the closest enemy robot in sensing radius of the robot.
+	 * @return closest enemy within sensing range
+	 */
+	public RobotInfo getNearestNearByEnemy() {
+		double closestDistance = Double.MAX_VALUE-1;
+		double distanceToEnemy;
+		RobotInfo closestEnemy = null;
+		for ( RobotInfo ri : getNearbyEnemies() ) {
+			distanceToEnemy = rc.getLocation().distanceSquaredTo(ri.location);
+			if (closestDistance >  distanceToEnemy ) {
+				closestDistance = distanceToEnemy;
+				closestEnemy = ri;
+			}
+		}
+		return closestEnemy;
 	}
 	
 	/**
