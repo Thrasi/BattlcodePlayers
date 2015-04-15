@@ -1,16 +1,19 @@
 package T102;
 
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 
+/**
+ * 
+ * @author magnus
+ *
+ */
 public class Supplier extends BaseBot {
 	public Supplier(RobotController rc) {
 		super(rc);
 	}
-
 	public void execute() throws GameActionException {
         int queueStart = rc.readBroadcast(RobotPlayer.SUPPLYQSTART), queueEnd = rc.readBroadcast(RobotPlayer.SUPPLYQEND);
 
@@ -27,10 +30,9 @@ public class Supplier extends BaseBot {
                             rc.broadcast(RobotPlayer.SUPPLYQSTART, queueStart+1);
                         }
                         else {
-                            Direction toGoDir = getMoveDirection(allies[i].location);
-
-                            if (toGoDir != null) {
-                                rc.move(toGoDir);
+                            boolean moved = tryMoveTo( allies[i].location );
+                            if (!moved) {
+                                // do something?
                             }
                         }
                         break;
@@ -38,10 +40,9 @@ public class Supplier extends BaseBot {
                 }
             }
             if (rc.getSupplyLevel() <= 1000) {
-                Direction toGoDir = getMoveDirection(this.myHQ);
-
-                if (toGoDir != null) {
-                    rc.move(toGoDir);
+            	boolean moved = tryMoveTo( this.myHQ );
+                if (!moved) {
+                    // do something?
                 }
             }
         }
