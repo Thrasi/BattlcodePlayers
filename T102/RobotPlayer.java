@@ -55,7 +55,8 @@ public class RobotPlayer {
 			MAPWIDTH = 900,
 			MAPHEIGHT = 901,
 			TOPLEFTX = 902,
-			TOPLEFTY = 903
+			TOPLEFTY = 903,
+			MAPSET = 904
 			;
 	
 	public static Map<RobotType, Integer> countChannels = new HashMap<>();

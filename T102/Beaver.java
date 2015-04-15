@@ -25,7 +25,7 @@ public class Beaver extends BaseBot {
 		//if (rc.readBroadcast(RobotType.MINERFACTORY.ordinal()) < 1) {
 		if (rc.readBroadcast(RobotPlayer.numMINERFACTORY) < 1) {
 			hasBuilt = tryBuild(RobotType.MINERFACTORY);
-		} 
+		}
 		else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
 			hasBuilt = tryBuild(RobotType.HELIPAD);
 		}
@@ -55,6 +55,9 @@ public class Beaver extends BaseBot {
 		for (int i = 0; i < 5; i++) {
 			tryMoveTo(endPoint);
 			rc.yield();
+		}
+		if (rc.readBroadcast(RobotPlayer.numCOMPUTER) < 1) {
+			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
 		while (true) {
 			rc.yield();

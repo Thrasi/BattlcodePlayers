@@ -67,7 +67,7 @@ public class Drone extends BaseBot {
 			rc.broadcast(RobotPlayer.MAPHEIGHT, h);
 			rc.broadcast(RobotPlayer.TOPLEFTX, (int) (xc - w / 2.0 + 1));
 			rc.broadcast(RobotPlayer.TOPLEFTY, (int) (yc - h / 2.0 + 1));
-		
+			rc.broadcast(RobotPlayer.MAPSET, 1);
 		} else if (explore == 2) {
 			int xc = (myHQ.x + theirHQ.x) / 2;
 			int yc = (myHQ.y + theirHQ.y) / 2;

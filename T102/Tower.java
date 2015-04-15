@@ -12,6 +12,7 @@ public class Tower extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		tryShootWeakest();
+		rc.yield();
 	}
 
 }

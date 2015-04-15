@@ -1,9 +1,12 @@
 package T102;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import battlecode.common.Clock;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
@@ -86,6 +89,10 @@ public class HQ extends BaseBot {
 	public void execute() throws GameActionException {
 		countRobots();
 		
+		if (rc.readBroadcast(RobotPlayer.MAPSET) == 1) {
+			decideExploringPoints();
+		}
+		
 		int beaverCount = rc.readBroadcast(RobotPlayer.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
 		if (rc.readBroadcast(RobotPlayer.numBEAVERS) < 3) {
@@ -110,6 +117,39 @@ public class HQ extends BaseBot {
 	}
 	
 	
+	private void decideExploringPoints() throws GameActionException {
+		int height = rc.readBroadcast(RobotPlayer.MAPHEIGHT);
+		int width = rc.readBroadcast(RobotPlayer.MAPWIDTH);
+		int xs = rc.readBroadcast(RobotPlayer.TOPLEFTX);
+		int ys = rc.readBroadcast(RobotPlayer.TOPLEFTY);
+		
+		MapLocation pointA = null;
+		MapLocation pointB = null;
+		
+		if (isRotationSym()) {
+			MapLocation[] corners = corners(height, width, xs, ys);
+			Arrays.sort(corners, new Comparator<MapLocation>() {
+
+				@Override
+				public int compare(MapLocation o1, MapLocation o2) {
+					return o1.distanceSquaredTo(myHQ) - o2.distanceSquaredTo(myHQ);
+				}
+			});
+			
+			pointA = corners[1];
+			pointB = corners[2];
+		} else {
+			// TODO other shit
+		}
+		
+		for (int y = ys; y < ys + height; y += 3) {
+			for (int x = xs; x < xs + width; x+= 3) {
+				
+			}
+		}
+	}
+
+
 	/**
 	 * If the supplier is within transfer range we transfer supplies to it.
 	 * @throws GameActionException
@@ -164,6 +204,8 @@ public class HQ extends BaseBot {
 		int numSupplyDepot = 0;
 		int numHelipad = 0;
 		int numDrone = 0;
+		int numComputer = 0;
+		int numTech = 0;
 		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
@@ -189,6 +231,10 @@ public class HQ extends BaseBot {
 				numSupplyDepot++;
 			} else if (type == RobotType.HELIPAD) {
 				numHelipad++;
+			} else if (type == RobotType.COMPUTER) {
+				numComputer++;
+			} else if (type == RobotType.TECHNOLOGYINSTITUTE) {
+				numTech++;
 			}
 		}
 		
@@ -203,7 +249,8 @@ public class HQ extends BaseBot {
 		rc.broadcast(RobotPlayer.numSUPPLYDEPOT, numSupplyDepot);
 		rc.broadcast(RobotPlayer.numHELIPAD, numHelipad);
 		rc.broadcast(RobotPlayer.numDRONE, numDrone);
-		
+		rc.broadcast(RobotPlayer.numCOMPUTER, numComputer);
+		rc.broadcast(RobotPlayer.numTECHNOLOGYINSTITUTE, numTech);
 	}
 	
 	/**

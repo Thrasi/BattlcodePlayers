@@ -3,9 +3,11 @@ package T102;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -451,6 +453,14 @@ public class BaseBot {
 		return myHQ.x == theirHQ.x;
 	}
 	
+	public MapLocation[] corners(int height, int width, int tlx, int tly) {
+		MapLocation tl = new MapLocation(tlx, tly);
+		MapLocation tr = tl.add(Direction.EAST, width-1);
+		MapLocation bl = tl.add(Direction.SOUTH, height-1);
+		MapLocation br = bl.add(Direction.EAST, width-1);
+		return new MapLocation[] {tl, tr, bl, br};
+	}
+	
 
 	
 	// MORE COMPLEX ACTIONS
@@ -511,7 +521,7 @@ public class BaseBot {
 	 * is done, both robots have the same amount of supplies.
 	 */
 	public void transferSuppliesTolowest() throws GameActionException {
-		if (Clock.getRoundNum() % 10 != 0) {
+		if (Clock.getRoundNum() % 10 != 0 || rc.getType().isBuilding) {
 			return;
 		}
 		
@@ -522,7 +532,7 @@ public class BaseBot {
 		double transferAmount = 0;
 		MapLocation supplyTarget = null;
 		for (RobotInfo ri : nearbyAllies) {
-			if (ri.supplyLevel < lowestSupply && ri.type != RobotType.HQ) {
+			if (ri.supplyLevel < lowestSupply && !ri.type.isBuilding) {
 				lowestSupply = ri.supplyLevel;
 				transferAmount = (rc.getSupplyLevel() - lowestSupply) / 2;
 				supplyTarget = ri.location;
