@@ -1,5 +1,6 @@
 package T102;
 
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -36,7 +37,10 @@ public class Beaver extends BaseBot {
 		
 		// If you don't build anything we want the beaver to move.
 		if ( !hasBuilt ) {
-			tryMove( getRandomDirection() );
+			boolean didMine = tryMine();
+			if ( !didMine ) {
+				tryMove( getRandomDirection() );
+			}
 		}
 		
 		

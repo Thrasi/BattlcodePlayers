@@ -19,11 +19,9 @@ public class Miner extends BaseBot {
 			oreLoc = null;
 			tryMine();
 		} else {
+			oreLoc = closestOre();
 			if (oreLoc == null) {
-				oreLoc = closestOre();
-				if (oreLoc == null) {
-					tryMoveTo(rc.getLocation().add(getRandomDirection()));
-				}
+				tryMoveTo(rc.getLocation().add(getRandomDirection()));
 			} else {
 				tryMoveTo(oreLoc);
 			}

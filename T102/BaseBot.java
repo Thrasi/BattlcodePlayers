@@ -490,6 +490,7 @@ public class BaseBot {
 					&& rc.getLocation().distanceSquaredTo(loc) < dist
 					&& rc.senseRobotAtLocation(loc) == null) {
 				oreLoc = loc;
+				dist = rc.getLocation().distanceSquaredTo(loc);
 			}
 		}
 		//System.out.println("after " + Clock.getBytecodeNum());
