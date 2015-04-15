@@ -10,6 +10,7 @@ package T102;
 
 
 import battlecode.common.*;
+
 import java.util.*;
 
 public class RobotPlayer {
@@ -44,10 +45,22 @@ public class RobotPlayer {
 			SUPPLYQEND = 299,
 			
 		// EXPLORING ROBOTS
-			CORNERBEAVER = 800
+			CORNERBEAVER = 800,
+			expDRONE1 = 801,
+			expDRONE2 = 802,
+			expDRONE3 = 803,
+			expDRONE4 = 804
 			;
 	
-			
+	public static Map<RobotType, Integer> countChannels = new HashMap<>();
+	static {
+		int i = 2;
+		for (RobotType type : RobotType.values()) {
+			countChannels.put(type, i);
+			i++;
+		}
+	}
+	
 
 	// MAXIMUM AMOUNT OF UNITS OF A SPECIFIC TYPE:
 	static int MAXSOLDIERS = 20, MAXBASHERS = 20, MAXMINERS = 15, MAXBEAVERS = 3,
@@ -63,56 +76,60 @@ public class RobotPlayer {
 
 		RobotType type = rc.getType();
 
-		if (type == RobotType.HQ) {
-			myself = new HQ(rc);
-		} else if (type == RobotType.AEROSPACELAB) {
-			myself = new AeroSpaceLab(rc);
-		} else if (type == RobotType.BARRACKS) {
-			myself = new Barracks(rc);
-		} else if (type == RobotType.BASHER) {
-			myself = new Basher(rc);
-		} else if (type == RobotType.BEAVER) {
-			myself = new Beaver(rc);
-		} else if (type == RobotType.COMMANDER) {
-			myself = new Commander(rc);
-		} else if (type == RobotType.COMPUTER) {
-			myself = new Computer(rc);
-		} else if (type == RobotType.DRONE) {
-			try {
-				if (rc.getType() == RobotType.DRONE && needsSupplier(rc)) {
-					myself = new Supplier(rc);
-					rc.broadcast(numSUPPLIERS, rc.readBroadcast(numSUPPLIERS) + 1);
-				    rc.broadcast(SUPPLIERID, rc.getID());
+		try {
+			if (type == RobotType.HQ) {
+				myself = new HQ(rc);
+			} else if (type == RobotType.AEROSPACELAB) {
+				myself = new AeroSpaceLab(rc);
+			} else if (type == RobotType.BARRACKS) {
+				myself = new Barracks(rc);
+			} else if (type == RobotType.BASHER) {
+				myself = new Basher(rc);
+			} else if (type == RobotType.BEAVER) {
+				myself = new Beaver(rc);
+			} else if (type == RobotType.COMMANDER) {
+				myself = new Commander(rc);
+			} else if (type == RobotType.COMPUTER) {
+				myself = new Computer(rc);
+			} else if (type == RobotType.DRONE) {
+				try {
+					if (rc.getType() == RobotType.DRONE && needsSupplier(rc)) {
+						myself = new Supplier(rc);
+						rc.broadcast(numSUPPLIERS, rc.readBroadcast(numSUPPLIERS) + 1);
+					    rc.broadcast(SUPPLIERID, rc.getID());
+					}
+				} catch (GameActionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (GameActionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				myself = new Drone(rc);
+			} else if (type == RobotType.HELIPAD) {
+				myself = new Helipad(rc);
+			} else if (type == RobotType.LAUNCHER) {
+				myself = new Launcher(rc);
+			} else if (type == RobotType.MINER) {
+				myself = new Miner(rc);
+			} else if (type == RobotType.MINERFACTORY) {
+				myself = new MinerFactory(rc);
+			} else if (type == RobotType.MISSILE) {
+				myself = new Missle(rc);
+			} else if (type == RobotType.SOLDIER) {
+				myself = new Soldier(rc);
+			} else if (type == RobotType.TANK) {
+				myself = new Tank(rc);
+			} else if (type == RobotType.TANKFACTORY) {
+				myself = new TankFactory(rc);
+			} else if (type == RobotType.TECHNOLOGYINSTITUTE) {
+				myself = new TechnologyInstitute(rc);
+			} else if (type == RobotType.TOWER) {
+				myself = new Tower(rc);
+			} else if (type == RobotType.TRAININGFIELD) {
+				myself = new TrainingField(rc);
+			} else {
+				myself = new BaseBot(rc);
 			}
-			myself = new Drone(rc);
-		} else if (type == RobotType.HELIPAD) {
-			myself = new Helipad(rc);
-		} else if (type == RobotType.LAUNCHER) {
-			myself = new Launcher(rc);
-		} else if (type == RobotType.MINER) {
-			myself = new Miner(rc);
-		} else if (type == RobotType.MINERFACTORY) {
-			myself = new MinerFactory(rc);
-		} else if (type == RobotType.MISSILE) {
-			myself = new Missle(rc);
-		} else if (type == RobotType.SOLDIER) {
-			myself = new Soldier(rc);
-		} else if (type == RobotType.TANK) {
-			myself = new Tank(rc);
-		} else if (type == RobotType.TANKFACTORY) {
-			myself = new TankFactory(rc);
-		} else if (type == RobotType.TECHNOLOGYINSTITUTE) {
-			myself = new TechnologyInstitute(rc);
-		} else if (type == RobotType.TOWER) {
-			myself = new Tower(rc);
-		} else if (type == RobotType.TRAININGFIELD) {
-			myself = new TrainingField(rc);
-		} else {
-			myself = new BaseBot(rc);
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 
 		while (true) {

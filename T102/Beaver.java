@@ -18,9 +18,11 @@ public class Beaver extends BaseBot {
 			cornerBeaver();
 		}
 		
+		//if (rc.readBroadcast(RobotType.MINERFACTORY.ordinal()) < 1) {
 		if (rc.readBroadcast(RobotPlayer.numMINERFACTORY) < 1) {
 			tryBuild(RobotType.MINERFACTORY);
-		} else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
+		} else //if (rc.readBroadcast(RobotType.HELIPAD.ordinal()) < 1) {
+			if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
 			tryBuild(RobotType.HELIPAD);
 		}
 		

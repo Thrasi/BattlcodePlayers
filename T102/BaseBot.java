@@ -298,7 +298,7 @@ public class BaseBot {
 	 * @return true if moved, false if everything is occupied
 	 */
 	public boolean tryMoveTo(MapLocation loc) throws GameActionException {
-		for (Direction dir : getAllDirectionsTowards(loc)) {
+		for (Direction dir : getDirectionsTowards(loc)) {
 			if (tryMove(dir)) {
 				return true;
 			}
@@ -373,8 +373,66 @@ public class BaseBot {
 	public RobotInfo[] getAlliesInRange(int sqrRange) {
 		return rc.senseNearbyRobots(sqrRange, myTeam);
 	}
-
 	
+	/**
+	 * Senses all ally robots in given squared range with given type.
+	 * @param sqrRange squared range
+	 * @param type type of robot
+	 * @return array of ally robots
+	 */
+	public RobotInfo[] getAlliesInRange(int sqrRange, RobotType type) {
+		RobotInfo[] robots = getAlliesInRange(sqrRange);
+		List<RobotInfo> typeRobots = new LinkedList<>();
+		for (RobotInfo ri : robots) {
+			if (ri.type == type) {
+				typeRobots.add(ri);
+			}
+		}
+		return typeRobots.toArray(new RobotInfo[typeRobots.size()]);
+	}
+	
+	/**
+	 * Returns all map locations in the sensing range of this robot.
+	 * @return array of map locations in range
+	 */
+	public MapLocation[] getSurroundingLocations() {
+		return MapLocation.getAllMapLocationsWithinRadiusSq(
+				rc.getLocation(),
+				rc.getType().sensorRadiusSquared
+		);
+	}
+	
+	
+	
+	// MAP BLOCK
+	
+	/**
+	 * Decides whether location is corner or not.
+	 * @param loc location to check
+	 * @return true if is corner, false otherwise
+	 */
+	public boolean isCorner(MapLocation loc) {
+		boolean n = rc.senseTerrainTile(loc.add(Direction.NORTH)) == TerrainTile.OFF_MAP;
+		boolean s = rc.senseTerrainTile(loc.add(Direction.SOUTH)) == TerrainTile.OFF_MAP;
+		boolean e = rc.senseTerrainTile(loc.add(Direction.EAST)) == TerrainTile.OFF_MAP;
+		boolean w = rc.senseTerrainTile(loc.add(Direction.WEST)) == TerrainTile.OFF_MAP;
+		
+		return n && e || n && w || s && e || s && w;
+	}
+	
+	public boolean isRotationSym() {
+		return myHQ.x != theirHQ.x && myHQ.y != theirHQ.y;
+	}
+	
+	public boolean isHorizontalSym() {
+		return myHQ.y == theirHQ.y;
+	}
+	
+	public boolean isVerticalSym() {
+		return myHQ.x == theirHQ.x;
+	}
+	
+
 	
 	// MORE COMPLEX ACTIONS
 	

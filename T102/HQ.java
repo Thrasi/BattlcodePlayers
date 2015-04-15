@@ -32,6 +32,7 @@ public class HQ extends BaseBot {
 	public HQ(RobotController rc) {
 		super(rc);
 		
+		/*
 		// Initial tower locations (before destruction)
 		MapLocation[] myTowers = rc.senseTowerLocations();
 		MapLocation[] theirTowers = rc.senseEnemyTowerLocations();
@@ -52,11 +53,18 @@ public class HQ extends BaseBot {
 		if (towerCount == 0) {						// Unknown symmetry
 		}
 		if (allEqual(xs) && allEqual(ys)) {			// Rotation symmetry
-			
+			System.out.println("rotation");
 		} else if (onLine(xs, ys)) {				// Reflection symmetry
 			System.out.println("reflection");
 		} else {									// Unknown symmetry
 			System.out.println("something else");
+		}
+		*/
+		
+		if (myHQ.x == theirHQ.x || myHQ.y == theirHQ.y) {
+			System.out.println("reflection");
+		} else {
+			System.out.println("rotation");
 		}
 	}
 
@@ -79,7 +87,8 @@ public class HQ extends BaseBot {
 		countRobots();
 		
 		int beaverCount = rc.readBroadcast(RobotPlayer.numBEAVERS); 
-		if (beaverCount < 3) {
+		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
+		if (rc.readBroadcast(RobotPlayer.numBEAVERS) < 3) {
 			trySpawn(RobotType.BEAVER);
 		}
 		if (rc.readBroadcast(RobotPlayer.CORNERBEAVER) == 0 && beaverCount > 0) {
@@ -125,31 +134,51 @@ public class HQ extends BaseBot {
 	 * @throws GameActionException
 	 */
 	private void countRobots() throws GameActionException {
+		
+		//System.out.println("before " + Clock.getBytecodeNum());
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, myTeam);
+		/*
+		int n = RobotType.values().length;
+		int[] count = new int[n];
+
+		//System.out.println(Clock.getBytecodeNum());
+		
+		for (RobotInfo ri : myRobots) {
+			count[ri.type.ordinal()]++;
+		}
+		//System.out.println(Clock.getBytecodeNum());
+		for (int i = 0; i < n; i++) {
+			rc.broadcast(i, count[i]);
+		}
+		//System.out.println("after " + Clock.getBytecodeNum());
+		*/
+		
 		int numSoldiers = 0;
 		int numBashers = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
-		int numHelipad = 0;
 		int numMiners = 0;
 		int numMinerFactory = 0;
 		int numTankFactory = 0;
 		int numTanks = 0;
 		int numSupplyDepot = 0;
+		int numHelipad = 0;
+		int numDrone = 0;
+		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.SOLDIER) {
 				numSoldiers++;
+			} else if (type == RobotType.DRONE) {
+				numDrone++;
+			} else if (type == RobotType.MINER) {
+				numMiners++;
 			} else if (type == RobotType.BASHER) {
 				numBashers++;
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
-			} else if (type == RobotType.MINER) {
-				numMiners++;
-			} else if (type == RobotType.MINER) {
-				numMiners++;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactory++;
 			} else if (type == RobotType.TANKFACTORY) {
@@ -173,6 +202,8 @@ public class HQ extends BaseBot {
 		rc.broadcast(RobotPlayer.numTANKS, numTanks);
 		rc.broadcast(RobotPlayer.numSUPPLYDEPOT, numSupplyDepot);
 		rc.broadcast(RobotPlayer.numHELIPAD, numHelipad);
+		rc.broadcast(RobotPlayer.numDRONE, numDrone);
+		
 	}
 	
 	/**
