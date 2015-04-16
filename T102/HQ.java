@@ -11,17 +11,14 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+
 import T102.RobotPlayer;
+
+import static T102.Utility.Tuple;
 
 public class HQ extends BaseBot {
 	
-	private static class Tuple {
-		int x, y;
-		public Tuple(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
+	
 	
 	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();
 	static {

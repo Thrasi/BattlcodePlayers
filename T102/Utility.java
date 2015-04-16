@@ -50,4 +50,18 @@ public class Utility {
 		}
 		return true;
 	}
+	
+	
+	/**
+	 * Tuple class for some things.
+	 */
+	public static class Tuple {
+		
+		public int x, y;
+		
+		public Tuple(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
 }
