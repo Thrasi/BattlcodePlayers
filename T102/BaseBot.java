@@ -1,5 +1,6 @@
 package T102;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,6 +66,9 @@ public class BaseBot {
 		 * @throws GameActionException
 		 */
 		public void beginingOfTurn() throws GameActionException {
+			//if (rc.getType() == RobotType.SOLDIER) {
+				//rc.broadcast(RobotPlayer.numSOLDIERS, rc.readBroadcast(RobotPlayer.numSOLDIERS)+1);
+			//}
 			if (rc.senseEnemyHQLocation() != null) {
 				this.theirHQ = rc.senseEnemyHQLocation();
 			}
@@ -440,14 +444,48 @@ public class BaseBot {
 		}
 	}
 	
+	public MapLocation findSpotForBuilding() throws GameActionException {
+		MapLocation loc = rc.getLocation();
+		MapLocation[] potLoc = getSurroundingLocations();
+		
+		int score = Integer.MIN_VALUE;
+		MapLocation best = null;
+		for (MapLocation l : potLoc) {
+			if (isNormal(l) && !isTaken(l)) {
+				int s = 0;
+				for (Direction d : directions) {
+					MapLocation a = l.add(d);
+					if (!isTaken(a) && isNormal(a)) {
+						s++;
+					}
+				}
+				s *= s;
+				s += l.distanceSquaredTo(theirHQ) - loc.distanceSquaredTo(theirHQ);
+				s -= l.distanceSquaredTo(loc);
+				if (s > score) {
+					score = s;
+					best = l;
+				}
+			}
+		}
+		return best;
+	}
+	
+
+
+
 	/**
 	 * Check whether a location is taken by a robot.
 	 * @param loc location to check
-	 * @return true if it taken, false otherwise
+	 * @return true if it taken or out of sensing range, false otherwise
 	 * @throws GameActionException
 	 */
-	public boolean isTaken(MapLocation loc) throws GameActionException {
-		return rc.senseRobotAtLocation(loc) != null;
+	public boolean isTaken(MapLocation loc) {
+		try {
+			return rc.senseRobotAtLocation(loc) != null;
+		} catch (GameActionException e) {
+			return true;
+		}
 	}
 	
 	/**
@@ -631,7 +669,7 @@ public class BaseBot {
 		//System.out.println("before " + Clock.getBytecodeNum());
 		MapLocation[] locations = MapLocation.getAllMapLocationsWithinRadiusSq(
 				rc.getLocation(),
-				rc.getType().sensorRadiusSquared
+				50
 		);
 		
 		MapLocation oreLoc = null;

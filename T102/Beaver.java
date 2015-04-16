@@ -48,15 +48,43 @@ public class Beaver extends BaseBot {
 	}
 
 	private void cornerBeaver() throws GameActionException {
-		int xc = (myHQ.x + theirHQ.x) / 2;
+		/*int xc = (myHQ.x + theirHQ.x) / 2;
 		int yc = (myHQ.y + theirHQ.y) / 2;
 		MapLocation endPoint = myHQ.add(myHQ.directionTo(theirHQ).opposite(), 3);
 		for (int i = 0; i < 5; i++) {
 			tryMoveTo(endPoint);
 			rc.yield();
+		}*/
+		MapLocation spot = findSpotForBuilding();
+		while (spot == null) {
+			tryMove(getRandomDirection());
+			rc.yield();
+			spot = findSpotForBuilding();
 		}
+		while (!rc.getLocation().equals(spot)) {
+			tryMoveTo(spot);
+			rc.yield();
+		}
+		
+		
 		if (rc.readBroadcast(RobotPlayer.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
+		}
+		while (rc.readBroadcast(RobotPlayer.numSUPPLYDEPOT) < 10) {
+			boolean hasBuilt = tryBuild(RobotType.SUPPLYDEPOT);
+			rc.yield();
+			if (hasBuilt) {
+				spot = findSpotForBuilding();
+				while (spot == null) {
+					tryMove(getRandomDirection());
+					rc.yield();
+					spot = findSpotForBuilding();
+				}
+				while (!rc.getLocation().equals(spot)) {
+					tryMoveTo(spot);
+					rc.yield();
+				}
+			}
 		}
 		while (true) {
 			rc.yield();

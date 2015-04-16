@@ -2,3 +2,7 @@
 we need an estimation of when a unit is as good as dead.
 
 * Try to reconstruct the whole map using scouts
+
+* Each robot will change its own broadcast for count
+
+* Roaming drones
