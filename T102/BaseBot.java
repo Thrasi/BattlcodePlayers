@@ -177,8 +177,36 @@ public class BaseBot {
 		return false;
 	}
 
+	/**
+	 * Sets the given channel to 1. Channel is supposed to act as a flag (boolean).
+	 * @param channel channel to set
+	 * @throws GameActionException if channel doesn't exist
+	 */
+	protected void set(int channel) throws GameActionException {
+		rc.broadcast(channel, 1);
+	}
+	
+	/**
+	 * Sets the given channel to 0.
+	 * @param channel channel to reset
+	 * @throws GameActionException if channel doesnt exist
+	 */
+	protected void reset(int channel) throws GameActionException {
+		rc.broadcast(channel, 0);
+	}
+	
+	/**
+	 * Checks whether the channel is set (== 1).
+	 * @param channel channel to check
+	 * @return 
+	 * @throws GameActionException 
+	 */
+	protected boolean isSet(int channel) throws GameActionException {
+		return rc.readBroadcast(channel) == 1;
+	}
 	
 	
+
 	// DIRECTIONS BLOCK
 	
 	/**
@@ -582,6 +610,20 @@ public class BaseBot {
 			}
 			
 			tryAttack(weakestRobot.location);
+		}
+	}
+	
+	public void trySupplyTower() throws GameActionException {
+		MapLocation[] towers = rc.senseTowerLocations();
+		for (MapLocation t : towers) {
+			if (rc.getLocation().distanceSquaredTo(t) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+				continue;
+			}
+			RobotInfo tow = rc.senseRobotAtLocation(t);
+			if (tow.supplyLevel < 2000) {
+				rc.transferSupplies((int) (2000 - tow.supplyLevel), t);
+				return;
+			}
 		}
 	}
 	

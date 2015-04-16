@@ -32,7 +32,8 @@ public class HQ extends BaseBot {
 	static {
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 2000));
-		hqSupplies.put(RobotType.DRONE, new Tuple(400, 3000));
+		hqSupplies.put(RobotType.DRONE, new Tuple(400, 15000));
+		hqSupplies.put(RobotType.SOLDIER, new Tuple(500, 2500));
 	}
 
 	public HQ(RobotController rc) {
@@ -95,6 +96,27 @@ public class HQ extends BaseBot {
 		if (rc.readBroadcast(RobotPlayer.MAPSET) == 1 && rc.readBroadcast(RobotPlayer.expSTARTED) == 0) {
 			decideExploringPoints();
 		}
+		
+		/*
+		if (isSet(RobotPlayer.MAPBROADCASTED)) {
+			reset(RobotPlayer.MAPBROADCASTED);
+			int height = rc.readBroadcast(RobotPlayer.MAPHEIGHT);
+			int width = rc.readBroadcast(RobotPlayer.MAPWIDTH);
+			int xs = rc.readBroadcast(RobotPlayer.TOPLEFTX);
+			int ys = rc.readBroadcast(RobotPlayer.TOPLEFTY);
+			
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (rc.readBroadcast(RobotPlayer.MAPFIRST + y*width + x) == 1) {
+						System.out.print(" ");
+					} else {
+						System.out.print("#");
+					}
+				}
+				System.out.println();
+			}
+		}*/
+		
 		
 		int beaverCount = rc.readBroadcast(RobotPlayer.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {

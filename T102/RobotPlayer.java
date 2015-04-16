@@ -50,6 +50,10 @@ public class RobotPlayer {
 			expDRONE2 = 802,
 			expDRONE3 = 803,
 			expDRONE4 = 804,
+			expDRONE1DONE = 805,
+			expDRONE2DONE = 806,
+			expDRONE3DONE = 807,
+			expDRONE4DONE = 808,
 			expOFFSET1 = 1000,
 			expOFFSET2 = 1001,
 			expOFFSET3 = 1002,
@@ -64,7 +68,18 @@ public class RobotPlayer {
 			MAPHEIGHT = 901,
 			TOPLEFTX = 902,
 			TOPLEFTY = 903,
-			MAPSET = 904
+			MAPSET = 904,
+			
+			MAPBROADCASTED = 905,
+			
+			MAPFIRST = 20000,
+			MAPLAST = 35000,
+			
+			FLOODX = 39990,
+			FLOODY = 39991,
+			FLOODSET = 39992,
+			MAPFLOODFIRST = 40000,
+			MAPFLOODLAST = 55000
 			;
 	
 	public static Map<RobotType, Integer> countChannels = new HashMap<>();

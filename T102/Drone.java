@@ -1,6 +1,5 @@
 package T102;
 
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -16,6 +15,8 @@ public class Drone extends BaseBot {
 	// are tags for drones and each tag means that the drone will explore
 	// some part of the map
 	private int explore = -1;
+	
+	private int scout = 0;
 	
 	
 	/**
@@ -70,21 +71,25 @@ public class Drone extends BaseBot {
 						rc.readBroadcast(RobotPlayer.expOFFSET1),
 						rc.readBroadcast(RobotPlayer.expOFFSET2)
 				);
+				rc.broadcast(RobotPlayer.expDRONE1DONE, 1);
 			} else if (explore == 2) {
 				exploreAll(
 						rc.readBroadcast(RobotPlayer.expOFFSET2),
 						rc.readBroadcast(RobotPlayer.expOFFSET3)
 				);
+				rc.broadcast(RobotPlayer.expDRONE2DONE, 1);
 			} else if (explore == 3) {
 				exploreAll(
 						rc.readBroadcast(RobotPlayer.expOFFSET3),
 						rc.readBroadcast(RobotPlayer.expOFFSET4)
 				);
+				rc.broadcast(RobotPlayer.expDRONE3DONE, 1);
 			} else if (explore == 4) {
 				exploreAll(
 						rc.readBroadcast(RobotPlayer.expOFFSET4),
 						RobotPlayer.expLOCFIRST + rc.readBroadcast(RobotPlayer.expLOCCOUNT) * 2
 				);
+				rc.broadcast(RobotPlayer.expDRONE4DONE, 1);
 			}
 			
 			// Disable exploring role, this drone will continue to do whatever its
@@ -149,6 +154,7 @@ public class Drone extends BaseBot {
 			if (rc.getLocation().distanceSquaredTo(loc) < EXPLORE_DIST) {
 				return;
 			}
+			
 			tryMoveTo(loc);
 			rc.yield();
 		}

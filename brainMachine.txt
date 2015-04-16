@@ -6,3 +6,8 @@ we need an estimation of when a unit is as good as dead.
 * Each robot will change its own broadcast for count
 
 * Roaming drones
+
+* Attack undefended towers
+* Attack and go back
+
+* Drones to defend the towers

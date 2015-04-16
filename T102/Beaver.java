@@ -28,6 +28,8 @@ public class Beaver extends BaseBot {
 		}
 		else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
 			hasBuilt = tryBuild(RobotType.HELIPAD);
+		} else if (rc.readBroadcast(RobotPlayer.numTECHNOLOGYINSTITUTE) < 1) {
+			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
 		else if (rc.readBroadcast(RobotPlayer.numBARRACKS) < 2) {
 			hasBuilt = tryBuild(RobotType.BARRACKS);
