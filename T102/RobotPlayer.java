@@ -79,7 +79,11 @@ public class RobotPlayer {
 			FLOODY = 39991,
 			FLOODSET = 39992,
 			MAPFLOODFIRST = 40000,
-			MAPFLOODLAST = 55000
+			MAPFLOODLAST = 55000,
+		
+		// SUPPLIERS
+			SUPPLIERFIRST = 920,
+			SUPPLIERLAST = 929
 			;
 	
 	public static Map<RobotType, Integer> countChannels = new HashMap<>();

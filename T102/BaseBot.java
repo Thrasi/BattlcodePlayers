@@ -31,16 +31,16 @@ public class BaseBot {
 	
 	
 	// Current robot
-	protected RobotController rc;
+	public static RobotController rc;
 	
 	// Locations of both HQs
-	protected MapLocation myHQ, theirHQ;
+	public static MapLocation myHQ, theirHQ;
 	
 	// References to both teams
-	protected Team myTeam, theirTeam;
+	public static Team myTeam, theirTeam;
 	
 	// Random number generator
-	protected Random rand;
+	public static Random rand;
 
 	
 	/**
@@ -376,7 +376,7 @@ public class BaseBot {
 	 * Senses all allies.
 	 * @return array of ally robots
 	 */
-	public RobotInfo[] getAllAllies() {
+	public static RobotInfo[] getAllAllies() {
 		return rc.senseNearbyRobots(Integer.MAX_VALUE, myTeam);
 	}
 

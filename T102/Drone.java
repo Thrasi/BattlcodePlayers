@@ -18,6 +18,7 @@ public class Drone extends BaseBot {
 	private int explore = -1;
 	
 	private int scout = 0;
+	private int supply = -1;
 	
 	private boolean visitedHQ = false;
 	
@@ -105,7 +106,12 @@ public class Drone extends BaseBot {
 			
 			// Disable exploring role, this drone will continue to do whatever its
 			// role is to do afterwards
+			supply = explore;	// Become supplier
 			explore = -1;
+		}
+		
+		if (supply != -1) {
+			
 		}
 		
 		rc.yield();

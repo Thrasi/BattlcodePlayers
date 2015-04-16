@@ -1,16 +1,10 @@
 package T102;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
 import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.TerrainTile;
-import battlecode.world.Robot;
 
 public class Computer extends BaseBot {
 
