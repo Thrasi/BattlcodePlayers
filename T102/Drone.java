@@ -2,6 +2,7 @@ package T102;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
@@ -17,6 +18,8 @@ public class Drone extends BaseBot {
 	private int explore = -1;
 	
 	private int scout = 0;
+	
+	private boolean visitedHQ = false;
 	
 	
 	/**
@@ -46,6 +49,14 @@ public class Drone extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		if (explore != -1) {		// Drone is exploring one
+			if (!visitedHQ) {
+				while (rc.getLocation().distanceSquaredTo(myHQ) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+					tryMoveTo(myHQ);
+					rc.yield();
+				}
+				rc.yield();
+				visitedHQ = true;
+			}
 			
 			// Before exploring the whole map, these functions are called
 			// and they are used to decide some parameters such as map size
@@ -154,7 +165,7 @@ public class Drone extends BaseBot {
 			if (rc.getLocation().distanceSquaredTo(loc) < EXPLORE_DIST) {
 				return;
 			}
-			
+			trySupplyTower();
 			tryMoveTo(loc);
 			rc.yield();
 		}

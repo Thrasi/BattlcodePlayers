@@ -1,21 +1,16 @@
 package T102;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode.world.Robot;
 import T102.RobotPlayer;
 
 public class HQ extends BaseBot {
@@ -32,7 +27,7 @@ public class HQ extends BaseBot {
 	static {
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 2000));
-		hqSupplies.put(RobotType.DRONE, new Tuple(400, 15000));
+		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 15000));
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(500, 2500));
 	}
 

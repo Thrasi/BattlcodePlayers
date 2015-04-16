@@ -22,7 +22,6 @@ public class Beaver extends BaseBot {
 		}
 		boolean hasBuilt = false;
 		
-		//if (rc.readBroadcast(RobotType.MINERFACTORY.ordinal()) < 1) {
 		if (rc.readBroadcast(RobotPlayer.numMINERFACTORY) < 1) {
 			hasBuilt = tryBuild(RobotType.MINERFACTORY);
 		}
@@ -42,6 +41,7 @@ public class Beaver extends BaseBot {
 		if ( !hasBuilt ) {
 			boolean didMine = tryMine();
 			if ( !didMine ) {
+				rc.yield();
 				tryMove( getRandomDirection() );
 			}
 		}

@@ -719,7 +719,7 @@ public class BaseBot {
 		for (MapLocation loc : locations) {
 			if (rc.senseTerrainTile(loc) == TerrainTile.NORMAL && rc.senseOre(loc) > 0
 					&& rc.getLocation().distanceSquaredTo(loc) < dist
-					&& rc.senseRobotAtLocation(loc) == null) {
+					&& isTaken(loc)) {
 				oreLoc = loc;
 				dist = rc.getLocation().distanceSquaredTo(loc);
 			}
