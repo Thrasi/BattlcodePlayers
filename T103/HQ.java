@@ -3,15 +3,18 @@ package T103;
 import java.util.HashMap;
 import java.util.Map;
 
+import battlecode.common.Clock;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-
 import static T103.Channels.isSet;
 import static T103.Utility.Tuple;
+import static T103.Channels.set;
+import static T103.Channels.reset;
 
 
 public class HQ extends BaseBot {
@@ -93,6 +96,24 @@ public class HQ extends BaseBot {
 	
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
+		
+		MapLocation[] myTowers = rc.senseTowerLocations();
+		if (myTowers.length > 0) {
+			//tryMoveTo(myTowers[0]);
+			rc.broadcast(Channels.MAINSWARMRALLYX, myTowers[0].x);
+			rc.broadcast(Channels.MAINSWARMRALLYY, myTowers[0].y);
+			set(Channels.MAINSWARMRALLY);
+		} else {
+			Direction dir = myHQ.directionTo(theirHQ);
+			// TODO fix these squared distances
+			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 3);
+			
+			//tryMoveTo(myHQ.add(dir, dist));
+			MapLocation rally = myHQ.add(dir, dist);
+			rc.broadcast(Channels.MAINSWARMRALLYX, rally.x);
+			rc.broadcast(Channels.MAINSWARMRALLYY, rally.y);
+			set(Channels.MAINSWARMRALLY);
+		}
 		
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();

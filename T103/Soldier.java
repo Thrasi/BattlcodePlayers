@@ -1,10 +1,11 @@
 package T103;
 
 import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+
+import static T103.Channels.isSet;
 
 public class Soldier extends BaseBot {
 
@@ -26,6 +27,8 @@ public class Soldier extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		tryShootWeakest();
+		
+		
 		
 		if (firstWave && Clock.getRoundNum() > 600) {
 			MapLocation[] otherTowers = rc.senseEnemyTowerLocations();
@@ -54,6 +57,7 @@ public class Soldier extends BaseBot {
 			}
 		}
 		
+		/*
 		MapLocation[] myTowers = rc.senseTowerLocations();
 		if (myTowers.length > 0) {
 			tryMoveTo(myTowers[0]);
@@ -63,6 +67,13 @@ public class Soldier extends BaseBot {
 			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 3);
 			
 			tryMoveTo(myHQ.add(dir, dist));
+		}
+		*/
+		if (isSet(Channels.MAINSWARMRALLY)) {
+			tryMoveTo(new MapLocation(
+					rc.readBroadcast(Channels.MAINSWARMRALLYX),
+					rc.readBroadcast(Channels.MAINSWARMRALLYY)
+			));
 		}
 		rc.yield();
 	}

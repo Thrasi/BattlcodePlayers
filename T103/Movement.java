@@ -1,16 +1,10 @@
 package T103;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Set;
-
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
 import static T103.BaseBot.rc;
-import static T103.BaseBot.directions;
 import static T103.BaseBot.isOccupied;
 import static T103.Utility.Pair;
 
@@ -85,46 +79,6 @@ public class Movement {
 	 */
 	private static boolean isNormalOrUnknown(TerrainTile tile) {
 		return tile == TerrainTile.NORMAL || tile == TerrainTile.UNKNOWN;
-	}
-	
-	public static Pair<Direction[], Integer> bestFirstSearch(
-			final MapLocation target, boolean avoidObst, int depth) {
-		
-		MapLocation current = rc.getLocation();
-		PriorityQueue<MapLocation> open = new PriorityQueue<>(depth << 1, new Comparator<MapLocation>() {
-
-			@Override
-			public int compare(MapLocation o1, MapLocation o2) {
-				return o1.distanceSquaredTo(target) - o2.distanceSquaredTo(target);
-			}
-		});
-		Set<MapLocation> visited = new HashSet<>();
-		open.offer(current);
-		Direction[] moves = new Direction[depth];
-		int idx = 0;
-		
-		while (!open.isEmpty()) {
-			current = open.poll();
-			visited.add(current);
-			
-			if (current.equals(target)) {
-				return new Pair<>(moves, idx);
-			}
-			
-			for (Direction d : directions) {
-				MapLocation next = current.add(d);
-				TerrainTile tile = rc.senseTerrainTile(next);
-				if (visited.contains(next)
-						|| isOccupied(next)
-						|| (avoidObst && !isNormalOrUnknown(tile))
-						|| (!avoidObst && tile == TerrainTile.OFF_MAP)) {
-					continue;
-				}
-				open.offer(next);
-			}
-		}
-		
-		return null;
 	}
 	
 }
