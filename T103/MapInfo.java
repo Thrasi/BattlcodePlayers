@@ -82,24 +82,26 @@ public class MapInfo {
 		
 	}//End reconstructMap
 	
+
 	
+	// Flood constants
 	private static final int MAXFLOODS = 10;
-	private static final int MINBYTECODE = 1000;
+	private static final int MINBYTECODE = 500;
 	
-	// Used for flooding
-	private static boolean[] visited;
-//	
+	// Flood data
 	private static int[][] floods;
+	
+	// Flood flags
 	private static boolean[] floodCreated;
-//	
-	//private static int[] fxs;
-	//private static int[] fys;
 	
-	
-	
+	/**
+	 * Sets the queue. Broadcasts the queue. Can be called only once
+	 * @param locations locations to broadcast into queue
+	 * @throws GameActionException incorrect channels
+	 */
 	public static void setQueue(MapLocation... locations) throws GameActionException {
 		if (isSet(RobotPlayer.FLOODQUEUESET)) {
-			return;
+			throw new RobotException("Can set queue only once.");
 		}
 		
 		// Set queue size
@@ -120,6 +122,21 @@ public class MapInfo {
 		set(RobotPlayer.FLOODQUEUESET);
 	}
 	
+	/**
+	 * Tests whether a flood with given index is active.
+	 * @param idx index of the flood
+	 * @return true if it is active, false otherwise
+	 * @throws GameActionException incorrect channels
+	 */
+	public static boolean isActive(int idx) throws GameActionException {
+		return isSet(RobotPlayer.FLOODACTIVE)
+				&& rc.readBroadcast(RobotPlayer.FLOODACTIVEINDEX) == idx;
+	}
+	
+	/**
+	 * Floods whatever is given in flooding queue and server every now and then.
+	 * @throws GameActionException incorrect channels
+	 */
 	public static void floodAndServe() throws GameActionException {
 		readParameters();
 		
@@ -139,23 +156,22 @@ public class MapInfo {
 			int xStart = rc.readBroadcast(RobotPlayer.FLOODQUEUEFIRST + idx);
 			int yStart = rc.readBroadcast(RobotPlayer.FLOODQUEUEFIRST + idx + 1);
 			flood(floods[i], xStart, yStart);
-			//set(RobotPlayer.FLOODDONEFIRST + i);
 			floodCreated[i] = true;
 		}
 	}
 	
 	/**
-	 * TODO flood
-	 * @param flood 
-	 * @throws GameActionException
+	 * Function used for flooding the map and finding directions. It will also serve 2-3
+	 * times at the beginning of each turn. It looks like shit but it's the only
+	 * way to make to run fast.
+	 * @param flood flood to fill
+	 * @param xStart flood source x
+	 * @param yStart flood source y
+	 * @throws GameActionException incorrect channels
 	 */
 	private static void flood(int[] flood, int xStart, int yStart) throws GameActionException {
 		readParameters();
 		
-		// Visited "set"
-		visited = new boolean[width * height];
-		visited[(yStart - ytl) * width + xStart - xtl] = true;
-
 		// Open "queue"
 		int[] xx = new int[width*height];
 		int[] yy = new int[width*height];
@@ -163,19 +179,19 @@ public class MapInfo {
 		xx[0] = xStart-xtl;
 		yy[0] = yStart-ytl;
 		int i = 0, j = 1;		// Head and tail of the queue
-		
 
 		while (i < j) {
+			// This part is called 2-3 times on the beginning of each turn
 			if (Clock.getBytecodesLeft() < MINBYTECODE) {
-				serve();	//TODO this is not ok
+				serve();
 			}
 			
-			
+			// Dequeue
 			int xg = xx[i];
 			int yg = yy[i];
 			i++;
 			
-			// All 8 directions to move
+			// All 8 directions to move (Succ)
 			int x1 = xg,   y1 = yg-1;
 			int x2 = xg  , y2 = yg+1;
 			int x3 = xg-1, y3 = yg;
@@ -188,74 +204,74 @@ public class MapInfo {
 			// Check if location is within the borders, if it has not been
 			// visited and if it is free (not obstacle)
 			if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height
-					&& !visited[y1*width+x1] && map[y1*width+x1]) {
-				visited[y1*width + x1] = true;
-				xx[j] = x1;
-				yy[j] = y1;
-				j++;
+					&& flood[y1*width+x1] == 0 && map[y1*width+x1]) {
+				xx[j] = x1;		// Enqueue
+				yy[j] = y1;		// Enqueue
+				j++;			// Enqueue
 				flood[y1*width + x1] = 1;
 			}
 			if (x2 >= 0 && x2 < width && y2 >= 0 && y2 < height
-					&& !visited[y2*width+x2] && map[y2*width+x2]) {
-				visited[y2*width + x2] = true;
+					&& flood[y2*width+x2] == 0 && map[y2*width+x2]) {
 				xx[j] = x2;
 				yy[j] = y2;
 				j++;
 				flood[y2*width + x2] = 2;
 			}
 			if (x3 >= 0 && x3 < width && y3 >= 0 && y3 < height
-					&& !visited[y3*width+x3] && map[y3*width+x3]) {
-				visited[y3*width + x3] = true;
+					&& flood[y3*width+x3] == 0 && map[y3*width+x3]) {
 				xx[j] = x3;
 				yy[j] = y3;
 				j++;
 				flood[y3*width + x3] = 3;
 			}
 			if (x4 >= 0 && x4 < width && y4 >= 0 && y4 < height
-					&& !visited[y4*width+x4] && map[y4*width+x4]) {
-				visited[y4*width + x4] = true;
+					&& flood[y4*width+x4] == 0 && map[y4*width+x4]) {
 				xx[j] = x4;
 				yy[j] = y4;
 				j++;
 				flood[y4*width + x4] = 4;
 			}
 			if (x5 >= 0 && x5 < width && y5 >= 0 && y5 < height
-					&& !visited[y5*width+x5] && map[y5*width+x5]) {
-				visited[y5*width + x5] = true;
+					&& flood[y5*width+x5] == 0 && map[y5*width+x5]) {
 				xx[j] = x5;
 				yy[j] = y5;
 				j++;
 				flood[y5*width + x5] = 5;
 			}
 			if (x6 >= 0 && x6 < width && y6 >= 0 && y6 < height
-					&& !visited[y6*width+x6] && map[y6*width+x6]) {
-				visited[y6*width + x6] = true;
+					&& flood[y6*width+x6] == 0 && map[y6*width+x6]) {
 				xx[j] = x6;
 				yy[j] = y6;
 				j++;
 				flood[y6*width + x6] = 6;
 			}
 			if (x7 >= 0 && x7 < width && y7 >= 0 && y7 < height
-					&& !visited[y7*width+x7] && map[y7*width+x7]) {
-				visited[y7*width + x7] = true;
+					&& flood[y7*width+x7] == 0 && map[y7*width+x7]) {
 				xx[j] = x7;
 				yy[j] = y7;
 				j++;
 				flood[y7*width + x7] = 7;
 			}
 			if (x8 >= 0 && x8 < width && y8 >= 0 && y8 < height
-					&& !visited[y8*width+x8] && map[y8*width+x8]) {
-				visited[y8*width + x8] = true;
+					&& flood[y8*width+x8] == 0 && map[y8*width+x8]) {
 				xx[j] = x8;
 				yy[j] = y8;
 				j++;
 				flood[y8*width + x8] = 8;
 			}
 			
-		}
-	}
+		}//End while
+		
+		// Set flood source to 0 (don't move)
+		flood[yy[0]*width + xx[0]] = 0;
+		
+	}//End flood
 	
 	
+	/**
+	 * Serves the flood if the request is set.
+	 * @throws GameActionException incorrect channels
+	 */
 	public static void serve() throws GameActionException {
 		if (!isSet(RobotPlayer.FLOODREQUEST)) {
 			return;
@@ -263,21 +279,27 @@ public class MapInfo {
 		
 		readParameters();
 		
+		// Check if flood has been created
 		int idx = rc.readBroadcast(RobotPlayer.FLOODINDEX);
 		if (!floodCreated[idx]) {
 			return;
 		}
 
-		System.out.println(Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		//System.out.println("Started serve "
+		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		
 		int[] flood = floods[idx];
 		int size = flood.length;
+		reset(RobotPlayer.FLOODACTIVE);						// Disable reading flood
 		for (int i = 0; i < size; i++) {
 			rc.broadcast(RobotPlayer.FLOODFIRST + i, flood[i]);
 		}
-		rc.broadcast(RobotPlayer.FLOODACTIVEINDEX, idx);
-		set(RobotPlayer.FLOODACTIVE);
-		reset(RobotPlayer.FLOODREQUEST);
-		System.out.println(Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		rc.broadcast(RobotPlayer.FLOODACTIVEINDEX, idx);	// Set active flood index
+		set(RobotPlayer.FLOODACTIVE);						// Enable reading flood
+		reset(RobotPlayer.FLOODREQUEST);					// Can set new request
+		
+		//System.out.println("Finished serve "
+		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 	}
 
 	/**
@@ -293,15 +315,12 @@ public class MapInfo {
 		ytl = rc.readBroadcast(RobotPlayer.TOPLEFTY);
 	}
 	
-	public static boolean isActive(int idx) throws GameActionException {
-		//System.out.println(isSet(RobotPlayer.FLOODACTIVE) + " " + rc.readBroadcast(RobotPlayer.FLOODACTIVEINDEX));
-		return isSet(RobotPlayer.FLOODACTIVE) && rc.readBroadcast(RobotPlayer.FLOODACTIVEINDEX) == idx;
-	}
 	
+	
+	// FOR DEBUGGING
 	
 	/**
 	 * Prints map to console. Used only for debugging.
-	 * @throws GameActionException incorrect channels
 	 */
 	public static void printMap() throws GameActionException {
 		readParameters();
@@ -320,7 +339,6 @@ public class MapInfo {
 	
 	/**
 	 * Marks flooding in the map. Used for debugging purposes.
-	 * @throws GameActionException
 	 */
 	public static void markFlood(int idx) throws GameActionException {
 		readParameters();
@@ -352,15 +370,17 @@ public class MapInfo {
 		}
 	}
 	
-	
-	
-	public static void markFloodFromChannels(int idx) throws GameActionException {
+	/**
+	 * Marks in map whatever is in the flood channels if it is active.
+	 * Used for debugging.
+	 */
+	public static void markFloodFromChannels() throws GameActionException {
 		readParameters();
 		
-		if (!isSet(RobotPlayer.FLOODACTIVE)
-				|| rc.readBroadcast(RobotPlayer.FLOODACTIVEINDEX) != idx) {
-			throw new RobotException("Incorrect flood is active.");
+		if (!isSet(RobotPlayer.FLOODACTIVE)) {
+			throw new RobotException("Flood is not active.");
 		}
+		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int d = rc.readBroadcast(RobotPlayer.FLOODFIRST + y*width + x);

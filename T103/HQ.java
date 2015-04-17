@@ -11,9 +11,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-
 import T103.RobotPlayer;
-
 import static T103.Utility.Tuple;
 
 public class HQ extends BaseBot {
@@ -28,9 +26,15 @@ public class HQ extends BaseBot {
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(500, 2500));
 	}
 
-	public HQ(RobotController rc) {
+	public HQ(RobotController rc) throws GameActionException {
 		super(rc);
-		
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		MapLocation[] q = new MapLocation[enemyTowers.length+1];
+		for (int i = 0; i < enemyTowers.length; i++) {
+			q[i+1] = enemyTowers[i];
+		}
+		q[0] = theirHQ;
+		MapInfo.setQueue(q);
 		/*
 		// Initial tower locations (before destruction)
 		MapLocation[] myTowers = rc.senseTowerLocations();
@@ -83,6 +87,8 @@ public class HQ extends BaseBot {
 	}
 	
 	boolean printMap = false;
+	int reqFlood = 1;
+	int rCount = 0;
 	
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
@@ -91,11 +97,32 @@ public class HQ extends BaseBot {
 			decideExploringPoints();
 		}
 		
+//		if (printMap && isSet(RobotPlayer.MAPBROADCASTED)) {
+//			printMap = false;
+//			System.out.println("entered here");
+//			MapInfo.printMap();
+//		}
 		
-		if (printMap && isSet(RobotPlayer.MAPBROADCASTED)) {
-			printMap = false;
-			System.out.println("entered here");
-			MapInfo.printMap();
+		if (reqFlood == 1) {
+			rc.broadcast(RobotPlayer.FLOODINDEX, 1);
+			rc.broadcast(RobotPlayer.FLOODREQUEST, 1);
+			reqFlood = 2;
+			rCount = 0;
+		} else if (reqFlood == 2 && MapInfo.isActive(1) && rCount > 3) {
+			System.out.println(rCount);
+			rc.broadcast(RobotPlayer.FLOODINDEX, 0);
+			rc.broadcast(RobotPlayer.FLOODREQUEST, 1);
+			reqFlood = 3;
+			rCount = 0;
+		} else if (reqFlood == 3  && MapInfo.isActive(0) && rCount > 3) {
+			rc.broadcast(RobotPlayer.FLOODINDEX, 3);
+			rc.broadcast(RobotPlayer.FLOODREQUEST, 1);
+			reqFlood = 0;
+		}
+		
+		if (isSet(RobotPlayer.FLOODACTIVE)) {
+			rCount++;
+			MapInfo.markFloodFromChannels();
 		}
 		
 		

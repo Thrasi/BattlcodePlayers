@@ -185,7 +185,7 @@ public class BaseBot {
 	/**
 	 * Sets the given channel to 0.
 	 * @param channel channel to reset
-	 * @throws GameActionException if channel doesnt exist
+	 * @throws GameActionException if channel doesn't exist
 	 */
 	public static void reset(int channel) throws GameActionException {
 		rc.broadcast(channel, 0);
