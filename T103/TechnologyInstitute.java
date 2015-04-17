@@ -13,7 +13,7 @@ public class TechnologyInstitute extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
-		if (rc.readBroadcast(RobotPlayer.numCOMPUTER) < 1) {
+		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			trySpawn(RobotType.COMPUTER);
 		}
 		rc.yield();

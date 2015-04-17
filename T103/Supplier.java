@@ -15,7 +15,7 @@ public class Supplier extends BaseBot {
 		super(rc);
 	}
 	public void execute() throws GameActionException {
-        int queueStart = rc.readBroadcast(RobotPlayer.SUPPLYQSTART), queueEnd = rc.readBroadcast(RobotPlayer.SUPPLYQEND);
+        int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART), queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
 
         if (rc.isCoreReady()) {
             if (queueStart != queueEnd && rc.getSupplyLevel() > 1000) {
@@ -27,7 +27,7 @@ public class Supplier extends BaseBot {
                     if (allies[i].ID == target) {
                         if (rc.getLocation().distanceSquaredTo(allies[i].location) <= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
                             rc.transferSupplies(10000, allies[i].location);
-                            rc.broadcast(RobotPlayer.SUPPLYQSTART, queueStart+1);
+                            rc.broadcast(Channels.SUPPLYQSTART, queueStart+1);
                         }
                         else {
                             boolean moved = tryMoveTo( allies[i].location );

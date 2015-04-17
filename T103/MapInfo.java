@@ -10,7 +10,10 @@ import static T103.BaseBot.isVerticalSym;
 import static T103.BaseBot.reset;
 import static T103.BaseBot.set;
 
-import T103.RobotPlayer;
+import java.util.LinkedList;
+import java.util.List;
+
+import T103.Channels;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -73,14 +76,76 @@ public class MapInfo {
 				// Test tile
 				TerrainTile tile = rc.senseTerrainTile(loc);
 				if (tile == TerrainTile.NORMAL) {
-					rc.broadcast(RobotPlayer.MAPFIRST + y * width + x, 1);
+					rc.broadcast(Channels.MAPFIRST + y * width + x, 1);
 					map[y * width + x] = true;
 				}
 				
 			}//End for x
 		}//End for y
 		
+		// Map done
+		set(Channels.MAPBROADCASTED);
+		
 	}//End reconstructMap
+	
+	
+	// TODO drone queue, optimize this
+	public static void decideExploringPoints() throws GameActionException {
+		readParameters();
+		
+		List<MapLocation> exploreLocations = new LinkedList<>();
+		for (int y = ytl; y < ytl + height; y += 6) {
+			for (int x = xtl; x < xtl + width; x+= 3) {
+				MapLocation loc = new MapLocation(x, y);
+				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
+					exploreLocations.add(loc);
+				}
+				
+			}
+			for (int x = xtl + width; x >= xtl; x -= 3) {
+				MapLocation loc = new MapLocation(x, y+3);
+				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
+					exploreLocations.add(loc);
+				}
+			}
+		}
+		int offset = 0;
+		for (MapLocation loc : exploreLocations) {
+			if (Channels.expLOCFIRST + offset < Channels.expLOCLAST) {
+				rc.broadcast(Channels.expLOCFIRST + offset, loc.x);
+				rc.broadcast(Channels.expLOCFIRST + offset + 1, loc.y);
+				offset += 2;
+			}
+		}
+		int diff = (exploreLocations.size() / 4) << 1;
+		rc.broadcast(Channels.expOFFSET1, Channels.expLOCFIRST);
+		rc.broadcast(Channels.expOFFSET2, Channels.expLOCFIRST + diff);
+		rc.broadcast(Channels.expOFFSET3, Channels.expLOCFIRST + 2*diff);
+		rc.broadcast(Channels.expOFFSET4, Channels.expLOCFIRST + 3*diff);
+		rc.broadcast(Channels.expLOCCOUNT, exploreLocations.size());
+		rc.broadcast(Channels.expSTARTED, 1);
+		
+		/*
+		for (int i = rc.readBroadcast(Channels.expOFFSET1); i < rc.readBroadcast(Channels.expOFFSET2); i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 20, 100, 20);
+		}
+		for (int i = rc.readBroadcast(Channels.expOFFSET2); i < rc.readBroadcast(Channels.expOFFSET3); i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 100, 20, 20);
+		}
+		for (int i = rc.readBroadcast(Channels.expOFFSET3); i < rc.readBroadcast(Channels.expOFFSET4); i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 20, 200, 100);
+		}
+		for (int i = rc.readBroadcast(Channels.expOFFSET4);
+				i < Channels.expLOCFIRST + rc.readBroadcast(Channels.expLOCCOUNT) * 2; i+= 2) {
+			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
+			rc.setIndicatorDot(loc, 20, 20, 100);
+		}*/
+		
+		rc.yield();
+	}
 	
 
 	
@@ -100,7 +165,7 @@ public class MapInfo {
 	 * @throws GameActionException incorrect channels
 	 */
 	public static void setQueue(MapLocation... locations) throws GameActionException {
-		if (isSet(RobotPlayer.FLOODQUEUESET)) {
+		if (isSet(Channels.FLOODQUEUESET)) {
 			throw new RobotException("Can set queue only once.");
 		}
 		
@@ -109,17 +174,17 @@ public class MapInfo {
 		if (size > MAXFLOODS) {
 			throw new RobotException("Queue is too large.");
 		}
-		rc.broadcast(RobotPlayer.FLOODQUEUECOUNT, size);
+		rc.broadcast(Channels.FLOODQUEUECOUNT, size);
 		
 		// Set queue locations
 		for (int i = 0; i < size; i++) {
 			int idx = i << 1;
-			rc.broadcast(RobotPlayer.FLOODQUEUEFIRST + idx, locations[i].x);
-			rc.broadcast(RobotPlayer.FLOODQUEUEFIRST + idx + 1, locations[i].y);
+			rc.broadcast(Channels.FLOODQUEUEFIRST + idx, locations[i].x);
+			rc.broadcast(Channels.FLOODQUEUEFIRST + idx + 1, locations[i].y);
 		}
 		
 		// Queue is set
-		set(RobotPlayer.FLOODQUEUESET);
+		set(Channels.FLOODQUEUESET);
 	}
 	
 	/**
@@ -129,8 +194,8 @@ public class MapInfo {
 	 * @throws GameActionException incorrect channels
 	 */
 	public static boolean isActive(int idx) throws GameActionException {
-		return isSet(RobotPlayer.FLOODACTIVE)
-				&& rc.readBroadcast(RobotPlayer.FLOODACTIVEINDEX) == idx;
+		return isSet(Channels.FLOODACTIVE)
+				&& rc.readBroadcast(Channels.FLOODACTIVEINDEX) == idx;
 	}
 	
 	/**
@@ -140,21 +205,21 @@ public class MapInfo {
 	public static void floodAndServe() throws GameActionException {
 		readParameters();
 		
-		if (!isSet(RobotPlayer.MAPBROADCASTED)) {
+		if (!isSet(Channels.MAPBROADCASTED)) {
 			throw new RobotException("Map not broadcasted.");
 		}
-		if (!isSet(RobotPlayer.FLOODQUEUESET)) {
+		if (!isSet(Channels.FLOODQUEUESET)) {
 			throw new RobotException("Flood queue not set.");
 		}
 		
-		int size = rc.readBroadcast(RobotPlayer.FLOODQUEUECOUNT);
+		int size = rc.readBroadcast(Channels.FLOODQUEUECOUNT);
 		floods = new int[size][width*height];
 		floodCreated = new boolean[size];
 		
 		for (int i = 0; i < size; i++) {
 			int idx = i << 1;
-			int xStart = rc.readBroadcast(RobotPlayer.FLOODQUEUEFIRST + idx);
-			int yStart = rc.readBroadcast(RobotPlayer.FLOODQUEUEFIRST + idx + 1);
+			int xStart = rc.readBroadcast(Channels.FLOODQUEUEFIRST + idx);
+			int yStart = rc.readBroadcast(Channels.FLOODQUEUEFIRST + idx + 1);
 			flood(floods[i], xStart, yStart);
 			floodCreated[i] = true;
 		}
@@ -273,14 +338,14 @@ public class MapInfo {
 	 * @throws GameActionException incorrect channels
 	 */
 	public static void serve() throws GameActionException {
-		if (!isSet(RobotPlayer.FLOODREQUEST)) {
+		if (!isSet(Channels.FLOODREQUEST)) {
 			return;
 		}
 		
 		readParameters();
 		
 		// Check if flood has been created
-		int idx = rc.readBroadcast(RobotPlayer.FLOODINDEX);
+		int idx = rc.readBroadcast(Channels.FLOODINDEX);
 		if (!floodCreated[idx]) {
 			return;
 		}
@@ -290,13 +355,13 @@ public class MapInfo {
 		
 		int[] flood = floods[idx];
 		int size = flood.length;
-		reset(RobotPlayer.FLOODACTIVE);						// Disable reading flood
+		reset(Channels.FLOODACTIVE);						// Disable reading flood
 		for (int i = 0; i < size; i++) {
-			rc.broadcast(RobotPlayer.FLOODFIRST + i, flood[i]);
+			rc.broadcast(Channels.FLOODFIRST + i, flood[i]);
 		}
-		rc.broadcast(RobotPlayer.FLOODACTIVEINDEX, idx);	// Set active flood index
-		set(RobotPlayer.FLOODACTIVE);						// Enable reading flood
-		reset(RobotPlayer.FLOODREQUEST);					// Can set new request
+		rc.broadcast(Channels.FLOODACTIVEINDEX, idx);	// Set active flood index
+		set(Channels.FLOODACTIVE);						// Enable reading flood
+		reset(Channels.FLOODREQUEST);					// Can set new request
 		
 		//System.out.println("Finished serve "
 		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
@@ -306,13 +371,13 @@ public class MapInfo {
 	 * Read all parameters from broadcast if possible
 	 */
 	private static void readParameters() throws GameActionException {
-		if (!isSet(RobotPlayer.MAPSET)) {
+		if (!isSet(Channels.MAPSET)) {
 			throw new RobotException("Map parameters are not set");
 		}
-		height = rc.readBroadcast(RobotPlayer.MAPHEIGHT);
-		width = rc.readBroadcast(RobotPlayer.MAPWIDTH);
-		xtl = rc.readBroadcast(RobotPlayer.TOPLEFTX);
-		ytl = rc.readBroadcast(RobotPlayer.TOPLEFTY);
+		height = rc.readBroadcast(Channels.MAPHEIGHT);
+		width = rc.readBroadcast(Channels.MAPWIDTH);
+		xtl = rc.readBroadcast(Channels.TOPLEFTX);
+		ytl = rc.readBroadcast(Channels.TOPLEFTY);
 	}
 	
 	
@@ -327,7 +392,7 @@ public class MapInfo {
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				if (rc.readBroadcast(RobotPlayer.MAPFIRST + y*width + x) == 1) {
+				if (rc.readBroadcast(Channels.MAPFIRST + y*width + x) == 1) {
 					System.out.print(" ");
 				} else {
 					System.out.print("#");
@@ -377,13 +442,13 @@ public class MapInfo {
 	public static void markFloodFromChannels() throws GameActionException {
 		readParameters();
 		
-		if (!isSet(RobotPlayer.FLOODACTIVE)) {
+		if (!isSet(Channels.FLOODACTIVE)) {
 			throw new RobotException("Flood is not active.");
 		}
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				int d = rc.readBroadcast(RobotPlayer.FLOODFIRST + y*width + x);
+				int d = rc.readBroadcast(Channels.FLOODFIRST + y*width + x);
 				MapLocation loc = new MapLocation(x+xtl, y+ytl);
 				
 				if (d == 1) {

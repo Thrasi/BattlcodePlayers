@@ -17,76 +17,7 @@ public class RobotPlayer {
 	
 	private static RobotController rc;
 	
-	// COMMUNICATION CHANNELS:
-	public static int numBEAVERS = 2, 
-			numMINERS = 3, 
-			numSOLDIERS = 4, 
-			numBASHERS = 5,
-			numBARRACKS = 6, 
-			numMINERFACTORY = 7, 
-			numTANKFACTORY = 8, 
-			numTANKS = 9,
-			numSUPPLYDEPOT = 10, 
-			numAEROSPACELAB = 11, 
-			numCOMMANDER = 12, 
-			numCOMPUTER = 13,
-			numDRONE = 14, 
-			numHELIPAD = 15, 
-			numLAUNCHERS = 16, 
-			numMISSILE = 17,
-			numTECHNOLOGYINSTITUTE = 18, 
-			numTOWER = 19, 
-			numTRAININGFIED = 20,
 	
-		// SUPPLY QUEUE:
-			SUPPLIERID = 296, 
-			numSUPPLIERS = 297,
-			SUPPLYQSTART = 298,
-			SUPPLYQEND = 299,
-			
-		// EXPLORING ROBOTS
-			CORNERBEAVER = 800,
-			expDRONE1 = 801,
-			expDRONE2 = 802,
-			expDRONE3 = 803,
-			expDRONE4 = 804,
-			expDRONE1DONE = 805,
-			expDRONE2DONE = 806,
-			expDRONE3DONE = 807,
-			expDRONE4DONE = 808,
-			expOFFSET1 = 1000,
-			expOFFSET2 = 1001,
-			expOFFSET3 = 1002,
-			expOFFSET4 = 1003,
-			expLOCCOUNT = 1004,
-			expSTARTED = 1005,
-			expLOCFIRST = 1010,
-			expLOCLAST = 5000,
-			
-		// MAP
-			MAPWIDTH = 900,
-			MAPHEIGHT = 901,
-			TOPLEFTX = 902,
-			TOPLEFTY = 903,
-			MAPSET = 904,
-			
-			MAPBROADCASTED = 905,
-			
-			MAPFIRST = 20000,
-			MAPLAST = 35000,
-			
-			
-			FLOODREQUEST = 39000,
-			FLOODINDEX = 39001,
-			FLOODQUEUESET = 39002,
-			FLOODQUEUECOUNT = 39003,
-			FLOODACTIVEINDEX = 39004,
-			FLOODACTIVE = 39005,
-			FLOODQUEUEFIRST = 39100,
-			FLOODQUEUELAST = 39499,
-			FLOODFIRST = 40000,
-			FLOODLAST = 55000
-		;
 	
 	public static Map<RobotType, Integer> countChannels = new HashMap<>();
 	static {
@@ -131,8 +62,8 @@ public class RobotPlayer {
 				try {
 					if (rc.getType() == RobotType.DRONE && needsSupplier(rc)) {
 						myself = new Supplier(rc);
-						rc.broadcast(numSUPPLIERS, rc.readBroadcast(numSUPPLIERS) + 1);
-					    rc.broadcast(SUPPLIERID, rc.getID());
+						rc.broadcast(Channels.numSUPPLIERS, rc.readBroadcast(Channels.numSUPPLIERS) + 1);
+					    rc.broadcast(Channels.SUPPLIERID, rc.getID());
 					}
 				} catch (GameActionException e) {
 					// TODO Auto-generated catch block
@@ -178,7 +109,7 @@ public class RobotPlayer {
 	}
 
 	public static boolean needsSupplier(RobotController rc) throws GameActionException {
-		if (rc.readBroadcast(numSUPPLIERS) == 0) {
+		if (rc.readBroadcast(Channels.numSUPPLIERS) == 0) {
 			return true;
 		}
 		return false;

@@ -11,7 +11,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import T103.RobotPlayer;
+import T103.Channels;
 import static T103.Utility.Tuple;
 
 public class HQ extends BaseBot {
@@ -93,45 +93,45 @@ public class HQ extends BaseBot {
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
 		
-		if (rc.readBroadcast(RobotPlayer.MAPSET) == 1 && rc.readBroadcast(RobotPlayer.expSTARTED) == 0) {
-			decideExploringPoints();
+		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
+			MapInfo.decideExploringPoints();
 		}
 		
-//		if (printMap && isSet(RobotPlayer.MAPBROADCASTED)) {
+//		if (printMap && isSet(Channels.MAPBROADCASTED)) {
 //			printMap = false;
 //			System.out.println("entered here");
 //			MapInfo.printMap();
 //		}
 		
 		if (reqFlood == 1) {
-			rc.broadcast(RobotPlayer.FLOODINDEX, 1);
-			rc.broadcast(RobotPlayer.FLOODREQUEST, 1);
+			rc.broadcast(Channels.FLOODINDEX, 1);
+			rc.broadcast(Channels.FLOODREQUEST, 1);
 			reqFlood = 2;
 			rCount = 0;
 		} else if (reqFlood == 2 && MapInfo.isActive(1) && rCount > 3) {
 			System.out.println(rCount);
-			rc.broadcast(RobotPlayer.FLOODINDEX, 0);
-			rc.broadcast(RobotPlayer.FLOODREQUEST, 1);
+			rc.broadcast(Channels.FLOODINDEX, 0);
+			rc.broadcast(Channels.FLOODREQUEST, 1);
 			reqFlood = 3;
 			rCount = 0;
 		} else if (reqFlood == 3  && MapInfo.isActive(0) && rCount > 3) {
-			rc.broadcast(RobotPlayer.FLOODINDEX, 3);
-			rc.broadcast(RobotPlayer.FLOODREQUEST, 1);
+			rc.broadcast(Channels.FLOODINDEX, 3);
+			rc.broadcast(Channels.FLOODREQUEST, 1);
 			reqFlood = 0;
 		}
 		
-		if (isSet(RobotPlayer.FLOODACTIVE)) {
+		if (isSet(Channels.FLOODACTIVE)) {
 			rCount++;
 			MapInfo.markFloodFromChannels();
 		}
 		
 		
-		int beaverCount = rc.readBroadcast(RobotPlayer.numBEAVERS); 
+		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
-		if (rc.readBroadcast(RobotPlayer.numBEAVERS) < 3) {
+		if (rc.readBroadcast(Channels.numBEAVERS) < 3) {
 			trySpawn(RobotType.BEAVER);
 		}
-		if (rc.readBroadcast(RobotPlayer.CORNERBEAVER) == 0 && beaverCount > 0) {
+		if (rc.readBroadcast(Channels.CORNERBEAVER) == 0 && beaverCount > 0) {
 			RobotInfo[] robots = rc.senseNearbyRobots(2, myTeam);
 			RobotInfo firstBeaver = null;
 			for (RobotInfo ri : robots) {
@@ -142,7 +142,7 @@ public class HQ extends BaseBot {
 				}
 			}
 			if (firstBeaver != null) {
-				rc.broadcast(RobotPlayer.CORNERBEAVER, firstBeaver.ID);
+				rc.broadcast(Channels.CORNERBEAVER, firstBeaver.ID);
 			}
 		}
 		
@@ -152,65 +152,7 @@ public class HQ extends BaseBot {
 	}
 	
 	
-	private void decideExploringPoints() throws GameActionException {
-		int height = rc.readBroadcast(RobotPlayer.MAPHEIGHT);
-		int width = rc.readBroadcast(RobotPlayer.MAPWIDTH);
-		int xs = rc.readBroadcast(RobotPlayer.TOPLEFTX);
-		int ys = rc.readBroadcast(RobotPlayer.TOPLEFTY);
-		
-		List<MapLocation> exploreLocations = new LinkedList<>();
-		for (int y = ys; y < ys + height; y += 6) {
-			for (int x = xs; x < xs + width; x+= 3) {
-				MapLocation loc = new MapLocation(x, y);
-				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
-					exploreLocations.add(loc);
-				}
-				
-			}
-			for (int x = xs + width; x >= xs; x -= 3) {
-				MapLocation loc = new MapLocation(x, y+3);
-				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
-					exploreLocations.add(loc);
-				}
-			}
-		}
-		int offset = 0;
-		for (MapLocation loc : exploreLocations) {
-			if (RobotPlayer.expLOCFIRST + offset < RobotPlayer.expLOCLAST) {
-				rc.broadcast(RobotPlayer.expLOCFIRST + offset, loc.x);
-				rc.broadcast(RobotPlayer.expLOCFIRST + offset + 1, loc.y);
-				offset += 2;
-			}
-		}
-		int diff = (exploreLocations.size() / 4) << 1;
-		rc.broadcast(RobotPlayer.expOFFSET1, RobotPlayer.expLOCFIRST);
-		rc.broadcast(RobotPlayer.expOFFSET2, RobotPlayer.expLOCFIRST + diff);
-		rc.broadcast(RobotPlayer.expOFFSET3, RobotPlayer.expLOCFIRST + 2*diff);
-		rc.broadcast(RobotPlayer.expOFFSET4, RobotPlayer.expLOCFIRST + 3*diff);
-		rc.broadcast(RobotPlayer.expLOCCOUNT, exploreLocations.size());
-		rc.broadcast(RobotPlayer.expSTARTED, 1);
-		
-		/*
-		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET1); i < rc.readBroadcast(RobotPlayer.expOFFSET2); i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 100, 20);
-		}
-		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET2); i < rc.readBroadcast(RobotPlayer.expOFFSET3); i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 100, 20, 20);
-		}
-		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET3); i < rc.readBroadcast(RobotPlayer.expOFFSET4); i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 200, 100);
-		}
-		for (int i = rc.readBroadcast(RobotPlayer.expOFFSET4);
-				i < RobotPlayer.expLOCFIRST + rc.readBroadcast(RobotPlayer.expLOCCOUNT) * 2; i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 20, 100);
-		}*/
-		
-		rc.yield();
-	}
+	
 
 
 	/**
@@ -221,7 +163,7 @@ public class HQ extends BaseBot {
 		/*RobotInfo[] allies = rc.senseNearbyRobots(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, 
 				myTeam);
 		
-		int idToLook = rc.readBroadcast(RobotPlayer.SUPPLIERID);
+		int idToLook = rc.readBroadcast(Channels.SUPPLIERID);
 
 		for (int i=0; i<allies.length; ++i) {
 			RobotInfo k = allies[i];
@@ -230,7 +172,7 @@ public class HQ extends BaseBot {
 				rc.transferSupplies(100000, allies[i].location);
 			}
 		}*/
-		int idToLook = rc.readBroadcast(RobotPlayer.SUPPLIERID);
+		int idToLook = rc.readBroadcast(Channels.SUPPLIERID);
 		RobotInfo supplier = getRobot(idToLook); 
 		if (supplier != null && rc.getLocation().distanceSquaredTo(supplier.location)
 				<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {

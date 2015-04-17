@@ -61,19 +61,19 @@ public class RobotCounter {
 			}
 		}
 		
-		rc.broadcast(RobotPlayer.numBEAVERS, numBeavers);
-		rc.broadcast(RobotPlayer.numSOLDIERS, numSoldiers);
-		rc.broadcast(RobotPlayer.numBASHERS, numBashers);
-		rc.broadcast(RobotPlayer.numBARRACKS, numBarracks);
-		rc.broadcast(RobotPlayer.numMINERS, numMiners);
-		rc.broadcast(RobotPlayer.numMINERFACTORY, numMinerFactory);
-		rc.broadcast(RobotPlayer.numTANKFACTORY, numTankFactory);
-		rc.broadcast(RobotPlayer.numTANKS, numTanks);
-		rc.broadcast(RobotPlayer.numSUPPLYDEPOT, numSupplyDepot);
-		rc.broadcast(RobotPlayer.numHELIPAD, numHelipad);
-		rc.broadcast(RobotPlayer.numDRONE, numDrone);
-		rc.broadcast(RobotPlayer.numCOMPUTER, numComputer);
-		rc.broadcast(RobotPlayer.numTECHNOLOGYINSTITUTE, numTech);
+		rc.broadcast(Channels.numBEAVERS, numBeavers);
+		rc.broadcast(Channels.numSOLDIERS, numSoldiers);
+		rc.broadcast(Channels.numBASHERS, numBashers);
+		rc.broadcast(Channels.numBARRACKS, numBarracks);
+		rc.broadcast(Channels.numMINERS, numMiners);
+		rc.broadcast(Channels.numMINERFACTORY, numMinerFactory);
+		rc.broadcast(Channels.numTANKFACTORY, numTankFactory);
+		rc.broadcast(Channels.numTANKS, numTanks);
+		rc.broadcast(Channels.numSUPPLYDEPOT, numSupplyDepot);
+		rc.broadcast(Channels.numHELIPAD, numHelipad);
+		rc.broadcast(Channels.numDRONE, numDrone);
+		rc.broadcast(Channels.numCOMPUTER, numComputer);
+		rc.broadcast(Channels.numTECHNOLOGYINSTITUTE, numTech);
 	}
 	
 	/**

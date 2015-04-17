@@ -16,23 +16,23 @@ public class Beaver extends BaseBot {
 	
 	@Override
 	public void execute() throws GameActionException {
-		if (rc.getID() == rc.readBroadcast(RobotPlayer.CORNERBEAVER)) {
+		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
 			cornerBeaver();
 		}
 		boolean hasBuilt = false;
 		
-		if (rc.readBroadcast(RobotPlayer.numMINERFACTORY) < 1) {
+		if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
 			hasBuilt = tryBuild(RobotType.MINERFACTORY);
 		}
-		else if (rc.readBroadcast(RobotPlayer.numHELIPAD) < 1) {
+		else if (rc.readBroadcast(Channels.numHELIPAD) < 1) {
 			hasBuilt = tryBuild(RobotType.HELIPAD);
-		} else if (rc.readBroadcast(RobotPlayer.numTECHNOLOGYINSTITUTE) < 1) {
+		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < 1) {
 			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		else if (rc.readBroadcast(RobotPlayer.numBARRACKS) < 2) {
+		else if (rc.readBroadcast(Channels.numBARRACKS) < 2) {
 			hasBuilt = tryBuild(RobotType.BARRACKS);
 		}
-		else if (rc.readBroadcast(RobotPlayer.numTANKFACTORY) < 2) {
+		else if (rc.readBroadcast(Channels.numTANKFACTORY) < 2) {
 			hasBuilt = tryBuild(RobotType.TANKFACTORY);
 		}
 		
@@ -68,10 +68,10 @@ public class Beaver extends BaseBot {
 		}
 		
 		
-		if (rc.readBroadcast(RobotPlayer.numCOMPUTER) < 1) {
+		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		while (rc.readBroadcast(RobotPlayer.numSUPPLYDEPOT) < 10) {
+		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 10) {
 			boolean hasBuilt = tryBuild(RobotType.SUPPLYDEPOT);
 			rc.yield();
 			if (hasBuilt) {

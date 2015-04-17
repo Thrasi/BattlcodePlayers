@@ -32,18 +32,18 @@ public class Drone extends BaseBot {
 		super(rc);
 		
 		// Decide which of the exploring drones this is
-		if (rc.readBroadcast(RobotPlayer.expDRONE1) == 0) {
+		if (rc.readBroadcast(Channels.expDRONE1) == 0) {
 			explore = 1;
-			rc.broadcast(RobotPlayer.expDRONE1, rc.getID());
-		} else if (rc.readBroadcast(RobotPlayer.expDRONE2) == 0) {
+			rc.broadcast(Channels.expDRONE1, rc.getID());
+		} else if (rc.readBroadcast(Channels.expDRONE2) == 0) {
 			explore = 2;
-			rc.broadcast(RobotPlayer.expDRONE2, rc.getID());
-		} else if (rc.readBroadcast(RobotPlayer.expDRONE3) == 0) {
+			rc.broadcast(Channels.expDRONE2, rc.getID());
+		} else if (rc.readBroadcast(Channels.expDRONE3) == 0) {
 			explore = 3;
-			rc.broadcast(RobotPlayer.expDRONE3, rc.getID());
-		} else if (rc.readBroadcast(RobotPlayer.expDRONE4) == 0) {
+			rc.broadcast(Channels.expDRONE3, rc.getID());
+		} else if (rc.readBroadcast(Channels.expDRONE4) == 0) {
 			explore = 4;
-			rc.broadcast(RobotPlayer.expDRONE4, rc.getID());
+			rc.broadcast(Channels.expDRONE4, rc.getID());
 		}
 	}
 
@@ -71,7 +71,7 @@ public class Drone extends BaseBot {
 			}
 			
 			// Wait until the points are ready, it wont take more than 2-3 turns
-			while (rc.readBroadcast(RobotPlayer.expSTARTED) == 0) {
+			while (rc.readBroadcast(Channels.expSTARTED) == 0) {
 				// TODO this time can be spend to do something else
 				rc.yield();
 			}
@@ -80,28 +80,28 @@ public class Drone extends BaseBot {
 			// explore their parts of the map
 			if (explore == 1) {
 				exploreAll(
-						rc.readBroadcast(RobotPlayer.expOFFSET1),
-						rc.readBroadcast(RobotPlayer.expOFFSET2)
+						rc.readBroadcast(Channels.expOFFSET1),
+						rc.readBroadcast(Channels.expOFFSET2)
 				);
-				rc.broadcast(RobotPlayer.expDRONE1DONE, 1);
+				rc.broadcast(Channels.expDRONE1DONE, 1);
 			} else if (explore == 2) {
 				exploreAll(
-						rc.readBroadcast(RobotPlayer.expOFFSET2),
-						rc.readBroadcast(RobotPlayer.expOFFSET3)
+						rc.readBroadcast(Channels.expOFFSET2),
+						rc.readBroadcast(Channels.expOFFSET3)
 				);
-				rc.broadcast(RobotPlayer.expDRONE2DONE, 1);
+				rc.broadcast(Channels.expDRONE2DONE, 1);
 			} else if (explore == 3) {
 				exploreAll(
-						rc.readBroadcast(RobotPlayer.expOFFSET3),
-						rc.readBroadcast(RobotPlayer.expOFFSET4)
+						rc.readBroadcast(Channels.expOFFSET3),
+						rc.readBroadcast(Channels.expOFFSET4)
 				);
-				rc.broadcast(RobotPlayer.expDRONE3DONE, 1);
+				rc.broadcast(Channels.expDRONE3DONE, 1);
 			} else if (explore == 4) {
 				exploreAll(
-						rc.readBroadcast(RobotPlayer.expOFFSET4),
-						RobotPlayer.expLOCFIRST + rc.readBroadcast(RobotPlayer.expLOCCOUNT) * 2
+						rc.readBroadcast(Channels.expOFFSET4),
+						Channels.expLOCFIRST + rc.readBroadcast(Channels.expLOCCOUNT) * 2
 				);
-				rc.broadcast(RobotPlayer.expDRONE4DONE, 1);
+				rc.broadcast(Channels.expDRONE4DONE, 1);
 			}
 			
 			// Disable exploring role, this drone will continue to do whatever its
@@ -122,7 +122,7 @@ public class Drone extends BaseBot {
 	 * @throws GameActionException
 	 */
 	private void exploreRotational() throws GameActionException {
-		if (explore == 1 && rc.readBroadcast(RobotPlayer.MAPSET) == 0) {
+		if (explore == 1 && rc.readBroadcast(Channels.MAPSET) == 0) {
 			Direction dir = myHQ.directionTo(theirHQ).opposite();
 			
 			// Calculating parameters (size and top left corner)
@@ -137,16 +137,16 @@ public class Drone extends BaseBot {
 			tly = tly < 0 ? tly - 1 : tly;
 			
 			// Broadcast map parameters
-			rc.broadcast(RobotPlayer.MAPWIDTH, w);
-			rc.broadcast(RobotPlayer.MAPHEIGHT, h);
-			rc.broadcast(RobotPlayer.TOPLEFTX, tlx);
-			rc.broadcast(RobotPlayer.TOPLEFTY, tly);
-			rc.broadcast(RobotPlayer.MAPSET, 1);
+			rc.broadcast(Channels.MAPWIDTH, w);
+			rc.broadcast(Channels.MAPHEIGHT, h);
+			rc.broadcast(Channels.TOPLEFTX, tlx);
+			rc.broadcast(Channels.TOPLEFTY, tly);
+			rc.broadcast(Channels.MAPSET, 1);
 		}
 	}
 	
 	private void exploreVertical() throws GameActionException {
-		boolean mapSet = rc.readBroadcast(RobotPlayer.MAPSET) == 0;
+		boolean mapSet = rc.readBroadcast(Channels.MAPSET) == 0;
 		Direction dir = myHQ.directionTo(theirHQ).opposite();
 		if (explore == 1 && mapSet) {
 			System.out.println("drone 1");
