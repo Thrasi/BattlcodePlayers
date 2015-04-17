@@ -1,5 +1,6 @@
 package T103;
 
+import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
@@ -22,13 +23,13 @@ public class Computer extends BaseBot {
 		
 		MapInfo.reconstructMap();
 		
-		//System.out.println("Started flooding "
-		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		System.out.println("Started flooding "
+				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 		
 		MapInfo.floodAndServe();
 		
-		//System.out.println("Finished flooding "
-		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		System.out.println("Finished flooding "
+				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 		
 		// Serve forever
 		while (true) {

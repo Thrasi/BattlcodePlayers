@@ -1,5 +1,10 @@
 package T103;
 
+import battlecode.common.GameActionException;
+
+import static T103.BaseBot.rc;
+
+
 public class Channels {
 
 	// COMMUNICATION CHANNELS:
@@ -55,12 +60,18 @@ public class Channels {
 				TOPLEFTY = 903,
 				MAPSET = 904,
 				
-				MAPBROADCASTED = 905,
+				MAPCORNER1SET = 905,
+				MAPCORNER1X = 906,
+				MAPCORNER1Y = 907,
+				MAPCORNER2SET = 908,
+				MAPCORNER2X = 909,
+				MAPCORNER2Y = 910,
 				
+				MAPBROADCASTED = 915,
 				MAPFIRST = 20000,
 				MAPLAST = 35000,
-				
-				
+
+			// FLOODING
 				FLOODREQUEST = 39000,
 				FLOODINDEX = 39001,
 				FLOODQUEUESET = 39002,
@@ -72,4 +83,33 @@ public class Channels {
 				FLOODFIRST = 40000,
 				FLOODLAST = 55000
 			;
+		
+		
+		/**
+		 * Sets the given channel to 1. Channel is supposed to act as a flag (boolean).
+		 * @param channel channel to set
+		 * @throws GameActionException if channel doesn't exist
+		 */
+		public static void set(int channel) throws GameActionException {
+			rc.broadcast(channel, 1);
+		}
+		
+		/**
+		 * Sets the given channel to 0.
+		 * @param channel channel to reset
+		 * @throws GameActionException if channel doesn't exist
+		 */
+		public static void reset(int channel) throws GameActionException {
+			rc.broadcast(channel, 0);
+		}
+		
+		/**
+		 * Checks whether the channel is set (== 1).
+		 * @param channel channel to check
+		 * @return true if channel is set, false otherwise
+		 * @throws GameActionException  if channel doesn't exist
+		 */
+		public static boolean isSet(int channel) throws GameActionException {
+			return rc.readBroadcast(channel) == 1;
+		}
 }

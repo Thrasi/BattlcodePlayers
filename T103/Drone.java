@@ -6,6 +6,10 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
+import static T103.MapInfo.isHorizontalSym;
+import static T103.MapInfo.isRotationSym;
+import static T103.MapInfo.isVerticalSym;
+
 public class Drone extends BaseBot {
 	
 	// Explore until target location is at this distance
@@ -55,7 +59,7 @@ public class Drone extends BaseBot {
 					tryMoveTo(myHQ);
 					rc.yield();
 				}
-				rc.yield();
+				//rc.yield();
 				visitedHQ = true;
 			}
 			
@@ -66,8 +70,10 @@ public class Drone extends BaseBot {
 				exploreVertical();
 			} else if (isHorizontalSym()) {
 				exploreHorizontal();
-			} else {
+			} else if (isRotationSym()) {
 				exploreRotational();
+			} else {
+				throw new RobotException("Don't know which symmetry");
 			}
 			
 			// Wait until the points are ready, it wont take more than 2-3 turns
@@ -149,15 +155,76 @@ public class Drone extends BaseBot {
 		boolean mapSet = rc.readBroadcast(Channels.MAPSET) == 0;
 		Direction dir = myHQ.directionTo(theirHQ).opposite();
 		if (explore == 1 && mapSet) {
-			System.out.println("drone 1");
 			MapLocation corner = exploreCorner(dir.rotateLeft());
-			System.out.println(corner);
+			rc.broadcast(Channels.MAPCORNER1X, corner.x);
+			rc.broadcast(Channels.MAPCORNER1Y, corner.y);
+			Channels.set(Channels.MAPCORNER1SET);
 		} else if (explore == 2 && mapSet) {
-			System.out.println("drone 2");
 			MapLocation corner = exploreCorner(dir.rotateRight());
-			System.out.println(corner);
+			rc.broadcast(Channels.MAPCORNER2X, corner.x);
+			rc.broadcast(Channels.MAPCORNER2Y, corner.y);
+			Channels.set(Channels.MAPCORNER2SET);
+			
+			while (!Channels.isSet(Channels.MAPCORNER1SET)) {
+				rc.yield();
+			}
+			
+			int cx = rc.readBroadcast(Channels.MAPCORNER1X);
+			int cy = rc.readBroadcast(Channels.MAPCORNER1Y);
+			
+			double centerX = (myHQ.x + theirHQ.x) / 2.0;
+			int h = Math.abs(cy - corner.y) + 1;
+			int w = (int) (Math.abs(centerX - cx) * 2 + 1);
+			int tlx = (int) (centerX - w / 2.0 + 1);
+			tlx = tlx < 0 ? tlx - 1 : tlx;
+			int tly = Math.min(cy, corner.y);
+			//System.out.println(w + " " + h + " " + tlx + " " + tly);
+			rc.broadcast(Channels.MAPWIDTH, w);
+			rc.broadcast(Channels.MAPHEIGHT, h);
+			rc.broadcast(Channels.TOPLEFTX, tlx);
+			rc.broadcast(Channels.TOPLEFTY, tly);
+			rc.broadcast(Channels.MAPSET, 1);
 		}
-		
+	}
+	
+	/**
+	 * TODO not tested
+	 * @throws GameActionException
+	 */
+	private void exploreHorizontal() throws GameActionException {
+		boolean mapSet = rc.readBroadcast(Channels.MAPSET) == 0;
+		Direction dir = myHQ.directionTo(theirHQ).opposite();
+		if (explore == 1 && mapSet) {
+			MapLocation corner = exploreCorner(dir.rotateLeft());
+			rc.broadcast(Channels.MAPCORNER1X, corner.x);
+			rc.broadcast(Channels.MAPCORNER1Y, corner.y);
+			Channels.set(Channels.MAPCORNER1SET);
+		} else if (explore == 2 && mapSet) {
+			MapLocation corner = exploreCorner(dir.rotateRight());
+			rc.broadcast(Channels.MAPCORNER2X, corner.x);
+			rc.broadcast(Channels.MAPCORNER2Y, corner.y);
+			Channels.set(Channels.MAPCORNER2SET);
+			
+			while (!Channels.isSet(Channels.MAPCORNER1SET)) {
+				rc.yield();
+			}
+			
+			int cx = rc.readBroadcast(Channels.MAPCORNER1X);
+			int cy = rc.readBroadcast(Channels.MAPCORNER1Y);
+			
+			double centerY = (myHQ.y + theirHQ.y) / 2.0;
+			int w = Math.abs(cx - corner.x) + 1;
+			int h = (int) (Math.abs(centerY - cy) * 2 + 1);
+			int tly = (int) (centerY - h / 2.0 + 1);
+			tly = tly < 0 ? tly - 1 : tly;
+			int tlx = Math.min(cx, corner.x);
+			//System.out.println(w + " " + h + " " + tlx + " " + tly);
+			rc.broadcast(Channels.MAPWIDTH, w);
+			rc.broadcast(Channels.MAPHEIGHT, h);
+			rc.broadcast(Channels.TOPLEFTX, tlx);
+			rc.broadcast(Channels.TOPLEFTY, tly);
+			rc.broadcast(Channels.MAPSET, 1);
+		}
 	}
 
 	
@@ -201,15 +268,16 @@ public class Drone extends BaseBot {
 		MapLocation loc = myHQ.add(dir, 400);
 		while (true) {
 			for (MapLocation l : getSurroundingLocations()) {
-				if (isCorner(l)) {
+				if (MapInfo.isCorner(l)) {
 					rc.yield();
 					return l;
 				}
 			}
-			if (!rc.canMove(rc.getLocation().directionTo(loc))) {
+			
+			/*if (!rc.canMove(rc.getLocation().directionTo(loc))) {
 				//rc.setIndicatorString(0, bugPlanning(loc).toString());
 				
-			}
+			}*/
 			if (!tryMoveTo(loc)) {
 				rc.setIndicatorString(2, "nisam uspio");
 				Direction[] ds = bugPlanning(loc);
@@ -219,14 +287,12 @@ public class Drone extends BaseBot {
 				}
 				rc.setIndicatorString(0, ds.length + "");
 				rc.setIndicatorString(1, sb.toString());
+				//rc.yield();
 			}
 			rc.yield();
 		}
 	}
 
-	private void exploreHorizontal() {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 }

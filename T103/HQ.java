@@ -1,8 +1,6 @@
 package T103;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import battlecode.common.GameActionException;
@@ -11,11 +9,12 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import T103.Channels;
+
+import static T103.Channels.isSet;
 import static T103.Utility.Tuple;
 
+
 public class HQ extends BaseBot {
-	
 	
 	
 	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();

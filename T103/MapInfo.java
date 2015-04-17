@@ -3,21 +3,19 @@ package T103;
 import static T103.BaseBot.myHQ;
 import static T103.BaseBot.theirHQ;
 import static T103.BaseBot.rc;
-import static T103.BaseBot.isSet;
-import static T103.BaseBot.isRotationSym;
-import static T103.BaseBot.isHorizontalSym;
-import static T103.BaseBot.isVerticalSym;
-import static T103.BaseBot.reset;
-import static T103.BaseBot.set;
+import static T103.Channels.isSet;
+import static T103.Channels.reset;
+import static T103.Channels.set;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import T103.Channels;
 import battlecode.common.Clock;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
+
 
 public class MapInfo {
 
@@ -63,11 +61,12 @@ public class MapInfo {
 						double xdiff = loc.x - xc;
 						double ydiff = loc.y - yc;
 						loc = new MapLocation((int) (xc - xdiff), (int) (yc - ydiff));
-						
 					} else if (isHorizontalSym()) {
-						//TODO
+						double ydiff = loc.y - yc;
+						loc = new MapLocation(loc.x, (int) (yc - ydiff));
 					} else if (isVerticalSym()) {
-						//TODO
+						double xdiff = loc.x - xc;
+						loc = new MapLocation((int) (xc - xdiff), loc.y);
 					} else {
 						throw new RobotException("Don't know which symmetry.");
 					}
@@ -125,28 +124,93 @@ public class MapInfo {
 		rc.broadcast(Channels.expLOCCOUNT, exploreLocations.size());
 		rc.broadcast(Channels.expSTARTED, 1);
 		
-		/*
+		
 		for (int i = rc.readBroadcast(Channels.expOFFSET1); i < rc.readBroadcast(Channels.expOFFSET2); i+= 2) {
 			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 100, 20);
+			rc.setIndicatorDot(loc, 20, 200, 20);
 		}
 		for (int i = rc.readBroadcast(Channels.expOFFSET2); i < rc.readBroadcast(Channels.expOFFSET3); i+= 2) {
 			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 100, 20, 20);
+			rc.setIndicatorDot(loc, 200, 20, 20);
 		}
 		for (int i = rc.readBroadcast(Channels.expOFFSET3); i < rc.readBroadcast(Channels.expOFFSET4); i+= 2) {
 			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 200, 100);
+			rc.setIndicatorDot(loc, 20, 200, 200);
 		}
 		for (int i = rc.readBroadcast(Channels.expOFFSET4);
 				i < Channels.expLOCFIRST + rc.readBroadcast(Channels.expLOCCOUNT) * 2; i+= 2) {
 			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 20, 100);
-		}*/
+			rc.setIndicatorDot(loc, 20, 20, 200);
+		}
 		
-		rc.yield();
+		//rc.yield();
 	}
 	
+	/**
+	 * Check whether the map is rotationally symmetric.
+	 * @return true if it is, false otherwise
+	 */
+	public static boolean isRotationSym() {
+		return myHQ.x != theirHQ.x && myHQ.y != theirHQ.y;
+	}
+
+	/**
+	 * Check whether the map is horizontally symmetric.
+	 * @return true if it is, false otherwise
+	 */
+	public static boolean isHorizontalSym() {
+		return myHQ.x == theirHQ.x;
+	}
+
+	/**
+	 * Check whether the map is vertically symmetric.
+	 * @return true if it is, false otherwise
+	 */
+	public static boolean isVerticalSym() {
+		return myHQ.y == theirHQ.y;
+	}
+	
+	/**
+	 * Decides whether location is corner or not.
+	 * @param loc location to check
+	 * @return true if is corner, false otherwise
+	 */
+	public static boolean isCorner(MapLocation loc) {
+		boolean n = rc.senseTerrainTile(loc.add(Direction.NORTH)) == TerrainTile.OFF_MAP;
+		boolean s = rc.senseTerrainTile(loc.add(Direction.SOUTH)) == TerrainTile.OFF_MAP;
+		boolean e = rc.senseTerrainTile(loc.add(Direction.EAST)) == TerrainTile.OFF_MAP;
+		boolean w = rc.senseTerrainTile(loc.add(Direction.WEST)) == TerrainTile.OFF_MAP;
+		boolean curr = rc.senseTerrainTile(loc) == TerrainTile.OFF_MAP;
+		return (n && e || n && w || s && e || s && w) && !curr;
+	}
+	
+	/**
+	 * Calculates all corners using given info.
+	 * @param height map height
+	 * @param width map width
+	 * @param tlx upper left x
+	 * @param tly upper left y
+	 * @return return an array of all corners
+	 */
+	public static MapLocation[] corners(int height, int width, int tlx, int tly) {
+		MapLocation tl = new MapLocation(tlx, tly);
+		MapLocation tr = tl.add(Direction.EAST, width - 1);
+		MapLocation bl = tl.add(Direction.SOUTH, height - 1);
+		MapLocation br = bl.add(Direction.EAST, width - 1);
+		return new MapLocation[] { tl, tr, bl, br };
+	}
+	
+	/**
+	 * Calculates all corners using the data from channels. If the parameters
+	 * are not broadcasted, it will throw exception.
+	 * @return an array of all corners
+	 * @throws GameActionException incorrect channels
+	 */
+	public static MapLocation[] corners() throws GameActionException {
+		readParameters();
+		return corners(height, width, xtl, ytl);
+	}
+
 
 	
 	// Flood constants
@@ -350,8 +414,8 @@ public class MapInfo {
 			return;
 		}
 
-		//System.out.println("Started serve "
-		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		System.out.println("Started serve "
+				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 		
 		int[] flood = floods[idx];
 		int size = flood.length;
@@ -363,8 +427,8 @@ public class MapInfo {
 		set(Channels.FLOODACTIVE);						// Enable reading flood
 		reset(Channels.FLOODREQUEST);					// Can set new request
 		
-		//System.out.println("Finished serve "
-		//+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		System.out.println("Finished serve "
+				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 	}
 
 	/**
