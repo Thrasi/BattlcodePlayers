@@ -1,5 +1,6 @@
 package T103;
 
+
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -9,6 +10,7 @@ import battlecode.common.RobotController;
 import static T103.MapInfo.isHorizontalSym;
 import static T103.MapInfo.isRotationSym;
 import static T103.MapInfo.isVerticalSym;
+import static T103.DroneExploration.exploreCorner;
 
 public class Drone extends BaseBot {
 	
@@ -53,7 +55,7 @@ public class Drone extends BaseBot {
 					tryMoveTo(myHQ);
 					rc.yield();
 				}
-				rc.yield();
+				rc.yield();		// TODO receive supplies ?
 				visitedHQ = true;
 			}
 			
@@ -82,7 +84,6 @@ public class Drone extends BaseBot {
 					rc.readBroadcast(Channels.expOFFSET + explore - 1),
 					rc.readBroadcast(Channels.expOFFSET + explore)
 			);
-			System.out.println(explore + " " +rc.readBroadcast(Channels.expOFFSET + explore));
 			rc.broadcast(Channels.expDRONEDONE + explore - 1, 1);
 			
 			// Disable exploring role, this drone will continue to do whatever its
@@ -98,33 +99,7 @@ public class Drone extends BaseBot {
 		rc.yield();
 	}
 
-	/**
-	 * Explores map with rotational symmetry.
-	 * @throws GameActionException
-	 */
-	private void exploreRotational() throws GameActionException {
-		if (explore == 1 && rc.readBroadcast(Channels.MAPSET) == 0) {
-			Direction dir = myHQ.directionTo(theirHQ).opposite();
-			
-			// Calculating parameters (size and top left corner)
-			MapLocation corner = exploreCorner(dir);
-			double xc = (myHQ.x + theirHQ.x) / 2.0;
-			double yc = (myHQ.y + theirHQ.y) / 2.0;
-			int w = (int) (Math.abs(xc - corner.x) * 2) + 1;
-			int h = (int) (Math.abs(yc - corner.y) * 2) + 1;
-			int tlx = (int) (xc - w / 2.0 + 1);
-			tlx = tlx < 0 ? tlx - 1 : tlx;
-			int tly = (int) (yc - h / 2.0 + 1);
-			tly = tly < 0 ? tly - 1 : tly;
-			
-			// Broadcast map parameters
-			rc.broadcast(Channels.MAPWIDTH, w);
-			rc.broadcast(Channels.MAPHEIGHT, h);
-			rc.broadcast(Channels.TOPLEFTX, tlx);
-			rc.broadcast(Channels.TOPLEFTY, tly);
-			rc.broadcast(Channels.MAPSET, 1);
-		}
-	}
+	
 	
 	private void exploreVertical() throws GameActionException {
 		boolean mapSet = rc.readBroadcast(Channels.MAPSET) == 0;
@@ -231,42 +206,32 @@ public class Drone extends BaseBot {
 	}
 
 	/**
-	 * Explores one corner of the map and calculates the size of the map. Drone tries to
-	 * move in given direction if possible. In each step it tries to detect corner of
-	 * the map. Once the corner is found it returns it. If it cannot find corner,
-	 * it will move infinitely towards it.
-	 * @param dir direction in which to move to find corner
-	 * @return corner it finds when going in given direction
+	 * Explores map with rotational symmetry.
 	 * @throws GameActionException
 	 */
-	private MapLocation exploreCorner(Direction dir) throws GameActionException {
-		MapLocation loc = myHQ.add(dir, 400);
-		while (true) {
-			for (MapLocation l : getSurroundingLocations()) {
-				if (MapInfo.isCorner(l)) {
-					rc.yield();
-					return l;
-				}
-			}
-			
-			/*if (!rc.canMove(rc.getLocation().directionTo(loc))) {
-				//rc.setIndicatorString(0, bugPlanning(loc).toString());
-				
-			}*/
-			if (!tryMoveTo(loc)) {
-				rc.setIndicatorString(2, "nisam uspio");
-				Direction[] ds = bugPlanning(loc);
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < ds.length; i++) {
-					sb.append(" " + ds[i]);
-				}
-				rc.setIndicatorString(0, ds.length + "");
-				rc.setIndicatorString(1, sb.toString());
-				//rc.yield();
-			}
-			rc.yield();
-		}
+	public void exploreRotational() throws GameActionException {
+		Direction dir = myHQ.directionTo(theirHQ).opposite();
+		
+		// Calculating parameters (size and top left corner)
+		MapLocation corner = exploreCorner(dir);
+		double xc = (myHQ.x + theirHQ.x) / 2.0;
+		double yc = (myHQ.y + theirHQ.y) / 2.0;
+		int w = (int) (Math.abs(xc - corner.x) * 2) + 1;
+		int h = (int) (Math.abs(yc - corner.y) * 2) + 1;
+		int tlx = (int) (xc - w / 2.0 + 1);
+		tlx = tlx < 0 ? tlx - 1 : tlx;
+		int tly = (int) (yc - h / 2.0 + 1);
+		tly = tly < 0 ? tly - 1 : tly;
+		
+		// Broadcast map parameters
+		rc.broadcast(Channels.MAPWIDTH, w);
+		rc.broadcast(Channels.MAPHEIGHT, h);
+		rc.broadcast(Channels.TOPLEFTX, tlx);
+		rc.broadcast(Channels.TOPLEFTY, tly);
+		rc.broadcast(Channels.MAPSET, 1);
 	}
+	
+	
 
 	
 

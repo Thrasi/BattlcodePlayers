@@ -1,5 +1,7 @@
 package T103;
 
+import T103.Utility.Pair;
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -20,6 +22,27 @@ public class Beaver extends BaseBot {
 		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
 			cornerBeaver();
 		}
+		/*while (true) {
+			//tryPrimitiveMoveTo(theirHQ);
+			System.out.println("start " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+			Pair<Direction[], Integer> d = Movement.bugPlanning(theirHQ, true);
+			System.out.println("end " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+//			StringBuilder sb = new StringBuilder();
+//			for (int i = 0; i < d.length; i++) {
+//				sb.append(d[i]).append(" ; ");
+//			}
+//			rc.setIndicatorString(0, d.length + "");
+//			rc.setIndicatorString(1, sb.toString());
+			for (int i = 0; i < d.y;) {
+				if (tryMove(d.x[i])) {
+					i++;
+				}
+				rc.yield();
+			}
+			//System.out.println("end " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+		}*/
+		
+		
 		boolean hasBuilt = false;
 		
 		if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
@@ -47,6 +70,7 @@ public class Beaver extends BaseBot {
 		}
 		
 		rc.yield();
+		
 	}
 
 	private void cornerBeaver() throws GameActionException {
@@ -72,7 +96,7 @@ public class Beaver extends BaseBot {
 		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 30) {
+		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 10) {
 			Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
 			if (dirBuilt != null) {
 				MapLocation newBuild = rc.getLocation().add(dirBuilt);

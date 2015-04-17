@@ -20,7 +20,7 @@ public class BaseBot {
 	//TODO isTaken change to affect only allies, check with HQ
 
 	// All 8 directions in one place
-	protected static final Direction[] directions = { Direction.NORTH,
+	public static final Direction[] directions = { Direction.NORTH,
 			Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH,
 			Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
 
@@ -128,7 +128,7 @@ public class BaseBot {
 	 * @return true if moved, false otherwise
 	 * @throws GameActionException should not be thrown
 	 */
-	protected static boolean tryMove(Direction dir) throws GameActionException {
+	public static boolean tryMove(Direction dir) throws GameActionException {
 		if (rc.isCoreReady() && rc.canMove(dir)) {
 			rc.move(dir);
 			return true;
@@ -204,7 +204,7 @@ public class BaseBot {
 	 * @param target target location
 	 * @return array of 5 directions
 	 */
-	protected Direction[] getDirectionsTowards(MapLocation target) {
+	protected static Direction[] getDirectionsTowards(MapLocation target) {
 		Direction toTarget = rc.getLocation().directionTo(target);
 		Direction dirs[] = { toTarget, toTarget.rotateLeft(), toTarget.rotateRight(),
 				toTarget.rotateLeft().rotateLeft(), toTarget.rotateRight().rotateRight() };
@@ -275,7 +275,7 @@ public class BaseBot {
 	 * @param loc target location
 	 * @return true if moved, false if everything is occupied
 	 */
-	public boolean tryMoveTo(MapLocation loc) throws GameActionException {
+	public static boolean tryMoveTo(MapLocation loc) throws GameActionException {
 		for (Direction dir : getDirectionsTowards(loc)) {
 			if (tryMove(dir)) {
 				return true;
@@ -417,7 +417,7 @@ public class BaseBot {
 	 * Returns all map locations in the sensing range of this robot.
 	 * @return array of map locations in range
 	 */
-	public MapLocation[] getSurroundingLocations() {
+	public static MapLocation[] getSurroundingLocations() {
 		return MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(),
 				rc.getType().sensorRadiusSquared);
 	}
@@ -478,7 +478,7 @@ public class BaseBot {
 	 * @return true if it taken or out of sensing range, false otherwise
 	 * @throws GameActionException
 	 */
-	public boolean isOccupied(MapLocation loc) {
+	public static boolean isOccupied(MapLocation loc) {
 		try {
 			return rc.isLocationOccupied(loc);
 		} catch (GameActionException e) {
@@ -563,6 +563,7 @@ public class BaseBot {
 		}
 	}
 	
+	
 	private static Direction possibleLeft(Direction dir) {
 		for (int i = 0; i < 8; i++) {
 			if (rc.canMove(dir)) {
@@ -573,44 +574,7 @@ public class BaseBot {
 		return null;
 	}
 
-	public Direction[] bugPlanning(MapLocation target) throws GameActionException {
-		MapLocation loc = rc.getLocation();
-		int dist = loc.distanceSquaredTo(target);
-		Direction dir = possibleLeft(loc.directionTo(target));
-		
-		if (dir == null) {
-			return null;
-		}
-		
-		List<Direction> moves = new LinkedList<>();
-
-		int d = 0;
-
-		while (true) {
-			if (dir == loc.directionTo(target) || dir == null || d > 8) {
-				break;
-			}
-			moves.add(dir);
-
-			loc = loc.add(dir);
-
-			//Direction right = dir.rotateRight().rotateRight();
-			dir = loc.directionTo(target);
-			
-			for (int i = 0; i < 8; i++) {
-				MapLocation newLoc = loc.add(dir);
-				TerrainTile tile = rc.senseTerrainTile(loc);
-				if (isOccupied(newLoc) || tile == TerrainTile.OFF_MAP) {
-					dir.rotateLeft();
-				} else {
-					break;
-				}
-			}
-			//dir = right;//directionLeftTowards(tloc);
-			d++;
-		}
-		return moves.toArray(new Direction[moves.size()]);
-	}
+	
 
 	/**
 	 * I have to admit, I have no idea what this is.

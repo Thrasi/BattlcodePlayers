@@ -34,6 +34,9 @@ public class MapInfo {
 	private static double xc;
 	private static double yc;
 	
+	// Step used for explore points
+	private static final int EXP_STEP = 3;
+	
 	
 	/**
 	 * Reconstructs the map from what drones have explored.
@@ -88,26 +91,35 @@ public class MapInfo {
 	}//End reconstructMap
 	
 	
-	// TODO drone queue, optimize this
+	/**
+	 * From map info creates points that drones need to explore.
+	 * @throws GameActionException incorrect channels
+	 */
 	public static void decideExploringPoints() throws GameActionException {
 		readParameters();
-		
+
 		List<MapLocation> exploreLocations = new LinkedList<>();
-		for (int y = ytl; y < ytl + height; y += 6) {
-			for (int x = xtl; x < xtl + width; x+= 3) {
+		final int ybl = ytl + height;
+		final int xtr = xtl + width;
+		final int dStep = EXP_STEP << 1;
+		
+		// Set explore locations
+		for (int y = ytl; y < ybl; y += dStep) {
+			for (int x = xtl; x < xtr; x += EXP_STEP) {
 				MapLocation loc = new MapLocation(x, y);
 				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
 					exploreLocations.add(loc);
 				}
-				
 			}
-			for (int x = xtl + width; x >= xtl; x -= 3) {
-				MapLocation loc = new MapLocation(x, y+3);
+			for (int x = xtl + width; x >= xtl; x -= EXP_STEP) {
+				MapLocation loc = new MapLocation(x, y+EXP_STEP);
 				if (loc.distanceSquaredTo(myHQ) <= loc.distanceSquaredTo(theirHQ)) {
 					exploreLocations.add(loc);
 				}
 			}
 		}
+		
+		// Broadcast locations
 		int offset = 0;
 		for (MapLocation loc : exploreLocations) {
 			if (Channels.expLOCFIRST + offset < Channels.expLOCLAST) {
@@ -116,15 +128,22 @@ public class MapInfo {
 				offset += 2;
 			}
 		}
+		
+		// Set offsets
 		int count = rc.readBroadcast(Channels.expDRONECOUNT);
 		int diff = (exploreLocations.size() / count) << 1;
 		for (int i = 0; i < count; i++) {
 			rc.broadcast(Channels.expOFFSET + i, Channels.expLOCFIRST + diff*i);
 		}
-		rc.broadcast(Channels.expOFFSET + count, Channels.expLOCFIRST + exploreLocations.size()*2);
-		rc.broadcast(Channels.expLOCCOUNT, exploreLocations.size());
-		rc.broadcast(Channels.expSTARTED, 1);
+		rc.broadcast(		// Set last offset
+				Channels.expOFFSET + count,
+				Channels.expLOCFIRST + exploreLocations.size()*2
+		);
+		
+		rc.broadcast(Channels.expLOCCOUNT, exploreLocations.size());	// Set point count
+		rc.broadcast(Channels.expSTARTED, 1);							// Done
 	}
+	
 	
 	/**
 	 * Check whether the map is rotationally symmetric.

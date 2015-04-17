@@ -16,7 +16,7 @@ public class Computer extends BaseBot {
 	public void execute() throws GameActionException {
 		while (!allDone()) {
 			
-			// TODO waiting here
+			// waiting here
 			rc.yield();
 		}
 		
@@ -37,6 +37,11 @@ public class Computer extends BaseBot {
 		}
 	}
 	
+	/**
+	 * Checks if all drones are done exploring
+	 * @return true if all done, false otherwise
+	 * @throws GameActionException incorrect channels
+	 */
 	private static boolean allDone() throws GameActionException {
 		int count = rc.readBroadcast(Channels.expDRONECOUNT);
 		for (int i = count-1; i >= 0; i--) {
