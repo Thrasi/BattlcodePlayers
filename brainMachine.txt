@@ -14,3 +14,5 @@ we need an estimation of when a unit is as good as dead.
 
 * Drones explore queue
 * Bug Nav
+
+* Dying unity supplies transfer
