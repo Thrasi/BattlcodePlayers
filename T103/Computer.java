@@ -4,6 +4,8 @@ import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
+import static T103.Channels.isSet;
+
 public class Computer extends BaseBot {
 
 	public Computer(RobotController rc) {
@@ -12,10 +14,7 @@ public class Computer extends BaseBot {
 	
 	@Override
 	public void execute() throws GameActionException {
-		while (rc.readBroadcast(Channels.expDRONE1DONE) != 1
-				|| rc.readBroadcast(Channels.expDRONE2DONE) != 1
-				|| rc.readBroadcast(Channels.expDRONE3DONE) != 1
-				|| rc.readBroadcast(Channels.expDRONE4DONE) != 1) {
+		while (!allDone()) {
 			
 			// TODO waiting here
 			rc.yield();
@@ -36,6 +35,16 @@ public class Computer extends BaseBot {
 			MapInfo.serve();
 			rc.yield();
 		}
+	}
+	
+	private static boolean allDone() throws GameActionException {
+		int count = rc.readBroadcast(Channels.expDRONECOUNT);
+		for (int i = count-1; i >= 0; i--) {
+			if (!isSet(Channels.expDRONEDONE + i)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 }

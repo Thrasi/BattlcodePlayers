@@ -116,34 +116,14 @@ public class MapInfo {
 				offset += 2;
 			}
 		}
-		int diff = (exploreLocations.size() / 4) << 1;
-		rc.broadcast(Channels.expOFFSET1, Channels.expLOCFIRST);
-		rc.broadcast(Channels.expOFFSET2, Channels.expLOCFIRST + diff);
-		rc.broadcast(Channels.expOFFSET3, Channels.expLOCFIRST + 2*diff);
-		rc.broadcast(Channels.expOFFSET4, Channels.expLOCFIRST + 3*diff);
+		int count = rc.readBroadcast(Channels.expDRONECOUNT);
+		int diff = (exploreLocations.size() / count) << 1;
+		for (int i = 0; i < count; i++) {
+			rc.broadcast(Channels.expOFFSET + i, Channels.expLOCFIRST + diff*i);
+		}
+		rc.broadcast(Channels.expOFFSET + count, Channels.expLOCFIRST + exploreLocations.size()*2);
 		rc.broadcast(Channels.expLOCCOUNT, exploreLocations.size());
 		rc.broadcast(Channels.expSTARTED, 1);
-		
-		
-		for (int i = rc.readBroadcast(Channels.expOFFSET1); i < rc.readBroadcast(Channels.expOFFSET2); i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 200, 20);
-		}
-		for (int i = rc.readBroadcast(Channels.expOFFSET2); i < rc.readBroadcast(Channels.expOFFSET3); i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 200, 20, 20);
-		}
-		for (int i = rc.readBroadcast(Channels.expOFFSET3); i < rc.readBroadcast(Channels.expOFFSET4); i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 200, 200);
-		}
-		for (int i = rc.readBroadcast(Channels.expOFFSET4);
-				i < Channels.expLOCFIRST + rc.readBroadcast(Channels.expLOCCOUNT) * 2; i+= 2) {
-			MapLocation loc = new MapLocation(rc.readBroadcast(i), rc.readBroadcast(i+1));
-			rc.setIndicatorDot(loc, 20, 20, 200);
-		}
-		
-		//rc.yield();
 	}
 	
 	/**
@@ -448,6 +428,22 @@ public class MapInfo {
 	
 	// FOR DEBUGGING
 	
+	// Colors used to color shit when debugging
+	private static final int[] colors = {
+		10, 250, 10,
+		250, 10, 250,
+		10, 10, 250,
+		250, 250, 10,
+		250, 10, 250,
+		10, 250, 250,
+		140, 10, 140,
+		10, 140, 140,
+		140, 140, 10,
+		140, 10, 10,
+		10, 140, 10,
+		10, 10, 140
+	};
+	
 	/**
 	 * Prints map to console. Used only for debugging.
 	 */
@@ -476,25 +472,15 @@ public class MapInfo {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int d = flood[y*width+x];
-				MapLocation loc = new MapLocation(x+xtl, y+ytl);
-				
-				if (d == 1) {
-					rc.setIndicatorDot(loc, 150, 250, 100);
-				} else if (d == 2) {
-					rc.setIndicatorDot(loc, 250, 100, 100);
-				} else if (d == 3) {
-					rc.setIndicatorDot(loc, 100, 100, 250);
-				} else if (d == 4) {
-					rc.setIndicatorDot(loc, 30, 250, 250);
-				} else if (d == 5) {
-					rc.setIndicatorDot(loc, 250, 250, 30);
-				} else if (d == 6) {
-					rc.setIndicatorDot(loc, 30, 250, 30);
-				} else if (d == 7) {
-					rc.setIndicatorDot(loc, 30, 30, 250);
-				} else if (d == 8) {
-					rc.setIndicatorDot(loc, 250, 30, 30);
+				if (d == 0) {
+					continue;
 				}
+				
+				MapLocation loc = new MapLocation(x+xtl, y+ytl);
+				int r = d * 3;
+				int g = d * 3 + 1;
+				int b = d * 3 + 2;
+				rc.setIndicatorDot(loc, colors[r], colors[g], colors[b]);
 			}
 		}
 	}
@@ -513,25 +499,34 @@ public class MapInfo {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int d = rc.readBroadcast(Channels.FLOODFIRST + y*width + x);
-				MapLocation loc = new MapLocation(x+xtl, y+ytl);
-				
-				if (d == 1) {
-					rc.setIndicatorDot(loc, 150, 250, 100);
-				} else if (d == 2) {
-					rc.setIndicatorDot(loc, 250, 100, 100);
-				} else if (d == 3) {
-					rc.setIndicatorDot(loc, 100, 100, 250);
-				} else if (d == 4) {
-					rc.setIndicatorDot(loc, 30, 250, 250);
-				} else if (d == 5) {
-					rc.setIndicatorDot(loc, 250, 250, 30);
-				} else if (d == 6) {
-					rc.setIndicatorDot(loc, 30, 250, 30);
-				} else if (d == 7) {
-					rc.setIndicatorDot(loc, 30, 30, 250);
-				} else if (d == 8) {
-					rc.setIndicatorDot(loc, 250, 30, 30);
+				if (d == 0) {
+					continue;
 				}
+				
+				MapLocation loc = new MapLocation(x+xtl, y+ytl);
+				int r = d * 3;
+				int g = d * 3 + 1;
+				int b = d * 3 + 2;
+				rc.setIndicatorDot(loc, colors[r], colors[g], colors[b]);
+			}
+		}
+	}
+	
+	/**
+	 * Marks locations for exploring in the map. Used for debugging.
+	 * @throws GameActionException incorrect channels
+	 */
+	public static void markExploreLocations() throws GameActionException {
+		int count = rc.readBroadcast(Channels.expDRONECOUNT);
+		for (int i = 0; i < count; i++) {
+			int start = rc.readBroadcast(Channels.expOFFSET + i);
+			int end = rc.readBroadcast(Channels.expOFFSET + i+1);
+			for (int j = start; j < end; j += 2) {
+				MapLocation loc = new MapLocation(
+						rc.readBroadcast(j),
+						rc.readBroadcast(j+1)
+				);
+				rc.setIndicatorDot(loc, colors[3*i], colors[3*i+1], colors[3*i+2]);
 			}
 		}
 	}

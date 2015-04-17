@@ -35,19 +35,13 @@ public class Drone extends BaseBot {
 	public Drone(RobotController rc) throws GameActionException {
 		super(rc);
 		
-		// Decide which of the exploring drones this is
-		if (rc.readBroadcast(Channels.expDRONE1) == 0) {
-			explore = 1;
-			rc.broadcast(Channels.expDRONE1, rc.getID());
-		} else if (rc.readBroadcast(Channels.expDRONE2) == 0) {
-			explore = 2;
-			rc.broadcast(Channels.expDRONE2, rc.getID());
-		} else if (rc.readBroadcast(Channels.expDRONE3) == 0) {
-			explore = 3;
-			rc.broadcast(Channels.expDRONE3, rc.getID());
-		} else if (rc.readBroadcast(Channels.expDRONE4) == 0) {
-			explore = 4;
-			rc.broadcast(Channels.expDRONE4, rc.getID());
+		int count = rc.readBroadcast(Channels.expDRONECOUNT);
+		for (int i = 0; i < count; i++) {
+			if (rc.readBroadcast(Channels.expDRONE + i) == 0) {
+				rc.broadcast(Channels.expDRONE + i, rc.getID());
+				explore = i+1;
+				break;
+			}
 		}
 	}
 
@@ -59,7 +53,7 @@ public class Drone extends BaseBot {
 					tryMoveTo(myHQ);
 					rc.yield();
 				}
-				//rc.yield();
+				rc.yield();
 				visitedHQ = true;
 			}
 			
@@ -84,31 +78,12 @@ public class Drone extends BaseBot {
 			
 			// After some parameters of the map are known, drones are set to
 			// explore their parts of the map
-			if (explore == 1) {
-				exploreAll(
-						rc.readBroadcast(Channels.expOFFSET1),
-						rc.readBroadcast(Channels.expOFFSET2)
-				);
-				rc.broadcast(Channels.expDRONE1DONE, 1);
-			} else if (explore == 2) {
-				exploreAll(
-						rc.readBroadcast(Channels.expOFFSET2),
-						rc.readBroadcast(Channels.expOFFSET3)
-				);
-				rc.broadcast(Channels.expDRONE2DONE, 1);
-			} else if (explore == 3) {
-				exploreAll(
-						rc.readBroadcast(Channels.expOFFSET3),
-						rc.readBroadcast(Channels.expOFFSET4)
-				);
-				rc.broadcast(Channels.expDRONE3DONE, 1);
-			} else if (explore == 4) {
-				exploreAll(
-						rc.readBroadcast(Channels.expOFFSET4),
-						Channels.expLOCFIRST + rc.readBroadcast(Channels.expLOCCOUNT) * 2
-				);
-				rc.broadcast(Channels.expDRONE4DONE, 1);
-			}
+			exploreAll(
+					rc.readBroadcast(Channels.expOFFSET + explore - 1),
+					rc.readBroadcast(Channels.expOFFSET + explore)
+			);
+			System.out.println(explore + " " +rc.readBroadcast(Channels.expOFFSET + explore));
+			rc.broadcast(Channels.expDRONEDONE + explore - 1, 1);
 			
 			// Disable exploring role, this drone will continue to do whatever its
 			// role is to do afterwards

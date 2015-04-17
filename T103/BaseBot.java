@@ -128,7 +128,7 @@ public class BaseBot {
 	 * @return true if moved, false otherwise
 	 * @throws GameActionException should not be thrown
 	 */
-	protected boolean tryMove(Direction dir) throws GameActionException {
+	protected static boolean tryMove(Direction dir) throws GameActionException {
 		if (rc.isCoreReady() && rc.canMove(dir)) {
 			rc.move(dir);
 			return true;
@@ -144,7 +144,7 @@ public class BaseBot {
 	 * @return true if built, false otherwise
 	 * @throws GameActionException should not be thrown
 	 */
-	protected boolean tryBuild(Direction dir, RobotType type) throws GameActionException {
+	protected static boolean tryBuild(Direction dir, RobotType type) throws GameActionException {
 		if (rc.isCoreReady() && rc.canBuild(dir, type)) {
 			rc.build(dir, type);
 			return true;
@@ -210,6 +210,7 @@ public class BaseBot {
 				toTarget.rotateLeft().rotateLeft(), toTarget.rotateRight().rotateRight() };
 		return dirs;
 	}
+	
 
 	// ACTIONS BLOCK
 
@@ -282,6 +283,20 @@ public class BaseBot {
 		}
 		return false;
 	}
+	
+	public static boolean tryPrimitiveMoveTo(MapLocation target) throws GameActionException {
+		Direction dir = rc.getLocation().directionTo(target);
+		if (tryMove(dir)) {
+			return true;
+		}
+		if (tryMove(dir.rotateLeft())) {
+			return true;
+		}
+		if (tryMove(dir.rotateRight())) {
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Tries to spawn robot no matter what in any direction.
@@ -302,13 +317,22 @@ public class BaseBot {
 	 * @param type robot type to build
 	 * @return true if built, false otherwise
 	 */
-	public boolean tryBuild(RobotType type) throws GameActionException {
+	public static boolean tryBuild(RobotType type) throws GameActionException {
 		for (Direction dir : directions) {
 			if (tryBuild(dir, type)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	public static Direction tryBuildDir(RobotType type) throws GameActionException {
+		for (Direction dir : directions) {
+			if (tryBuild(dir, type)) {
+				return dir;
+			}
+		}
+		return null;
 	}
 
 	// SENSING ROBOTS
@@ -418,6 +442,9 @@ public class BaseBot {
 		int score = Integer.MIN_VALUE;
 		MapLocation best = null;
 		for (MapLocation l : potLoc) {
+			if (!isNormal(l) || isOccupied(l)) {
+				continue;
+			}
 			if (isNormal(l) && !isOccupied(l)) {
 				int s = 0;
 				for (Direction d : directions) {
@@ -426,9 +453,15 @@ public class BaseBot {
 						s++;
 					}
 				}
-				s *= s;
+				if (s < 2) {
+					continue;
+				}
+				s *= s*s;
+				//System.out.println(s);
 				s += l.distanceSquaredTo(theirHQ) - loc.distanceSquaredTo(theirHQ);
+				//System.out.println(s);
 				s -= l.distanceSquaredTo(loc);
+				//System.out.println(s);
 				if (s > score) {
 					score = s;
 					best = l;
@@ -447,10 +480,15 @@ public class BaseBot {
 	 */
 	public boolean isOccupied(MapLocation loc) {
 		try {
-			return rc.senseRobotAtLocation(loc) != null;
+			return rc.isLocationOccupied(loc);
 		} catch (GameActionException e) {
 			return false;
 		}
+//		try {
+//			return rc.senseRobotAtLocation(loc) != null;
+//		} catch (GameActionException e) {
+//			return false;
+//		}
 	}
 
 	/**
@@ -610,7 +648,7 @@ public class BaseBot {
 	}
 
 	private boolean isInSupplyChain(RobotType type) {
-		return !type.isBuilding || type == RobotType.TOWER;
+		return (!type.isBuilding && type != RobotType.DRONE && type != RobotType.MINER) || type == RobotType.TOWER;
 	}
 
 	protected MapLocation closestOre() throws GameActionException {
@@ -622,7 +660,7 @@ public class BaseBot {
 		int dist = Integer.MAX_VALUE;
 		for (MapLocation loc : locations) {
 			if (rc.senseTerrainTile(loc) == TerrainTile.NORMAL && rc.senseOre(loc) > 0
-					&& rc.getLocation().distanceSquaredTo(loc) < dist && isOccupied(loc)) {
+					&& rc.getLocation().distanceSquaredTo(loc) < dist && !isOccupied(loc)) {
 				oreLoc = loc;
 				dist = rc.getLocation().distanceSquaredTo(loc);
 			}

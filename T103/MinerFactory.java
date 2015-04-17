@@ -14,7 +14,7 @@ public class MinerFactory extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		//if (rc.readBroadcast(RobotType.MINER.ordinal()) < 15) {
-		if (rc.readBroadcast(Channels.numMINERS) < 15) {
+		if (rc.readBroadcast(Channels.numMINERS) < 20) {
 			trySpawn(RobotType.MINER);
 		}
 		rc.yield();

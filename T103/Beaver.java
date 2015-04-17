@@ -1,5 +1,6 @@
 package T103;
 
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -71,18 +72,23 @@ public class Beaver extends BaseBot {
 		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 10) {
-			boolean hasBuilt = tryBuild(RobotType.SUPPLYDEPOT);
-			rc.yield();
-			if (hasBuilt) {
-				spot = findSpotForBuilding();
-				while (spot == null) {
-					tryMove(getRandomDirection());
+		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 30) {
+			Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
+			if (dirBuilt != null) {
+				MapLocation newBuild = rc.getLocation().add(dirBuilt);
+				while (rc.isBuildingSomething()) {
 					rc.yield();
+				}
+				spot = findSpotForBuilding();
+				
+				while (spot == null || spot.equals(newBuild)) {
+					tryMove(getRandomDirection());
 					spot = findSpotForBuilding();
+					rc.yield();
 				}
 				while (!rc.getLocation().equals(spot)) {
-					tryMoveTo(spot);
+					rc.setIndicatorString(1, "Occupied " + spot + " " + isOccupied(spot));
+					rc.setIndicatorString(0, tryPrimitiveMoveTo(spot) + " " + spot);
 					rc.yield();
 				}
 			}

@@ -12,7 +12,7 @@ public class Helipad extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
-		if (rc.readBroadcast(Channels.numDRONE) < 4) {
+		if (rc.readBroadcast(Channels.numDRONE) < HQ.EXPLCOUNT) {
 			trySpawn(RobotType.DRONE);
 		}
 		rc.yield();

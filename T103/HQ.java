@@ -16,17 +16,19 @@ import static T103.Utility.Tuple;
 
 public class HQ extends BaseBot {
 	
+	public static final int EXPLCOUNT = 4;
 	
 	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();
 	static {
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
-		hqSupplies.put(RobotType.MINER, new Tuple(200, 2000));
+		hqSupplies.put(RobotType.MINER, new Tuple(200, 3000));
 		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 15000));
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(500, 2500));
 	}
 
 	public HQ(RobotController rc) throws GameActionException {
 		super(rc);
+		rc.broadcast(Channels.expDRONECOUNT, EXPLCOUNT);
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		MapLocation[] q = new MapLocation[enemyTowers.length+1];
 		for (int i = 0; i < enemyTowers.length; i++) {
@@ -95,13 +97,16 @@ public class HQ extends BaseBot {
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();
 		}
+		if (isSet(Channels.expSTARTED)) {
+			MapInfo.markExploreLocations();
+		}
 		
 //		if (printMap && isSet(Channels.MAPBROADCASTED)) {
 //			printMap = false;
 //			System.out.println("entered here");
 //			MapInfo.printMap();
 //		}
-		
+		/*
 		if (reqFlood == 1) {
 			rc.broadcast(Channels.FLOODINDEX, 1);
 			rc.broadcast(Channels.FLOODREQUEST, 1);
@@ -119,11 +124,12 @@ public class HQ extends BaseBot {
 			reqFlood = 0;
 		}
 		
+		
 		if (isSet(Channels.FLOODACTIVE)) {
 			rCount++;
 			MapInfo.markFloodFromChannels();
 		}
-		
+		*/
 		
 		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
