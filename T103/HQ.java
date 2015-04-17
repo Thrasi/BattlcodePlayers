@@ -1,4 +1,4 @@
-package T102;
+package T103;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,9 +12,9 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
-import T102.RobotPlayer;
+import T103.RobotPlayer;
 
-import static T102.Utility.Tuple;
+import static T103.Utility.Tuple;
 
 public class HQ extends BaseBot {
 	
@@ -82,6 +82,8 @@ public class HQ extends BaseBot {
 		}
 	}
 	
+	boolean printMap = false;
+	
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
 		
@@ -89,25 +91,12 @@ public class HQ extends BaseBot {
 			decideExploringPoints();
 		}
 		
-		/*
-		if (isSet(RobotPlayer.MAPBROADCASTED)) {
-			reset(RobotPlayer.MAPBROADCASTED);
-			int height = rc.readBroadcast(RobotPlayer.MAPHEIGHT);
-			int width = rc.readBroadcast(RobotPlayer.MAPWIDTH);
-			int xs = rc.readBroadcast(RobotPlayer.TOPLEFTX);
-			int ys = rc.readBroadcast(RobotPlayer.TOPLEFTY);
-			
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					if (rc.readBroadcast(RobotPlayer.MAPFIRST + y*width + x) == 1) {
-						System.out.print(" ");
-					} else {
-						System.out.print("#");
-					}
-				}
-				System.out.println();
-			}
-		}*/
+		
+		if (printMap && isSet(RobotPlayer.MAPBROADCASTED)) {
+			printMap = false;
+			System.out.println("entered here");
+			MapInfo.printMap();
+		}
 		
 		
 		int beaverCount = rc.readBroadcast(RobotPlayer.numBEAVERS); 

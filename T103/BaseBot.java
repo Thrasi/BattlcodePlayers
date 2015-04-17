@@ -1,14 +1,8 @@
-package T102;
+package T103;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -23,6 +17,8 @@ import battlecode.common.TerrainTile;
 
 public class BaseBot {
 
+	//TODO isTaken change to affect only allies, check with HQ
+	
 	// All 8 directions in one place
 	protected static final Direction[] directions = {
 		Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
@@ -48,12 +44,12 @@ public class BaseBot {
 	 * @param rc this robot's controller
 	 */
 	public BaseBot(RobotController rc) {
-		this.rc = rc;
-		this.myHQ = rc.senseHQLocation();
-		this.theirHQ = rc.senseEnemyHQLocation();
-		this.myTeam = rc.getTeam();
-		this.theirTeam = this.myTeam.opponent();
-		this.rand = new Random(rc.getID());
+		BaseBot.rc = rc;
+		BaseBot.myHQ = rc.senseHQLocation();
+		BaseBot.theirHQ = rc.senseEnemyHQLocation();
+		BaseBot.myTeam = rc.getTeam();
+		BaseBot.theirTeam = BaseBot.myTeam.opponent();
+		BaseBot.rand = new Random(rc.getID());
 	}
 	
 	
@@ -70,7 +66,7 @@ public class BaseBot {
 				//rc.broadcast(RobotPlayer.numSOLDIERS, rc.readBroadcast(RobotPlayer.numSOLDIERS)+1);
 			//}
 			if (rc.senseEnemyHQLocation() != null) {
-				this.theirHQ = rc.senseEnemyHQLocation();
+				BaseBot.theirHQ = rc.senseEnemyHQLocation();
 			}
 			transferSuppliesTolowest();
 		}
@@ -182,7 +178,7 @@ public class BaseBot {
 	 * @param channel channel to set
 	 * @throws GameActionException if channel doesn't exist
 	 */
-	protected void set(int channel) throws GameActionException {
+	public static void set(int channel) throws GameActionException {
 		rc.broadcast(channel, 1);
 	}
 	
@@ -191,7 +187,7 @@ public class BaseBot {
 	 * @param channel channel to reset
 	 * @throws GameActionException if channel doesnt exist
 	 */
-	protected void reset(int channel) throws GameActionException {
+	public static void reset(int channel) throws GameActionException {
 		rc.broadcast(channel, 0);
 	}
 	
@@ -201,7 +197,7 @@ public class BaseBot {
 	 * @return 
 	 * @throws GameActionException 
 	 */
-	protected boolean isSet(int channel) throws GameActionException {
+	public static boolean isSet(int channel) throws GameActionException {
 		return rc.readBroadcast(channel) == 1;
 	}
 	
@@ -545,15 +541,15 @@ public class BaseBot {
 				&& (curr == TerrainTile.NORMAL || curr == TerrainTile.VOID);
 	}
 	
-	public boolean isRotationSym() {
+	public static boolean isRotationSym() {
 		return myHQ.x != theirHQ.x && myHQ.y != theirHQ.y;
 	}
 	
-	public boolean isHorizontalSym() {
+	public static boolean isHorizontalSym() {
 		return myHQ.x == theirHQ.x;
 	}
 	
-	public boolean isVerticalSym() {
+	public static boolean isVerticalSym() {
 		return myHQ.y == theirHQ.y;
 	}
 	

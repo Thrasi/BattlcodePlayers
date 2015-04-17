@@ -1,4 +1,4 @@
-package T102;
+package T103;
 
 /* This is built on a template for a player we found from robotplayerNPHard. 
  * That template had errors, but is a fine framework.  T100 is currently a shitty
@@ -75,11 +75,17 @@ public class RobotPlayer {
 			MAPFIRST = 20000,
 			MAPLAST = 35000,
 			
-			FLOODX = 39990,
-			FLOODY = 39991,
-			FLOODSET = 39992,
-			MAPFLOODFIRST = 40000,
-			MAPFLOODLAST = 55000
+			
+			FLOODREQUEST = 39000,
+			FLOODINDEX = 39001,
+			FLOODQUEUESET = 39002,
+			FLOODQUEUECOUNT = 39003,
+			FLOODACTIVEINDEX = 39004,
+			FLOODACTIVE = 39005,
+			FLOODQUEUEFIRST = 39100,
+			FLOODQUEUELAST = 39499,
+			FLOODFIRST = 40000,
+			FLOODLAST = 55000
 		;
 	
 	public static Map<RobotType, Integer> countChannels = new HashMap<>();

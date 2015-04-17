@@ -1,11 +1,11 @@
-package T102;
+package T103;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
-import static T102.BaseBot.rc;
-import static T102.BaseBot.getAllAllies;;
+import static T103.BaseBot.rc;
+import static T103.BaseBot.getAllAllies;;
 
 public class RobotCounter {
 
