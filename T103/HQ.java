@@ -11,15 +11,18 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import static T103.Channels.isSet;
 import static T103.Utility.Tuple;
 import static T103.Channels.set;
-import static T103.Channels.reset;
 
 
 public class HQ extends BaseBot {
 	
-	public static final int EXPLCOUNT = 4;
+	public static final int[] maxMINERSC = {10, 15, 20};
+	public static final int[] maxSUPPLYDEPOTSC = {2, 8, 12};
+	public static final int[] maxTECHC = {0, 1, 1};
+	public static final int[] maxEXPLC = {0, 4, 4};
+	public static final int[] maxTANKFACTORIESC = {2, 4, 6};
+	
 	
 	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();
 	static {
@@ -31,7 +34,6 @@ public class HQ extends BaseBot {
 
 	public HQ(RobotController rc) throws GameActionException {
 		super(rc);
-		rc.broadcast(Channels.expDRONECOUNT, EXPLCOUNT);
 		rc.broadcast(Channels.SUPPLYQSTART, Channels.LOWERSUPPLYBOUND);
 		rc.broadcast(Channels.SUPPLYQEND, Channels.LOWERSUPPLYBOUND);
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
@@ -42,6 +44,12 @@ public class HQ extends BaseBot {
 		q[0] = theirHQ;
 		MapInfo.setQueue(q);
 		MapInfo.requestFlood(0);
+		
+		MapLocation[] myTowers = rc.senseTowerLocations();
+		for (int i = 0; i < myTowers.length; i++) {
+			RobotInfo tower = rc.senseRobotAtLocation(myTowers[i]);
+			rc.broadcast(Channels.TOWERID + i, tower.ID);
+		}
 	}
 
 

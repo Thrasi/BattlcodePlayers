@@ -37,7 +37,8 @@ public class Drone extends BaseBot {
 	public Drone(RobotController rc) throws GameActionException {
 		super(rc);
 		
-		int count = rc.readBroadcast(Channels.expDRONECOUNT);
+		int mapClass = rc.readBroadcast(Channels.MAPSIZECLASS);
+		int count = HQ.maxEXPLC[mapClass];
 		for (int i = 0; i < count; i++) {
 			if (rc.readBroadcast(Channels.expDRONE + i) == 0) {
 				rc.broadcast(Channels.expDRONE + i, rc.getID());
