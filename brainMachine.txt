@@ -14,7 +14,9 @@ we need an estimation of when a unit is as good as dead.
 
 * Broadcast map size class
 
-* Shoot missile first
+* (Done) Shoot missile first.
 
 * Towers sense enemy and say if under attack or in danger
+
+* Soldiers should attack tanks that are shooting at them and not just wait for them to come int range.
 
