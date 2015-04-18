@@ -594,6 +594,53 @@ public class BaseBot {
 		}
 		rc.attackLocation(toAttack);
 	}
+	
+	public void attackOnSight() throws GameActionException {
+		RobotInfo[] nearbyEnemies = getNearbyEnemies();
+		if (nearbyEnemies.length > 0) {
+			
+			// Weakest
+			double minHealth = Integer.MAX_VALUE;
+			RobotInfo weakestRobot = null;
+			
+			// Missile
+			double minDist = Double.MAX_VALUE;
+			RobotInfo closestMissile = null;
+			
+			// Find weakest robot and closest missile
+			for (RobotInfo info : nearbyEnemies) {
+				if (info.type == RobotType.MISSILE) {
+					if (rc.getLocation().distanceSquaredTo(info.location) 
+							< minDist) {
+						closestMissile = info;
+						minDist = info.health;
+					}
+				}
+				else if (info.health < minHealth) {
+					weakestRobot = info;
+					minHealth = info.health;
+				}
+			}
+			
+			// Shoot!
+			boolean didShoot;
+			if (closestMissile != null) {
+				didShoot = tryAttack(closestMissile.location);
+			}
+			didShoot = tryAttack(weakestRobot.location);
+			
+			// move into range of closest enemy
+			if ( !didShoot ) {
+				RobotInfo nearestEnemy = getNearestNearByEnemy();
+				double dist = nearestEnemy.location.distanceSquaredTo(rc.getLocation());
+				if ( nearestEnemy.type != RobotType.MISSILE 
+						&& dist > rc.getType().attackRadiusSquared ) {
+					
+					tryMoveTo(nearestEnemy.location);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Shoots the weakest enemy in range. Finds all enemies in sensing range and tries to attack the
@@ -659,7 +706,6 @@ public class BaseBot {
 	 */
 	public void addToQueue(RobotController rc) throws GameActionException {
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
-        System.out.println("");
         rc.broadcast(queueEnd, rc.getID());
 
         queueEnd++;
