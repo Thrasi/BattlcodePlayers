@@ -19,16 +19,10 @@ public class Beaver extends BaseBot {
 	
 	@Override
 	public void execute() throws GameActionException {
-//		if (rc.readBroadcast(Channels.numHELIPAD) < 1) {
-//			tryBuild(RobotType.HELIPAD);
-//		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < 1) {
-//			tryBuild(RobotType.TECHNOLOGYINSTITUTE);
-//		}
-//		rc.yield();
+		
 		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
 			cornerBeaver();
 		}
-		
 		/*while (true) {
 			//tryPrimitiveMoveTo(theirHQ);
 			System.out.println("start " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
