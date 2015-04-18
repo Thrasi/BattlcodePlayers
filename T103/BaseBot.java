@@ -556,7 +556,8 @@ public class BaseBot {
 
 	/**
 	 * Shoots the weakest enemy in range. Finds all enemies in sensing range and tries to attack the
-	 * one with lowest health.
+	 * one with lowest health.  If there are missiles in range the closest of them becomes a priotity
+	 * target.
 	 */
 	public void tryShootMissilesOrWeakest() throws GameActionException {
 		RobotInfo[] nearbyEnemies = getNearbyEnemies();
@@ -588,6 +589,43 @@ public class BaseBot {
 			}
 			tryAttack(weakestRobot.location);
 		}
+	}
+	
+	/**
+	 * Check if the supply is low add this robot to the supply queue
+	 * @param isSupplyLow
+	 * @return isSupplyLow
+	 * @throws GameActionException
+	 */
+	public boolean addToQueue(boolean isSupplyLow) throws GameActionException {
+		double supply = rc.getSupplyLevel();
+		if (!isSupplyLow && supply <= 500) {
+			addToQueue(rc);
+            isSupplyLow = true;
+		}
+        else if (supply > 500) {
+            isSupplyLow = false;
+        }
+		
+		return isSupplyLow;
+	}
+	
+	/**
+	 * Add the robot to the supply queue
+	 * 
+	 * @param rc the robot to add to queue
+	 * @throws GameActionException
+	 */
+	public void addToQueue(RobotController rc) throws GameActionException {
+        int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
+        System.out.println("");
+        rc.broadcast(queueEnd, rc.getID());
+
+        queueEnd++;
+        if (queueEnd >= Channels.UPPERSUPPLYBOUND) {
+            queueEnd = Channels.LOWERSUPPLYBOUND;
+        }
+        rc.broadcast(Channels.SUPPLYQEND, queueEnd);
 	}
 
 	public void trySupplyTower() throws GameActionException {

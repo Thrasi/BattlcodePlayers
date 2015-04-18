@@ -32,6 +32,8 @@ public class HQ extends BaseBot {
 	public HQ(RobotController rc) throws GameActionException {
 		super(rc);
 		rc.broadcast(Channels.expDRONECOUNT, EXPLCOUNT);
+		rc.broadcast(Channels.SUPPLYQSTART, Channels.LOWERSUPPLYBOUND);
+		rc.broadcast(Channels.SUPPLYQEND, Channels.LOWERSUPPLYBOUND);
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		MapLocation[] q = new MapLocation[enemyTowers.length+1];
 		for (int i = 0; i < enemyTowers.length; i++) {
