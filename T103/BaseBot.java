@@ -365,7 +365,7 @@ public class BaseBot {
 	 * Senses all enemy robots in sensing radius of this robot.
 	 * @return array of enemy robots
 	 */
-	public RobotInfo[] getNearbyEnemies() {
+	public static RobotInfo[] getNearbyEnemies() {
 		return rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, theirTeam);
 	}
 
@@ -433,6 +433,14 @@ public class BaseBot {
 		} catch (GameActionException e) {
 			return null;
 		}
+	}
+	
+	public static boolean isInDanger() {
+		int count = getNearbyEnemies().length;
+		if (count > 3) {
+			return true;
+		}
+		return false;
 	}
 
 	public MapLocation findSpotForBuilding() throws GameActionException {

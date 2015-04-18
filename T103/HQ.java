@@ -115,6 +115,8 @@ public class HQ extends BaseBot {
 			set(Channels.MAINSWARMRALLY);
 		}
 		
+		//if ()
+		
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();
 		}

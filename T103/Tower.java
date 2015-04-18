@@ -5,6 +5,8 @@ import battlecode.common.RobotController;
 
 public class Tower extends BaseBot {
 
+	private static double prevHealth = -1;
+	
 	public Tower(RobotController rc) {
 		super(rc);
 	}
@@ -12,6 +14,10 @@ public class Tower extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		tryShootWeakest();
+		rc.setIndicatorString(0, getNearbyEnemies().length + "");
+		boolean underAttack = prevHealth > rc.getHealth();
+		rc.setIndicatorString(1, underAttack + "");
+		prevHealth = rc.getHealth();
 		rc.yield();
 	}
 
