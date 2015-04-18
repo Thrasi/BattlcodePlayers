@@ -20,7 +20,10 @@ public class Soldier extends BaseBot {
 	public void execute() throws GameActionException {
 		tryShootWeakest();
 		
-		if (isSet(Channels.SWARMSET + swarmIdx)) {
+		if (isSet(Channels.SWARMSETFLOOD + swarmIdx)) {
+			tryMoveFlood(rc.readBroadcast(Channels.SWARMFLOODIDX + swarmIdx));
+		} else
+			if (isSet(Channels.SWARMSET + swarmIdx)) {
 			tryMoveTo(new MapLocation(
 					rc.readBroadcast(Channels.SWARMFIRSTX + swarmIdx),
 					rc.readBroadcast(Channels.SWARMFIRSTY + swarmIdx)

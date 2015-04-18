@@ -26,7 +26,7 @@ public class HQ extends BaseBot {
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 3000));
 		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 15000));
-		hqSupplies.put(RobotType.SOLDIER, new Tuple(500, 2500));
+		hqSupplies.put(RobotType.SOLDIER, new Tuple(1000, 4000));
 	}
 
 	public HQ(RobotController rc) throws GameActionException {
@@ -39,6 +39,7 @@ public class HQ extends BaseBot {
 		}
 		q[0] = theirHQ;
 		MapInfo.setQueue(q);
+		MapInfo.requestFlood(0);
 	}
 
 
@@ -81,8 +82,8 @@ public class HQ extends BaseBot {
 			}
 		} else if (Clock.getRoundNum() > 600 && Clock.getRoundNum() < 1200) {
 			// Set rally
-			//rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
-			//rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
+			rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
+			rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
 			
 			rc.broadcast(Channels.SWARMIDXSOLDIER, 1);
 			MapLocation[] myTowers = rc.senseTowerLocations();
@@ -99,6 +100,9 @@ public class HQ extends BaseBot {
 				rc.broadcast(Channels.SWARMFIRSTY+1, rally.y);
 				set(Channels.SWARMSET+1);
 			}
+		} else {
+			//rc.broadcast(Channels.SWARMFLOODIDX+1, 0);
+			//set(Channels.SWARMSETFLOOD + 1);
 		}
 		
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
@@ -114,7 +118,7 @@ public class HQ extends BaseBot {
 //			MapInfo.printMap();
 //		}
 		
-		/*
+/*		
 		if (reqFlood == 1 && !isSet(Channels.FLOODREQUEST)) {
 			MapInfo.requestFlood(0);
 			reqFlood = 2;
@@ -137,7 +141,11 @@ public class HQ extends BaseBot {
 			reqFlood = 6;
 		}
 		*/
-/*		
+/*	
+		if (MapInfo.isActive(0)) {
+			MapInfo.markFloodFromChannels(0);
+		}
+	
 		if (MapInfo.isActive(0)) {
 			MapInfo.markFloodFromChannels(0);
 		}

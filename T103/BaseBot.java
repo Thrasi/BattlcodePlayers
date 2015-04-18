@@ -1,5 +1,7 @@
 package T103;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -443,7 +445,7 @@ public class BaseBot {
 		return false;
 	}
 
-	public MapLocation findSpotForBuilding() throws GameActionException {
+	public static MapLocation findSpotForBuilding() throws GameActionException {
 		MapLocation loc = rc.getLocation();
 		MapLocation[] potLoc = getSurroundingLocations();
 
@@ -504,7 +506,7 @@ public class BaseBot {
 	 * @param loc location to check
 	 * @return true if it is a normal tile, false otherwise
 	 */
-	public boolean isNormal(MapLocation loc) {
+	public static boolean isNormal(MapLocation loc) {
 		return rc.senseTerrainTile(loc) == TerrainTile.NORMAL;
 	}
 
@@ -513,7 +515,13 @@ public class BaseBot {
 
 	// MORE COMPLEX ACTIONS
 	
-	public static void moveAway() throws GameActionException {
+	public static boolean tryMoveFlood(int idx) throws GameActionException {
+		MapLocation curr = rc.getLocation();
+		Direction direction = MapInfo.get(idx, curr.x, curr.y);
+		return tryMove(direction);
+	}
+	
+	public static void tryMoveAway() throws GameActionException {
 		RobotInfo[] enemies = getNearbyEnemies();
 		if (enemies.length == 0) {
 			return;
@@ -530,6 +538,38 @@ public class BaseBot {
 		}
 		tryMove(loc.directionTo(rc.getLocation()));
 		//rc.yield();
+	}
+	
+	public static Direction tryBuildSafe(RobotType type) throws GameActionException {
+		MapLocation current = rc.getLocation();
+		int bestScore = Integer.MIN_VALUE;
+		Direction bestDir = null;
+		for (Direction dir : directions) {
+			MapLocation loc = current.add(dir);
+			if (isOccupied(loc) || !isNormal(loc)) {
+				continue;
+			}
+			
+			int score = 0;
+			for (Direction d : directions) {
+				TerrainTile tile = rc.senseTerrainTile(loc.add(d));
+				if (tile == TerrainTile.OFF_MAP || tile == TerrainTile.VOID) {
+					score++;
+				}
+			}
+			
+			if (score > bestScore) {
+				bestScore = score;
+				bestDir = dir;
+			}
+		}
+		if (bestDir == null) {
+			return null;
+		}
+		if (tryBuild(bestDir, type)) {
+			return bestDir;
+		}
+		return null;
 	}
 
 	/**

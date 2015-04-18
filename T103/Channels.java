@@ -36,6 +36,8 @@ public class Channels {
 				SWARMFIRSTX = 110,
 				SWARMFIRSTY = 130,
 				SWARMSET = 150,
+				SWARMSETFLOOD = 170,
+				SWARMFLOODIDX = 190,
 		
 			// SUPPLY QUEUE:
 				SUPPLIERID = 296, 
@@ -67,7 +69,7 @@ public class Channels {
 				MAPCORNER2SET = 908,
 				MAPCORNER2X = 909,
 				MAPCORNER2Y = 910,
-
+				
 			// FLOODING
 				FLOODREQUEST = 19000,
 				FLOODINDEX = 19001,
