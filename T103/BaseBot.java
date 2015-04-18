@@ -696,32 +696,7 @@ public class BaseBot {
 		return (!type.isBuilding && type != RobotType.DRONE && type != RobotType.MINER) || type == RobotType.TOWER;
 	}
 
-	protected MapLocation closestOre() throws GameActionException {
-		//System.out.println("before " + Clock.getBytecodeNum());
-		MapLocation[] locations = MapLocation.getAllMapLocationsWithinRadiusSq(
-				rc.getLocation(), 50);
-
-		MapLocation oreLoc = null;
-		int dist = Integer.MAX_VALUE;
-		for (MapLocation loc : locations) {
-			if (rc.senseTerrainTile(loc) == TerrainTile.NORMAL && rc.senseOre(loc) > 0
-					&& rc.getLocation().distanceSquaredTo(loc) < dist && !isOccupied(loc)) {
-				oreLoc = loc;
-				dist = rc.getLocation().distanceSquaredTo(loc);
-			}
-		}
-		//System.out.println("after " + Clock.getBytecodeNum());
-		return oreLoc;
-
-		/*
-		 * System.out.println(Clock.getBytecodeNum()); final MapLocation curr = rc.getLocation();
-		 * Set<MapLocation> visited = new HashSet<>(); List<MapLocation> open = new LinkedList<>();
-		 * open.add(curr); int i = 0; while (!open.isEmpty()) { i++; MapLocation loc =
-		 * open.remove(0); visited.add(loc); if (rc.senseOre(loc) > 0.5) { System.out.println(i +
-		 * " " + Clock.getBytecodeNum()); return loc; } for (MapLocation l : succ(loc)) { if
-		 * (visited.contains(l)) { continue; } open.add(l); } }
-		 */
-	}
+	
 
 	protected List<MapLocation> succ(MapLocation loc) {
 		List<MapLocation> adjacent = new LinkedList<>();

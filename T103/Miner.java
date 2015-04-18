@@ -9,6 +9,8 @@ public class Miner extends BaseBot {
 
 	private MapLocation oreLoc;
 	
+	
+	
 	public Miner(RobotController rc) {
 		super(rc);
 		this.oreLoc = null;
@@ -33,11 +35,11 @@ public class Miner extends BaseBot {
 				rc.yield();
 			}
 		}
-		if (rc.senseOre(rc.getLocation()) > 0) {
+		if (rc.senseOre(rc.getLocation()) > Mining.MINORE) {
 			oreLoc = null;
 			tryMine();
 		} else {
-			oreLoc = closestOre();
+			oreLoc = Mining.closestOre();
 			if (oreLoc == null) {
 				tryMoveTo(rc.getLocation().add(getRandomDirection()));
 			} else {

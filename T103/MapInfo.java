@@ -20,7 +20,7 @@ import battlecode.common.TerrainTile;
 
 /**
  * !! NOTE !!
- * Functions reconstruct map and floodAndServe must be executed in the same robot.
+ * Functions reconstructMap and floodAndServe must be executed in the same robot.
  */
 public class MapInfo {
 

@@ -159,7 +159,7 @@ public class HQ extends BaseBot {
 		
 		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
-		if (rc.readBroadcast(Channels.numBEAVERS) < 3) {
+		if (rc.readBroadcast(Channels.numBEAVERS) < 2) {
 			trySpawn(RobotType.BEAVER);
 		}
 		if (rc.readBroadcast(Channels.CORNERBEAVER) == 0 && beaverCount > 0) {
