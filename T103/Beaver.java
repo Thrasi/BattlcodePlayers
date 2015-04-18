@@ -19,6 +19,7 @@ public class Beaver extends BaseBot {
 	
 	@Override
 	public void execute() throws GameActionException {
+		
 		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
 			cornerBeaver();
 		}
@@ -99,11 +100,13 @@ public class Beaver extends BaseBot {
 		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 10) {
+		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 5) {
 			if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
 				continue;
 			}
-			Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
+			//Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
+			//TODO see if this works well
+			Direction dirBuilt = tryBuildSafe(RobotType.SUPPLYDEPOT);
 			if (dirBuilt != null) {
 				MapLocation newBuild = rc.getLocation().add(dirBuilt);
 				while (rc.isBuildingSomething()) {

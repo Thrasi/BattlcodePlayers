@@ -16,7 +16,9 @@ we need an estimation of when a unit is as good as dead.
 
 * (Done) Shoot missile first.
 
-* Towers sense enemy and say if under attack or in danger
-
 * Soldiers should attack tanks that are shooting at them and not just wait for them to come int range.
 
+* If HQ is the only robot that needs counts of other robots, there is no need to
+broadcast all numbers.
+
+* Change mining

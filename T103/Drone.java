@@ -92,12 +92,15 @@ public class Drone extends BaseBot {
 			explore = -1;
 		}
 		
-		moveAway();
-		if (supply != -1) {
-			
+		//tryMoveAway();
+		while (true) {
+			if (supply != -1) {
+				
+			}
+			rc.yield();
 		}
 		
-		rc.yield();
+		//rc.yield();
 	}
 
 	

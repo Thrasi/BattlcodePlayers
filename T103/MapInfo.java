@@ -20,7 +20,7 @@ import battlecode.common.TerrainTile;
 
 /**
  * !! NOTE !!
- * Functions reconstruct map and floodAndServe must be executed in the same robot.
+ * Functions reconstructMap and floodAndServe must be executed in the same robot.
  */
 public class MapInfo {
 
@@ -223,6 +223,11 @@ public class MapInfo {
 	// Flood flags
 	private static boolean[] floodCreated;
 	
+	// Directions in flooding. Order is very important
+	private static final Direction[] moves = { Direction.NONE, Direction.SOUTH,
+		Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH_EAST,
+		Direction.NORTH_WEST, Direction.SOUTH_WEST, Direction.NORTH_EAST};
+	
 	
 	/**
 	 * Request flood to be broadcasted.
@@ -240,12 +245,12 @@ public class MapInfo {
 	/**
 	 * Returns direction of the given coordinates in the given flood.
 	 * @param idx index of the flood in the queue
-	 * @param x transformed coordinate x
-	 * @param y transformed coordinate y
-	 * @return int direction
+	 * @param x non transformed x
+	 * @param y non transformed y
+	 * @return direction
 	 * @throws GameActionException incorrect channels 
 	 */
-	public static int get(int idx, int x, int y) throws GameActionException {
+	public static Direction get(int idx, int x, int y) throws GameActionException {
 		int first = getActiveFirst(idx);
 		readParameters();
 		if (first == Channels.FLOODACTIVEINDEX1) {
@@ -255,7 +260,11 @@ public class MapInfo {
 		} else {
 			rc.broadcast(Channels.FLOODLASTUSED3, Clock.getRoundNum());
 		}
-		return rc.readBroadcast(first + y * width + height);
+		rc.setIndicatorString(0, first+"");
+		rc.setIndicatorString(1, (y-ytl) + " " + (x-xtl));
+		int a = first + (y - ytl) * width + x - xtl;
+		rc.setIndicatorString(2, a+"");
+		return moves[rc.readBroadcast(first + (y - ytl) * width + x - xtl)];
 	}
 	
 	/**
@@ -310,13 +319,16 @@ public class MapInfo {
 	 * @throws GameActionException incorrect channels
 	 */
 	public static int getActiveFirst(int idx) throws GameActionException {
-		if (rc.readBroadcast(Channels.FLOODACTIVEINDEX1) == idx) {
+		if (isSet(Channels.FLOODACTIVE1) && 
+				rc.readBroadcast(Channels.FLOODACTIVEINDEX1) == idx) {
 			return Channels.FLOODFIRST1;
 		}
-		if (rc.readBroadcast(Channels.FLOODACTIVEINDEX2) == idx) {
+		if (isSet(Channels.FLOODACTIVE2) && 
+				rc.readBroadcast(Channels.FLOODACTIVEINDEX2) == idx) {
 			return Channels.FLOODFIRST2;
 		}
-		if (rc.readBroadcast(Channels.FLOODACTIVEINDEX3) == idx) {
+		if (isSet(Channels.FLOODACTIVE3) && 
+				rc.readBroadcast(Channels.FLOODACTIVEINDEX3) == idx) {
 			return Channels.FLOODFIRST3;
 		}
 		throw new RobotException("Flood: " + idx + " is not active.");
@@ -445,7 +457,7 @@ public class MapInfo {
 				j++;
 				flood[y8*width + x8] = 8;
 			}
-			
+
 		}//End while
 		
 		// Set flood source to 0 (don't move)
@@ -494,7 +506,7 @@ public class MapInfo {
 
 		System.out.println("Started serve "
 				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
-		
+
 		int[] flood = floods[idx];
 		int size = flood.length;
 		reset(floodActive);								// Disable reading flood
