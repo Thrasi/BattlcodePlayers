@@ -4,7 +4,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Tower extends BaseBot {
-
+	
 	private static double prevHealth = -1;
 	
 	public Tower(RobotController rc) {
@@ -18,6 +18,9 @@ public class Tower extends BaseBot {
 		boolean underAttack = prevHealth > rc.getHealth();
 		rc.setIndicatorString(1, underAttack + "");
 		prevHealth = rc.getHealth();
+		
+		isSupplyLow = addToQueue(isSupplyLow);
+		
 		rc.yield();
 	}
 

@@ -29,6 +29,9 @@ public class Soldier extends BaseBot {
 					rc.readBroadcast(Channels.SWARMFIRSTY + swarmIdx)
 			));
 		}
+		
+		isSupplyLow = addToQueue(isSupplyLow);
+		
 		rc.yield();
 	}
 

@@ -64,12 +64,14 @@ public class RobotPlayer {
 						myself = new Supplier(rc);
 						rc.broadcast(Channels.numSUPPLIERS, rc.readBroadcast(Channels.numSUPPLIERS) + 1);
 					    rc.broadcast(Channels.SUPPLIERID, rc.getID());
+					} else {
+						myself = new Drone(rc);
 					}
 				} catch (GameActionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				myself = new Drone(rc);
+				
 			} else if (type == RobotType.HELIPAD) {
 				myself = new Helipad(rc);
 			} else if (type == RobotType.LAUNCHER) {

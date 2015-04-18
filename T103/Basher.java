@@ -17,6 +17,9 @@ public class Basher extends BaseBot {
 				tryMoveTo(nearestEnemy.location);
 			}
 		}
+		
+		isSupplyLow = addToQueue(isSupplyLow);
+		
 		rc.yield();
 	}
 

@@ -64,6 +64,9 @@ public class Tank extends BaseBot {
 			
 			tryMoveTo(myHQ.add(dir, dist));
 		}
+		
+		isSupplyLow = addToQueue(isSupplyLow);
+		
 		rc.yield();
 	}
 
