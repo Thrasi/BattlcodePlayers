@@ -582,33 +582,60 @@ public class BaseBot {
 		// Find weakest
 		double minHealth = Integer.MAX_VALUE;
 		MapLocation toAttack = null;
+		
+		// Find closest missile
+		double minDist = Double.MAX_VALUE;
+		RobotInfo closestMissile = null;
+
 		for (RobotInfo info : enemies) {
+			if (info.type == RobotType.MISSILE) {
+				if (rc.getLocation().distanceSquaredTo(info.location) < minDist) {
+					closestMissile = info;
+					minDist = info.health;
+				}
+			}
 			if (info.health < minHealth) {
 				toAttack = info.location;
 				minHealth = info.health;
 			}
 		}
-		rc.attackLocation(toAttack);
+		if (closestMissile != null) {
+			tryAttack(closestMissile.location);
+		}
+		tryAttack(toAttack);
 	}
 	
 	/**
 	 * Shoots the weakest enemy in range. Finds all enemies in sensing range and
 	 * tries to attack the one with lowest health.
 	 */
-	public void tryShootWeakest() throws GameActionException {
+	public void tryShootMissileOrWeakest() throws GameActionException {
 		RobotInfo[] nearbyEnemies = getNearbyEnemies();
 		if (nearbyEnemies.length > 0) {
 			
+			// weakest
 			double minHealth = Integer.MAX_VALUE;
 			RobotInfo weakestRobot = null;
-			// Find weakest robot
+			// missile
+			double minDist = Double.MAX_VALUE;
+			RobotInfo closestMissile = null;
+			
+			// Find weakest robot and closest missile
 			for (RobotInfo info : nearbyEnemies) {
+				if (info.type == RobotType.MISSILE) {
+					if (rc.getLocation().distanceSquaredTo(info.location) < minDist) {
+						closestMissile = info;
+						minDist = info.health;
+					}
+				}
 				if (info.health < minHealth) {
 					weakestRobot = info;
 					minHealth = info.health;
 				}
 			}
-			
+			if (closestMissile != null) {
+				tryAttack(closestMissile.location);
+			}
 			tryAttack(weakestRobot.location);
 		}
 	}
