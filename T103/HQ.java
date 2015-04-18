@@ -11,10 +11,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import static T103.Channels.isSet;
 import static T103.Utility.Tuple;
 import static T103.Channels.set;
-import static T103.Channels.reset;
 
 
 public class HQ extends BaseBot {

@@ -1,7 +1,5 @@
 package T103;
 
-import T103.Utility.Pair;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -19,7 +17,6 @@ public class Beaver extends BaseBot {
 	
 	@Override
 	public void execute() throws GameActionException {
-		
 		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
 			cornerBeaver();
 		}
@@ -106,7 +103,7 @@ public class Beaver extends BaseBot {
 			}
 			//Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
 			//TODO see if this works well
-			Direction dirBuilt = tryBuildSafe(RobotType.SUPPLYDEPOT);
+			Direction dirBuilt = BuildingStrategies.tryBuildSafe(RobotType.SUPPLYDEPOT);
 			if (dirBuilt != null) {
 				MapLocation newBuild = rc.getLocation().add(dirBuilt);
 				while (rc.isBuildingSomething()) {

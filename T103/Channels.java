@@ -70,6 +70,8 @@ public class Channels {
 				MAPCORNER2X = 909,
 				MAPCORNER2Y = 910,
 				
+				MAPSIZECLASS = 911,
+				
 			// FLOODING
 				FLOODREQUEST = 19000,
 				FLOODINDEX = 19001,

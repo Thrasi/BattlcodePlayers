@@ -540,37 +540,7 @@ public class BaseBot {
 		//rc.yield();
 	}
 	
-	public static Direction tryBuildSafe(RobotType type) throws GameActionException {
-		MapLocation current = rc.getLocation();
-		int bestScore = Integer.MIN_VALUE;
-		Direction bestDir = null;
-		for (Direction dir : directions) {
-			MapLocation loc = current.add(dir);
-			if (isOccupied(loc) || !isNormal(loc)) {
-				continue;
-			}
-			
-			int score = 0;
-			for (Direction d : directions) {
-				TerrainTile tile = rc.senseTerrainTile(loc.add(d));
-				if (tile == TerrainTile.OFF_MAP || tile == TerrainTile.VOID) {
-					score++;
-				}
-			}
-			
-			if (score > bestScore) {
-				bestScore = score;
-				bestDir = dir;
-			}
-		}
-		if (bestDir == null) {
-			return null;
-		}
-		if (tryBuild(bestDir, type)) {
-			return bestDir;
-		}
-		return null;
-	}
+	
 
 	/**
 	 * Attack enemy with least health if there is one
@@ -645,16 +615,6 @@ public class BaseBot {
 	}
 	
 	
-	private static Direction possibleLeft(Direction dir) {
-		for (int i = 0; i < 8; i++) {
-			if (rc.canMove(dir)) {
-				return dir;
-			}
-			dir = dir.rotateLeft();
-		}
-		return null;
-	}
-
 	
 
 	/**
@@ -694,19 +654,6 @@ public class BaseBot {
 
 	private boolean isInSupplyChain(RobotType type) {
 		return (!type.isBuilding && type != RobotType.DRONE && type != RobotType.MINER) || type == RobotType.TOWER;
-	}
-
-	
-
-	protected List<MapLocation> succ(MapLocation loc) {
-		List<MapLocation> adjacent = new LinkedList<>();
-		for (Direction dir : directions) {
-			MapLocation adj = loc.add(dir);
-			if (rc.senseTerrainTile(adj) == TerrainTile.NORMAL) {
-				adjacent.add(loc.add(dir));
-			}
-		}
-		return adjacent;
 	}
 
 }
