@@ -5,7 +5,6 @@ import battlecode.common.RobotController;
 
 public class Tower extends BaseBot {
 	
-	static boolean isSupplyLow = false;
 	private static double prevHealth = -1;
 	
 	public Tower(RobotController rc) {

@@ -37,6 +37,7 @@ public class BaseBot {
 
 	// Random number generator
 	public static Random rand;
+	static boolean isSupplyLow = false;
 
 	/**
 	 * Sets HQ locations, teams and initializes random generator.
