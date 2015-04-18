@@ -12,7 +12,9 @@ we need an estimation of when a unit is as good as dead.
 
 * Drones to defend the towers
 
-* Drones explore queue
-* Bug Nav
+* Broadcast map size class
 
-* Dying unity supplies transfer
+* Shoot missile first
+
+* Towers sense enemy and say if under attack or in danger
+

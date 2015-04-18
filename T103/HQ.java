@@ -39,35 +39,6 @@ public class HQ extends BaseBot {
 		}
 		q[0] = theirHQ;
 		MapInfo.setQueue(q);
-		/*
-		// Initial tower locations (before destruction)
-		MapLocation[] myTowers = rc.senseTowerLocations();
-		MapLocation[] theirTowers = rc.senseEnemyTowerLocations();
-		
-		// Middle points of HQs and towers
-		int towerCount = myTowers.length; 
-		int[] xs = new int[towerCount+1];
-		int[] ys = new int[towerCount+1];
-		xs[0] = (myHQ.x + theirHQ.x) / 2;
-		ys[0] = (myHQ.y + theirHQ.y) / 2;
-		
-		// Set middle points for towers
-		for (int i = 0; i < myTowers.length; i++) {
-			xs[i+1] = (myTowers[i].x + theirTowers[i].x) / 2;
-			ys[i+1] = (myTowers[i].y + theirTowers[i].y) / 2;
-		}
-		
-		if (towerCount == 0) {						// Unknown symmetry
-		}
-		if (allEqual(xs) && allEqual(ys)) {			// Rotation symmetry
-			System.out.println("rotation");
-		} else if (onLine(xs, ys)) {				// Reflection symmetry
-			System.out.println("reflection");
-		} else {									// Unknown symmetry
-			System.out.println("something else");
-		}
-		*/
-		
 	}
 
 
@@ -110,14 +81,14 @@ public class HQ extends BaseBot {
 			}
 		} else if (Clock.getRoundNum() > 600 && Clock.getRoundNum() < 1200) {
 			// Set rally
-			rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
-			rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
+			//rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
+			//rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
 			
 			rc.broadcast(Channels.SWARMIDXSOLDIER, 1);
 			MapLocation[] myTowers = rc.senseTowerLocations();
 			if (myTowers.length > 0) {
-				rc.broadcast(Channels.SWARMFIRSTX+1, myTowers[0].x);
-				rc.broadcast(Channels.SWARMFIRSTY+1, myTowers[0].y);
+				rc.broadcast(Channels.SWARMFIRSTX+1, myTowers[1].x);
+				rc.broadcast(Channels.SWARMFIRSTY+1, myTowers[1].y);
 				set(Channels.SWARMSET+1);
 			} else {
 				Direction dir = myHQ.directionTo(theirHQ);

@@ -224,7 +224,6 @@ public class MapInfo {
 	private static boolean[] floodCreated;
 	
 	
-	
 	/**
 	 * Request flood to be broadcasted.
 	 * @param idx index of the flood in the queue
