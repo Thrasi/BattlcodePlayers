@@ -11,9 +11,52 @@ import static T103.BaseBot.isOccupied;
 import static T103.BaseBot.isNormal;
 import static T103.BaseBot.directions;
 import static T103.BaseBot.tryBuild;
+import static T103.BaseBot.theirHQ;
+import static T103.BaseBot.getAllDirectionsTowards;
 
 
 public class BuildingStrategies {
+	
+	// How much to sense for finding the spot
+	private static final int SENSERANGE = 24;
+	
+	/**
+	 * Finds a safe spot for building things. NOTE: Score system can be changed if it
+	 * sucks.
+	 * @return safest location according to score system
+	 */
+	public static MapLocation safeSpotForBuilding() throws GameActionException {
+		MapLocation current = rc.getLocation();
+		MapLocation[] potLoc =
+				MapLocation.getAllMapLocationsWithinRadiusSq(current, SENSERANGE);
+
+		int bestScore = Integer.MIN_VALUE;
+		MapLocation best = null;
+		for (MapLocation l : potLoc) {
+			if (!isNormal(l) || isOccupied(l)) {
+				continue;
+			}
+			int s = emptyScore(l);
+			if (s < 2) {				// Otherwise I will close myself in
+				continue;
+			}
+			
+			// Square of empty spots around location
+			s *= s*s;
+			
+			// Farther away from enemy HQ, higher score
+			s += l.distanceSquaredTo(theirHQ) - current.distanceSquaredTo(theirHQ);
+			
+			// Closer to my HQ, higher score
+			s -= l.distanceSquaredTo(current);
+			
+			if (s > bestScore) {
+				bestScore = s;
+				best = l;
+			}
+		}
+		return best;
+	}
 
 	/**
 	 * Tries to build the building in the safest possible spot around builder's location.
@@ -49,6 +92,23 @@ public class BuildingStrategies {
 	}
 	
 	/**
+	 * Tries to build the building towards the given direction.
+	 * @param target build towards this direction
+	 * @param type type of the building to build
+	 * @return true if built, false otherwise
+	 */
+	public static boolean tryBuildTowards(MapLocation target, RobotType type)
+			throws GameActionException {
+		
+		for (Direction dir : getAllDirectionsTowards(target)) {
+			if (tryBuild(dir, type)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Calculates score for safe building. Building is safe if everything around it
 	 * is VOID, OFF_MAP or another building.
 	 * @param loc location to score
@@ -59,6 +119,23 @@ public class BuildingStrategies {
 		for (Direction dir : directions) {
 			MapLocation neighborLoc = loc.add(dir);
 			if (isOffMapOrVoid(neighborLoc) || isOccupiedByBuilding(neighborLoc)) {
+				score++;
+			}
+		}
+		return score;
+	}
+	
+	/**
+	 * Number of empty spots around given location. Empty spot means not occupied and
+	 * normal.
+	 * @param loc location to score
+	 * @return empty score
+	 */
+	private static int emptyScore(MapLocation loc) {
+		int score = 0;
+		for (Direction d : directions) {
+			MapLocation a = loc.add(d);
+			if (!isOccupied(a) && isNormal(a)) {
 				score++;
 			}
 		}

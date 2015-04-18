@@ -1,7 +1,5 @@
 package T103;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -38,6 +36,8 @@ public class BaseBot {
 	// Random number generator
 	public static Random rand;
 	static boolean isSupplyLow = false;
+	
+	public static int mapClass;
 
 	/**
 	 * Sets HQ locations, teams and initializes random generator.
@@ -50,6 +50,14 @@ public class BaseBot {
 		BaseBot.myTeam = rc.getTeam();
 		BaseBot.theirTeam = BaseBot.myTeam.opponent();
 		BaseBot.rand = new Random(rc.getID());
+		int estSize = myHQ.distanceSquaredTo(theirHQ);
+		if (estSize < 1000) {
+			mapClass = 0;
+		} else if (estSize < 3000) {
+			mapClass = 1;
+		} else {
+			mapClass = 2;
+		}
 	}
 
 	// RUN
@@ -63,9 +71,9 @@ public class BaseBot {
 		//if (rc.getType() == RobotType.SOLDIER) {
 		//rc.broadcast(RobotPlayer.numSOLDIERS, rc.readBroadcast(RobotPlayer.numSOLDIERS)+1);
 		//}
-		if (rc.senseEnemyHQLocation() != null) {
-			BaseBot.theirHQ = rc.senseEnemyHQLocation();
-		}
+//		if (rc.senseEnemyHQLocation() != null) {
+//			BaseBot.theirHQ = rc.senseEnemyHQLocation();
+//		}
 		transferSuppliesTolowest();
 	}
 
@@ -193,7 +201,7 @@ public class BaseBot {
 	 * @param target target location
 	 * @return array of 8 directions
 	 */
-	protected Direction[] getAllDirectionsTowards(MapLocation target) {
+	public static Direction[] getAllDirectionsTowards(MapLocation target) {
 		Direction toTarget = rc.getLocation().directionTo(target);
 		Direction dirs[] = { toTarget, toTarget.rotateLeft(), toTarget.rotateRight(),
 				toTarget.rotateLeft().rotateLeft(), toTarget.rotateRight().rotateRight(),
@@ -438,56 +446,10 @@ public class BaseBot {
 		}
 	}
 	
-	public static boolean isInDanger() {
-		int count = getNearbyEnemies().length;
-		if (count > 3) {
-			return true;
-		}
-		return false;
-	}
-
-	public static MapLocation findSpotForBuilding() throws GameActionException {
-		MapLocation loc = rc.getLocation();
-		MapLocation[] potLoc = getSurroundingLocations();
-
-		int score = Integer.MIN_VALUE;
-		MapLocation best = null;
-		for (MapLocation l : potLoc) {
-			if (!isNormal(l) || isOccupied(l)) {
-				continue;
-			}
-			if (isNormal(l) && !isOccupied(l)) {
-				int s = 0;
-				for (Direction d : directions) {
-					MapLocation a = l.add(d);
-					if (!isOccupied(a) && isNormal(a)) {
-						s++;
-					}
-				}
-				if (s < 2) {
-					continue;
-				}
-				s *= s*s;
-				//System.out.println(s);
-				s += l.distanceSquaredTo(theirHQ) - loc.distanceSquaredTo(theirHQ);
-				//System.out.println(s);
-				s -= l.distanceSquaredTo(loc);
-				//System.out.println(s);
-				if (s > score) {
-					score = s;
-					best = l;
-				}
-			}
-		}
-		return best;
-	}
-
 	/**
-	 * TODO comment change
 	 * Check whether a location is taken by a robot.
 	 * @param loc location to check
-	 * @return true if it taken or out of sensing range, false otherwise
-	 * @throws GameActionException
+	 * @return true if it is occupied or out of sensing range, false otherwise
 	 */
 	public static boolean isOccupied(MapLocation loc) {
 		try {
@@ -495,11 +457,6 @@ public class BaseBot {
 		} catch (GameActionException e) {
 			return false;
 		}
-//		try {
-//			return rc.senseRobotAtLocation(loc) != null;
-//		} catch (GameActionException e) {
-//			return false;
-//		}
 	}
 
 	/**
@@ -653,9 +610,6 @@ public class BaseBot {
 		}
 	}
 	
-	
-	
-
 	/**
 	 * I have to admit, I have no idea what this is.
 	 */

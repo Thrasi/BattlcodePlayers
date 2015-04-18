@@ -7,10 +7,16 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
 public class Beaver extends BaseBot {
+	
+	
+	private static int maxSUPPLYDEPOTS;
+	private static int maxTECH;
 
-
-	public Beaver(RobotController rc) {
+	public Beaver(RobotController rc) throws GameActionException {
 		super(rc);
+		
+		maxSUPPLYDEPOTS = HQ.maxSUPPLYDEPOTSC[mapClass];
+		maxTECH = HQ.maxTECHC[mapClass];
 	}
 	
 	
@@ -48,7 +54,7 @@ public class Beaver extends BaseBot {
 		}
 		else if (rc.readBroadcast(Channels.numHELIPAD) < 1) {
 			//hasBuilt = tryBuild(RobotType.HELIPAD);
-		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < 1) {
+		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < maxTECH) {
 			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
 		else if (rc.readBroadcast(Channels.numBARRACKS) < 2) {
@@ -79,11 +85,11 @@ public class Beaver extends BaseBot {
 			tryMoveTo(endPoint);
 			rc.yield();
 		}*/
-		MapLocation spot = findSpotForBuilding();
+		MapLocation spot = BuildingStrategies.safeSpotForBuilding();
 		while (spot == null) {
 			tryMove(getRandomDirection());
 			rc.yield();
-			spot = findSpotForBuilding();
+			spot = BuildingStrategies.safeSpotForBuilding();
 		}
 		while (!rc.getLocation().equals(spot)) {
 			tryMoveTo(spot);
@@ -97,7 +103,7 @@ public class Beaver extends BaseBot {
 		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 5) {
+		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < maxSUPPLYDEPOTS) {
 			if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
 				continue;
 			}
@@ -109,11 +115,11 @@ public class Beaver extends BaseBot {
 				while (rc.isBuildingSomething()) {
 					rc.yield();
 				}
-				spot = findSpotForBuilding();
+				spot = BuildingStrategies.safeSpotForBuilding();
 				
 				while (spot == null || spot.equals(newBuild)) {
 					tryMove(getRandomDirection());
-					spot = findSpotForBuilding();
+					spot = BuildingStrategies.safeSpotForBuilding();
 					rc.yield();
 				}
 				while (!rc.getLocation().equals(spot)) {

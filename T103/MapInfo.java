@@ -642,5 +642,5 @@ public class MapInfo {
 			}
 		}
 	}
-	
+
 }//End class
