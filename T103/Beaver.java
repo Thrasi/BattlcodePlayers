@@ -49,7 +49,7 @@ public class Beaver extends BaseBot {
 			hasBuilt = tryBuild(RobotType.MINERFACTORY);
 		}
 		else if (rc.readBroadcast(Channels.numHELIPAD) < 1) {
-			hasBuilt = tryBuild(RobotType.HELIPAD);
+			//hasBuilt = tryBuild(RobotType.HELIPAD);
 		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < 1) {
 			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
@@ -91,12 +91,18 @@ public class Beaver extends BaseBot {
 			tryMoveTo(spot);
 			rc.yield();
 		}
-		
+		while (rc.readBroadcast(Channels.numHELIPAD) < 1) {
+			tryBuild(RobotType.HELIPAD);
+			rc.yield();
+		}
 		
 		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
 		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 10) {
+			if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
+				continue;
+			}
 			Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
 			if (dirBuilt != null) {
 				MapLocation newBuild = rc.getLocation().add(dirBuilt);

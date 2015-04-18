@@ -365,7 +365,7 @@ public class BaseBot {
 	 * Senses all enemy robots in sensing radius of this robot.
 	 * @return array of enemy robots
 	 */
-	public RobotInfo[] getNearbyEnemies() {
+	public static RobotInfo[] getNearbyEnemies() {
 		return rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, theirTeam);
 	}
 
@@ -433,6 +433,14 @@ public class BaseBot {
 		} catch (GameActionException e) {
 			return null;
 		}
+	}
+	
+	public static boolean isInDanger() {
+		int count = getNearbyEnemies().length;
+		if (count > 3) {
+			return true;
+		}
+		return false;
 	}
 
 	public MapLocation findSpotForBuilding() throws GameActionException {
@@ -504,6 +512,25 @@ public class BaseBot {
 
 
 	// MORE COMPLEX ACTIONS
+	
+	public static void moveAway() throws GameActionException {
+		RobotInfo[] enemies = getNearbyEnemies();
+		if (enemies.length == 0) {
+			return;
+		}
+		
+		int minDist = Integer.MAX_VALUE;
+		MapLocation loc = null;
+		for (RobotInfo ri : enemies) {
+			int dist = rc.getLocation().distanceSquaredTo(ri.location);
+			if (dist < minDist) {
+				minDist = dist;
+				loc = ri.location;
+			}
+		}
+		tryMove(loc.directionTo(rc.getLocation()));
+		//rc.yield();
+	}
 
 	/**
 	 * Attack enemy with least health if there is one

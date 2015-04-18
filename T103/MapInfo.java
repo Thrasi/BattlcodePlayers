@@ -16,7 +16,12 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
 
+//TODO request flood
 
+/**
+ * !! NOTE !!
+ * Functions reconstruct map and floodAndServe must be executed in the same robot.
+ */
 public class MapInfo {
 
 	// true are open spots, false are obstacles
@@ -78,15 +83,11 @@ public class MapInfo {
 				// Test tile
 				TerrainTile tile = rc.senseTerrainTile(loc);
 				if (tile == TerrainTile.NORMAL) {
-					rc.broadcast(Channels.MAPFIRST + y * width + x, 1);
 					map[y * width + x] = true;
 				}
 				
 			}//End for x
 		}//End for y
-		
-		// Map done
-		set(Channels.MAPBROADCASTED);
 		
 	}//End reconstructMap
 	
@@ -222,6 +223,41 @@ public class MapInfo {
 	// Flood flags
 	private static boolean[] floodCreated;
 	
+	
+	/**
+	 * Request flood to be broadcasted.
+	 * @param idx index of the flood in the queue
+	 * @throws GameActionException incorrect channels
+	 */
+	public static void requestFlood(int idx) throws GameActionException {
+		if (isActive(idx)) {
+			return;
+		}
+		rc.broadcast(Channels.FLOODINDEX, idx);
+		rc.broadcast(Channels.FLOODREQUEST, 1);
+	}
+	
+	/**
+	 * Returns direction of the given coordinates in the given flood.
+	 * @param idx index of the flood in the queue
+	 * @param x transformed coordinate x
+	 * @param y transformed coordinate y
+	 * @return int direction
+	 * @throws GameActionException incorrect channels 
+	 */
+	public static int get(int idx, int x, int y) throws GameActionException {
+		int first = getActiveFirst(idx);
+		readParameters();
+		if (first == Channels.FLOODACTIVEINDEX1) {
+			rc.broadcast(Channels.FLOODLASTUSED1, Clock.getRoundNum());
+		} else if (first == Channels.FLOODACTIVEINDEX2) {
+			rc.broadcast(Channels.FLOODLASTUSED2, Clock.getRoundNum());
+		} else {
+			rc.broadcast(Channels.FLOODLASTUSED3, Clock.getRoundNum());
+		}
+		return rc.readBroadcast(first + y * width + height);
+	}
+	
 	/**
 	 * Sets the queue. Broadcasts the queue. Can be called only once
 	 * @param locations locations to broadcast into queue
@@ -257,8 +293,33 @@ public class MapInfo {
 	 * @throws GameActionException incorrect channels
 	 */
 	public static boolean isActive(int idx) throws GameActionException {
-		return isSet(Channels.FLOODACTIVE)
-				&& rc.readBroadcast(Channels.FLOODACTIVEINDEX) == idx;
+		return (	isSet(Channels.FLOODACTIVE1)
+						&& rc.readBroadcast(Channels.FLOODACTIVEINDEX1) == idx)
+					||
+					(isSet(Channels.FLOODACTIVE2)
+						&& rc.readBroadcast(Channels.FLOODACTIVEINDEX2) == idx)
+					||
+					(isSet(Channels.FLOODACTIVE3)
+						&& rc.readBroadcast(Channels.FLOODACTIVEINDEX3) == idx);
+	}
+	
+	/**
+	 * Returns start location of the idx flood in the broadcast channels.
+	 * @param idx index of the flood in the queue
+	 * @return starting channel
+	 * @throws GameActionException incorrect channels
+	 */
+	public static int getActiveFirst(int idx) throws GameActionException {
+		if (rc.readBroadcast(Channels.FLOODACTIVEINDEX1) == idx) {
+			return Channels.FLOODFIRST1;
+		}
+		if (rc.readBroadcast(Channels.FLOODACTIVEINDEX2) == idx) {
+			return Channels.FLOODFIRST2;
+		}
+		if (rc.readBroadcast(Channels.FLOODACTIVEINDEX3) == idx) {
+			return Channels.FLOODFIRST3;
+		}
+		throw new RobotException("Flood: " + idx + " is not active.");
 	}
 	
 	/**
@@ -268,9 +329,6 @@ public class MapInfo {
 	public static void floodAndServe() throws GameActionException {
 		readParameters();
 		
-		if (!isSet(Channels.MAPBROADCASTED)) {
-			throw new RobotException("Map not broadcasted.");
-		}
 		if (!isSet(Channels.FLOODQUEUESET)) {
 			throw new RobotException("Flood queue not set.");
 		}
@@ -409,8 +467,29 @@ public class MapInfo {
 		
 		// Check if flood has been created
 		int idx = rc.readBroadcast(Channels.FLOODINDEX);
-		if (!floodCreated[idx]) {
+		if (!floodCreated[idx] || isActive(idx)) {
 			return;
+		}
+		
+		int flood1 = rc.readBroadcast(Channels.FLOODLASTUSED1);
+		int flood2 = rc.readBroadcast(Channels.FLOODLASTUSED2);
+		int flood3 = rc.readBroadcast(Channels.FLOODLASTUSED3);
+		int floodActive, floodFirst, floodActiveIdx, floodLastUsed;
+		if (flood1 < flood2 && flood1 < flood3) {
+			floodActive = Channels.FLOODACTIVE1;
+			floodFirst = Channels.FLOODFIRST1;
+			floodActiveIdx = Channels.FLOODACTIVEINDEX1;
+			floodLastUsed = Channels.FLOODLASTUSED1;
+		} else if (flood2 < flood3) {
+			floodActive = Channels.FLOODACTIVE2;
+			floodFirst = Channels.FLOODFIRST2;
+			floodActiveIdx = Channels.FLOODACTIVEINDEX2;
+			floodLastUsed = Channels.FLOODLASTUSED2;
+		} else {
+			floodActive = Channels.FLOODACTIVE3;
+			floodFirst = Channels.FLOODFIRST3;
+			floodActiveIdx = Channels.FLOODACTIVEINDEX3;
+			floodLastUsed = Channels.FLOODLASTUSED3;
 		}
 
 		System.out.println("Started serve "
@@ -418,12 +497,13 @@ public class MapInfo {
 		
 		int[] flood = floods[idx];
 		int size = flood.length;
-		reset(Channels.FLOODACTIVE);						// Disable reading flood
+		reset(floodActive);								// Disable reading flood
 		for (int i = 0; i < size; i++) {
-			rc.broadcast(Channels.FLOODFIRST + i, flood[i]);
+			rc.broadcast(floodFirst + i, flood[i]);
 		}
-		rc.broadcast(Channels.FLOODACTIVEINDEX, idx);	// Set active flood index
-		set(Channels.FLOODACTIVE);						// Enable reading flood
+		rc.broadcast(floodActiveIdx, idx);				// Set active flood index
+		rc.broadcast(floodLastUsed, Clock.getRoundNum());
+		set(floodActive);								// Enable reading flood
 		reset(Channels.FLOODREQUEST);					// Can set new request
 		
 		System.out.println("Finished serve "
@@ -471,7 +551,7 @@ public class MapInfo {
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				if (rc.readBroadcast(Channels.MAPFIRST + y*width + x) == 1) {
+				if (map[y*width + x]) {
 					System.out.print(" ");
 				} else {
 					System.out.print("#");
@@ -508,16 +588,17 @@ public class MapInfo {
 	 * Marks in map whatever is in the flood channels if it is active.
 	 * Used for debugging.
 	 */
-	public static void markFloodFromChannels() throws GameActionException {
+	public static void markFloodFromChannels(int idx) throws GameActionException {
 		readParameters();
 		
-		if (!isSet(Channels.FLOODACTIVE)) {
+		if (!isActive(idx)) {
 			throw new RobotException("Flood is not active.");
 		}
-		
+
+		int first = getActiveFirst(idx); 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				int d = rc.readBroadcast(Channels.FLOODFIRST + y*width + x);
+				int d = rc.readBroadcast(first + y*width + x);
 				if (d == 0) {
 					continue;
 				}

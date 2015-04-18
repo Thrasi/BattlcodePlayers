@@ -39,40 +39,6 @@ public class HQ extends BaseBot {
 		}
 		q[0] = theirHQ;
 		MapInfo.setQueue(q);
-		/*
-		// Initial tower locations (before destruction)
-		MapLocation[] myTowers = rc.senseTowerLocations();
-		MapLocation[] theirTowers = rc.senseEnemyTowerLocations();
-		
-		// Middle points of HQs and towers
-		int towerCount = myTowers.length; 
-		int[] xs = new int[towerCount+1];
-		int[] ys = new int[towerCount+1];
-		xs[0] = (myHQ.x + theirHQ.x) / 2;
-		ys[0] = (myHQ.y + theirHQ.y) / 2;
-		
-		// Set middle points for towers
-		for (int i = 0; i < myTowers.length; i++) {
-			xs[i+1] = (myTowers[i].x + theirTowers[i].x) / 2;
-			ys[i+1] = (myTowers[i].y + theirTowers[i].y) / 2;
-		}
-		
-		if (towerCount == 0) {						// Unknown symmetry
-		}
-		if (allEqual(xs) && allEqual(ys)) {			// Rotation symmetry
-			System.out.println("rotation");
-		} else if (onLine(xs, ys)) {				// Reflection symmetry
-			System.out.println("reflection");
-		} else {									// Unknown symmetry
-			System.out.println("something else");
-		}
-		*/
-		
-		if (myHQ.x == theirHQ.x || myHQ.y == theirHQ.y) {
-			System.out.println("reflection");
-		} else {
-			System.out.println("rotation");
-		}
 	}
 
 
@@ -97,60 +63,91 @@ public class HQ extends BaseBot {
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
 		
-		MapLocation[] myTowers = rc.senseTowerLocations();
-		if (myTowers.length > 0) {
-			//tryMoveTo(myTowers[0]);
-			rc.broadcast(Channels.MAINSWARMRALLYX, myTowers[0].x);
-			rc.broadcast(Channels.MAINSWARMRALLYY, myTowers[0].y);
-			set(Channels.MAINSWARMRALLY);
-		} else {
-			Direction dir = myHQ.directionTo(theirHQ);
-			// TODO fix these squared distances
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 3);
+		if (Clock.getRoundNum() < 600) {
+			// Set rally
+			MapLocation[] myTowers = rc.senseTowerLocations();
+			if (myTowers.length > 0) {
+				rc.broadcast(Channels.SWARMFIRSTX, myTowers[0].x);
+				rc.broadcast(Channels.SWARMFIRSTY, myTowers[0].y);
+				set(Channels.SWARMSET);
+			} else {
+				Direction dir = myHQ.directionTo(theirHQ);
+				int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 3);
+				
+				MapLocation rally = myHQ.add(dir, dist);
+				rc.broadcast(Channels.SWARMFIRSTX, rally.x);
+				rc.broadcast(Channels.SWARMFIRSTY, rally.y);
+				set(Channels.SWARMSET);
+			}
+		} else if (Clock.getRoundNum() > 600 && Clock.getRoundNum() < 1200) {
+			// Set rally
+			//rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
+			//rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
 			
-			//tryMoveTo(myHQ.add(dir, dist));
-			MapLocation rally = myHQ.add(dir, dist);
-			rc.broadcast(Channels.MAINSWARMRALLYX, rally.x);
-			rc.broadcast(Channels.MAINSWARMRALLYY, rally.y);
-			set(Channels.MAINSWARMRALLY);
+			rc.broadcast(Channels.SWARMIDXSOLDIER, 1);
+			MapLocation[] myTowers = rc.senseTowerLocations();
+			if (myTowers.length > 0) {
+				rc.broadcast(Channels.SWARMFIRSTX+1, myTowers[1].x);
+				rc.broadcast(Channels.SWARMFIRSTY+1, myTowers[1].y);
+				set(Channels.SWARMSET+1);
+			} else {
+				Direction dir = myHQ.directionTo(theirHQ);
+				int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 3);
+				
+				MapLocation rally = myHQ.add(dir, dist);
+				rc.broadcast(Channels.SWARMFIRSTX+1, rally.x);
+				rc.broadcast(Channels.SWARMFIRSTY+1, rally.y);
+				set(Channels.SWARMSET+1);
+			}
 		}
 		
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();
 		}
-		if (isSet(Channels.expSTARTED)) {
-			MapInfo.markExploreLocations();
-		}
+//		if (isSet(Channels.expSTARTED)) {
+//			MapInfo.markExploreLocations();
+//		}
 		
 //		if (printMap && isSet(Channels.MAPBROADCASTED)) {
 //			printMap = false;
 //			System.out.println("entered here");
 //			MapInfo.printMap();
 //		}
+		
 		/*
-		if (reqFlood == 1) {
-			rc.broadcast(Channels.FLOODINDEX, 1);
-			rc.broadcast(Channels.FLOODREQUEST, 1);
+		if (reqFlood == 1 && !isSet(Channels.FLOODREQUEST)) {
+			MapInfo.requestFlood(0);
 			reqFlood = 2;
 			rCount = 0;
-		} else if (reqFlood == 2 && MapInfo.isActive(1) && rCount > 3) {
-			System.out.println(rCount);
-			rc.broadcast(Channels.FLOODINDEX, 0);
-			rc.broadcast(Channels.FLOODREQUEST, 1);
+		} else if (reqFlood == 2 && !isSet(Channels.FLOODREQUEST)) {
+			MapInfo.requestFlood(1);
 			reqFlood = 3;
 			rCount = 0;
-		} else if (reqFlood == 3  && MapInfo.isActive(0) && rCount > 3) {
-			rc.broadcast(Channels.FLOODINDEX, 3);
-			rc.broadcast(Channels.FLOODREQUEST, 1);
-			reqFlood = 0;
-		}
-		
-		
-		if (isSet(Channels.FLOODACTIVE)) {
-			rCount++;
-			MapInfo.markFloodFromChannels();
+		} else if (reqFlood == 3 && !isSet(Channels.FLOODREQUEST)) {
+			MapInfo.requestFlood(3);
+			reqFlood = 4;
+		} else if (reqFlood == 4 && !isSet(Channels.FLOODREQUEST)) {
+			MapInfo.requestFlood(3);
+			reqFlood = 5;
+		} else if (reqFlood == 5 && !isSet(Channels.FLOODREQUEST)) {
+			MapInfo.requestFlood(1);
+			reqFlood = 6;
+		} else if (reqFlood == 6 && !isSet(Channels.FLOODREQUEST)) {
+			MapInfo.requestFlood(2);
+			reqFlood = 6;
 		}
 		*/
+/*		
+		if (MapInfo.isActive(0)) {
+			MapInfo.markFloodFromChannels(0);
+		}
+		if (MapInfo.isActive(1)) {
+			MapInfo.markFloodFromChannels(1);
+		}
+		if (MapInfo.isActive(3)) {
+			MapInfo.markFloodFromChannels(3);
+		}
+	*/	
 		
 		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
