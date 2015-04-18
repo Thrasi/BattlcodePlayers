@@ -260,11 +260,60 @@ public class RobotPlayer {
 		private void assignRallyPoints() throws GameActionException {
 			// Decide the rally point
 			MapLocation rallyPoint;
-			if ( Clock.getRoundNum() < 1600 ) {
-				rallyPoint = new MapLocation( (3*this.myHQ.x + this.theirHQ.x ) / 4 ,
-											 (3*this.myHQ.y + this.theirHQ.y ) / 4);
+//			double etot = 0;
+//			for (MapLocation ml : rc.senseTowerLocations() ) {
+//				RobotInfo ri = rc.senseRobotAtLocation(ml);
+//				etot += ri.health;
+//			}
+//			double mytot = 0;
+//			for (MapLocation ml : rc.senseEnemyTowerLocations() ) {
+//				RobotInfo ri = rc.senseRobotAtLocation(ml);
+//				mytot += ri.health;
+//			}
+//			if ( rc.senseEnemyTowerLocations().length == rc.senseTowerLocations().length && mytot < etot ) {
+//				rallyPoint = new MapLocation( (3*this.myHQ.x + this.theirHQ.x ) / 4 ,
+//						 (3*this.myHQ.y + this.theirHQ.y ) / 4);
+//				MapLocation[] towers = rc.senseEnemyTowerLocations();
+//				double dist = Double.MAX_VALUE;
+//				MapLocation closest = null;
+//				for (MapLocation tower : towers) {
+//					if (  dist > tower.distanceSquaredTo(rallyPoint) ) {
+//						dist = tower.distanceSquaredTo(rallyPoint);
+//						closest = tower;
+//					}
+//				}
+//				rallyPoint = closest;
+//			} else  
+				if ( rc.senseEnemyTowerLocations().length <= rc.senseTowerLocations().length ) {
+				double leastHealth = rc.senseRobotAtLocation(rc.senseTowerLocations()[0]).health;
+				MapLocation weakest = null;
+				for (MapLocation ml : rc.senseTowerLocations() ) {
+					RobotInfo ri = rc.senseRobotAtLocation(ml);
+					if (ri.health < leastHealth) {
+						leastHealth = ri.health;
+						weakest = ml;
+					}
+				}
+				if (leastHealth == rc.senseRobotAtLocation(rc.senseTowerLocations()[0]).health) {
+					rallyPoint = new MapLocation( (3*this.myHQ.x + this.theirHQ.x ) / 4 ,
+							 (3*this.myHQ.y + this.theirHQ.y ) / 4);
+				} else {
+					rallyPoint = weakest;
+				}
+				
 			} else {
-				rallyPoint = this.theirHQ;
+				rallyPoint = new MapLocation( (3*this.myHQ.x + this.theirHQ.x ) / 4 ,
+						 (3*this.myHQ.y + this.theirHQ.y ) / 4);
+				MapLocation[] towers = rc.senseEnemyTowerLocations();
+				double dist = Double.MAX_VALUE;
+				MapLocation closest = null;
+				for (MapLocation tower : towers) {
+					if (  dist > tower.distanceSquaredTo(rallyPoint) ) {
+						dist = tower.distanceSquaredTo(rallyPoint);
+						closest = tower;
+					}
+				}
+				rallyPoint = closest;
 			}
 			rc.broadcast(0, rallyPoint.x);
 			rc.broadcast(1, rallyPoint.y);
@@ -430,6 +479,12 @@ public class RobotPlayer {
 
 		public void execute() throws GameActionException{
 			if ( rc.isCoreReady()) {
+				RobotInfo nearestEnemy = getNearestNearByEnemy();
+				if ( nearestEnemy != null ) {
+					if (rc.getLocation().distanceSquaredTo(nearestEnemy.location) >= 2) {
+						tryMoveTo(nearestEnemy.location);
+					}
+				}
 				int rallyX = rc.readBroadcast(0);
 				int rallyY = rc.readBroadcast(1);
 				MapLocation rallyPoint = new MapLocation(rallyX, rallyY);
@@ -440,6 +495,53 @@ public class RobotPlayer {
 				}
 			}
 			rc.yield();
+		}
+		protected boolean tryMove(Direction dir) throws GameActionException {
+			if (rc.isCoreReady() && rc.canMove(dir)) {
+				rc.move(dir);
+				return true;
+			}
+			return false;
+		}
+		public RobotInfo[] getNearbyEnemies() {
+			return rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, theirTeam);
+		}
+		protected Direction[] getDirectionsTowards(MapLocation target) {
+			Direction toTarget = rc.getLocation().directionTo(target);
+			Direction dirs[] = {
+					toTarget,
+					toTarget.rotateLeft(),
+					toTarget.rotateRight(),
+					toTarget.rotateLeft().rotateLeft(),
+					toTarget.rotateRight().rotateRight()
+			};
+			return dirs;
+		}
+		public boolean tryMoveTo(MapLocation loc) throws GameActionException {
+			for (Direction dir : getDirectionsTowards(loc)) {
+				if (tryMove(dir)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		/**
+		 * Senses the closest enemy robot in sensing radius of the robot.
+		 * @return closest enemy within sensing range
+		 */
+		public RobotInfo getNearestNearByEnemy() {
+			double closestDistance = Double.MAX_VALUE-1;
+			double distanceToEnemy;
+			RobotInfo closestEnemy = null;
+			for ( RobotInfo ri : getNearbyEnemies() ) {
+				distanceToEnemy = rc.getLocation().distanceSquaredTo(ri.location);
+				if (closestDistance >  distanceToEnemy ) {
+					closestDistance = distanceToEnemy;
+					closestEnemy = ri;
+				}
+			}
+			return closestEnemy;
 		}
 	}
 
