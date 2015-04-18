@@ -20,7 +20,6 @@ public class Tower extends BaseBot {
 		rc.setIndicatorString(1, underAttack + "");
 		prevHealth = rc.getHealth();
 		
-		System.out.println("Tower ID:"+rc.getID()+": isSupplyLow: "+isSupplyLow);
 		isSupplyLow = addToQueue(isSupplyLow);
 		
 		rc.yield();

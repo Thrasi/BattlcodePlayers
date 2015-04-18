@@ -22,7 +22,6 @@ public class Supplier extends BaseBot {
         int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART);
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
         
-        System.out.println("SUPPLIER, qStart: "+queueStart+", qEnd: "+queueEnd);
         if (rc.isCoreReady()) {
             if (queueStart != queueEnd && rc.getSupplyLevel() > 1000) {
                 RobotInfo[] allies = getAllAllies();
