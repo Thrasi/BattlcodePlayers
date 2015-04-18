@@ -2,3 +2,17 @@
 we need an estimation of when a unit is as good as dead.
 
 * Try to reconstruct the whole map using scouts
+
+* Each robot will change its own broadcast for count
+
+* Roaming drones
+
+* Attack undefended towers
+* Attack and go back
+
+* Drones to defend the towers
+
+* Drones explore queue
+* Bug Nav
+
+* Dying unity supplies transfer

@@ -1,8 +1,8 @@
 package T102;
 
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
@@ -16,6 +16,11 @@ public class Drone extends BaseBot {
 	// are tags for drones and each tag means that the drone will explore
 	// some part of the map
 	private int explore = -1;
+	
+	private int scout = 0;
+	private int supply = -1;
+	
+	private boolean visitedHQ = false;
 	
 	
 	/**
@@ -45,6 +50,14 @@ public class Drone extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		if (explore != -1) {		// Drone is exploring one
+			if (!visitedHQ) {
+				while (rc.getLocation().distanceSquaredTo(myHQ) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+					tryMoveTo(myHQ);
+					rc.yield();
+				}
+				rc.yield();
+				visitedHQ = true;
+			}
 			
 			// Before exploring the whole map, these functions are called
 			// and they are used to decide some parameters such as map size
@@ -70,26 +83,35 @@ public class Drone extends BaseBot {
 						rc.readBroadcast(RobotPlayer.expOFFSET1),
 						rc.readBroadcast(RobotPlayer.expOFFSET2)
 				);
+				rc.broadcast(RobotPlayer.expDRONE1DONE, 1);
 			} else if (explore == 2) {
 				exploreAll(
 						rc.readBroadcast(RobotPlayer.expOFFSET2),
 						rc.readBroadcast(RobotPlayer.expOFFSET3)
 				);
+				rc.broadcast(RobotPlayer.expDRONE2DONE, 1);
 			} else if (explore == 3) {
 				exploreAll(
 						rc.readBroadcast(RobotPlayer.expOFFSET3),
 						rc.readBroadcast(RobotPlayer.expOFFSET4)
 				);
+				rc.broadcast(RobotPlayer.expDRONE3DONE, 1);
 			} else if (explore == 4) {
 				exploreAll(
 						rc.readBroadcast(RobotPlayer.expOFFSET4),
 						RobotPlayer.expLOCFIRST + rc.readBroadcast(RobotPlayer.expLOCCOUNT) * 2
 				);
+				rc.broadcast(RobotPlayer.expDRONE4DONE, 1);
 			}
 			
 			// Disable exploring role, this drone will continue to do whatever its
 			// role is to do afterwards
+			supply = explore;	// Become supplier
 			explore = -1;
+		}
+		
+		if (supply != -1) {
+			
 		}
 		
 		rc.yield();
@@ -149,6 +171,7 @@ public class Drone extends BaseBot {
 			if (rc.getLocation().distanceSquaredTo(loc) < EXPLORE_DIST) {
 				return;
 			}
+			trySupplyTower();
 			tryMoveTo(loc);
 			rc.yield();
 		}
@@ -183,7 +206,20 @@ public class Drone extends BaseBot {
 					return l;
 				}
 			}
-			tryMoveTo(loc);
+			if (!rc.canMove(rc.getLocation().directionTo(loc))) {
+				//rc.setIndicatorString(0, bugPlanning(loc).toString());
+				
+			}
+			if (!tryMoveTo(loc)) {
+				rc.setIndicatorString(2, "nisam uspio");
+				Direction[] ds = bugPlanning(loc);
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < ds.length; i++) {
+					sb.append(" " + ds[i]);
+				}
+				rc.setIndicatorString(0, ds.length + "");
+				rc.setIndicatorString(1, sb.toString());
+			}
 			rc.yield();
 		}
 	}
