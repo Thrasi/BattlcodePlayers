@@ -512,6 +512,25 @@ public class BaseBot {
 
 
 	// MORE COMPLEX ACTIONS
+	
+	public static void moveAway() throws GameActionException {
+		RobotInfo[] enemies = getNearbyEnemies();
+		if (enemies.length == 0) {
+			return;
+		}
+		
+		int minDist = Integer.MAX_VALUE;
+		MapLocation loc = null;
+		for (RobotInfo ri : enemies) {
+			int dist = rc.getLocation().distanceSquaredTo(ri.location);
+			if (dist < minDist) {
+				minDist = dist;
+				loc = ri.location;
+			}
+		}
+		tryMove(loc.directionTo(rc.getLocation()));
+		//rc.yield();
+	}
 
 	/**
 	 * Attack enemy with least health if there is one

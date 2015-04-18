@@ -92,6 +92,7 @@ public class Drone extends BaseBot {
 			explore = -1;
 		}
 		
+		moveAway();
 		if (supply != -1) {
 			
 		}

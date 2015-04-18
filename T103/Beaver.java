@@ -100,6 +100,9 @@ public class Beaver extends BaseBot {
 			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
 		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < 10) {
+			if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
+				continue;
+			}
 			Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
 			if (dirBuilt != null) {
 				MapLocation newBuild = rc.getLocation().add(dirBuilt);

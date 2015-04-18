@@ -12,9 +12,12 @@ public class Soldier extends BaseBot {
 	private static boolean firstWave = false;
 	private static boolean secondWave = false;
 	private static boolean thirdWave = false;
+	
+	private static int swarmIdx = -1;
 
-	public Soldier(RobotController rc) {
+	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
+		swarmIdx = rc.readBroadcast(Channels.SWARMIDXSOLDIER);
 		if (Clock.getRoundNum() > 1200) {
 			thirdWave = true;
 		} else if (Clock.getRoundNum() > 600) {
@@ -29,7 +32,7 @@ public class Soldier extends BaseBot {
 		tryShootWeakest();
 		
 		
-		
+		/*
 		if (firstWave && Clock.getRoundNum() > 600) {
 			MapLocation[] otherTowers = rc.senseEnemyTowerLocations();
 			if (otherTowers.length > 0) {
@@ -56,6 +59,7 @@ public class Soldier extends BaseBot {
 				tryMoveTo(theirHQ);
 			}
 		}
+		*/
 		
 		/*
 		MapLocation[] myTowers = rc.senseTowerLocations();
@@ -69,10 +73,10 @@ public class Soldier extends BaseBot {
 			tryMoveTo(myHQ.add(dir, dist));
 		}
 		*/
-		if (isSet(Channels.MAINSWARMRALLY)) {
+		if (isSet(Channels.SWARMSET + swarmIdx)) {
 			tryMoveTo(new MapLocation(
-					rc.readBroadcast(Channels.MAINSWARMRALLYX),
-					rc.readBroadcast(Channels.MAINSWARMRALLYY)
+					rc.readBroadcast(Channels.SWARMFIRSTX + swarmIdx),
+					rc.readBroadcast(Channels.SWARMFIRSTY + swarmIdx)
 			));
 		}
 		rc.yield();
