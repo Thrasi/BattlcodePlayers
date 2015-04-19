@@ -6,17 +6,15 @@ import battlecode.common.RobotType;
 
 public class Barracks extends BaseBot {
 
-	private static int maxTANKFACTORIES;
 	
 	public Barracks(RobotController rc) {
 		super(rc);
-		maxTANKFACTORIES = HQ.maxTANKFACTORIESC[mapClass]; 
 	}
 	
 	@Override
 	public void execute() throws GameActionException {
-		if (rc.readBroadcast(Channels.numTANKFACTORY) < maxTANKFACTORIES) {
-			tryBuild(RobotType.TANKFACTORY);
+		if (rc.readBroadcast(Channels.numBASHERS) < 10) {
+			trySpawn(RobotType.BASHER);
 		} else {
 			trySpawn(RobotType.SOLDIER);
 		}

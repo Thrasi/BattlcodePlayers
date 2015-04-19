@@ -111,7 +111,7 @@ public class BaseBot {
 	 * @return true if spawned, false otherwise
 	 * @throws GameActionException should not be thrown
 	 */
-	protected boolean trySpawn(Direction dir, RobotType type) throws GameActionException {
+	public static boolean trySpawn(Direction dir, RobotType type) throws GameActionException {
 		if (rc.isCoreReady() && rc.canSpawn(dir, type)) {
 			rc.spawn(dir, type);
 			return true;
@@ -446,6 +446,15 @@ public class BaseBot {
 		}
 	}
 	
+	public static boolean isAlive(int id) {
+		try {
+			rc.senseRobot(id);
+			return true;
+		} catch (GameActionException e) {
+			return false;
+		}
+	}
+	
 	/**
 	 * Check whether a location is taken by a robot.
 	 * @param loc location to check
@@ -472,6 +481,23 @@ public class BaseBot {
 
 
 	// MORE COMPLEX ACTIONS
+	
+	public static boolean tryMoveToEnemy() throws GameActionException {
+		RobotInfo[] enemies = rc.senseNearbyRobots(24, theirTeam);
+		int minDist = Integer.MAX_VALUE;
+		MapLocation loc = null;
+		for (RobotInfo ri : enemies) {
+			int dist = rc.getLocation().distanceSquaredTo(ri.location);
+			if (dist < minDist) {
+				minDist = dist;
+				loc = ri.location;
+			}
+		}
+		if (loc == null) {
+			return false;
+		}
+		return tryMoveTo(loc);
+	}
 	
 	public static boolean tryMoveFlood(int idx) throws GameActionException {
 		MapLocation curr = rc.getLocation();
@@ -586,7 +612,6 @@ public class BaseBot {
 	 */
 	public void addToQueue(RobotController rc) throws GameActionException {
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
-        System.out.println("");
         rc.broadcast(queueEnd, rc.getID());
 
         queueEnd++;

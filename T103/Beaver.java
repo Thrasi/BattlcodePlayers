@@ -1,5 +1,6 @@
 package T103;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -11,12 +12,20 @@ public class Beaver extends BaseBot {
 	
 	private static int maxSUPPLYDEPOTS;
 	private static int maxTECH;
+	private static int maxBARRACKS;
+	private static int maxTANKFACTORY;
+	private static int maxHELIPAD;
 
+	private static boolean movedOnce = false;
+	
 	public Beaver(RobotController rc) throws GameActionException {
 		super(rc);
 		
 		maxSUPPLYDEPOTS = HQ.maxSUPPLYDEPOTSC[mapClass];
 		maxTECH = HQ.maxTECHC[mapClass];
+		maxBARRACKS = HQ.maxBARRACKSC[mapClass];
+		maxTANKFACTORY = HQ.maxTANKFACTORIESC[mapClass];
+		maxHELIPAD = HQ.maxHELIPADC[mapClass];
 	}
 	
 	
@@ -46,22 +55,26 @@ public class Beaver extends BaseBot {
 			//System.out.println("end " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 		}*/
 		
+		if (!movedOnce) {
+			movedOnce = tryMove(rc.getLocation().directionTo(myHQ).opposite());
+		}
+		
 		
 		boolean hasBuilt = false;
 		
 		if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
-			hasBuilt = tryBuild(RobotType.MINERFACTORY);
+			hasBuilt = BuildingStrategies.tryBuildTowards(myHQ, RobotType.MINERFACTORY);
 		}
-		else if (rc.readBroadcast(Channels.numHELIPAD) < 1) {
-			//hasBuilt = tryBuild(RobotType.HELIPAD);
+		else if (rc.readBroadcast(Channels.numHELIPAD) < maxHELIPAD) {
+			hasBuilt = tryBuild(RobotType.HELIPAD);
 		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < maxTECH) {
 			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
 		}
-		else if (rc.readBroadcast(Channels.numBARRACKS) < 2) {
-			hasBuilt = tryBuild(RobotType.BARRACKS);
+		else if (rc.readBroadcast(Channels.numBARRACKS) < maxBARRACKS) {
+			hasBuilt = BuildingStrategies.tryBuildTowards(theirHQ, RobotType.BARRACKS);
 		}
-		else if (rc.readBroadcast(Channels.numTANKFACTORY) < 2) {
-			hasBuilt = tryBuild(RobotType.TANKFACTORY);
+		else if (rc.readBroadcast(Channels.numTANKFACTORY) < maxTANKFACTORY) {
+			hasBuilt = BuildingStrategies.tryBuildTowards(theirHQ, RobotType.TANKFACTORY);
 		}
 		
 		// If you don't build anything we want the beaver to move.
@@ -69,7 +82,9 @@ public class Beaver extends BaseBot {
 			boolean didMine = tryMine();
 			if ( !didMine ) {
 				rc.yield();
-				tryMove( getRandomDirection() );
+				if (Clock.getRoundNum() % 5 == 0) {
+					tryMove( getRandomDirection() );
+				}
 			}
 		}
 		

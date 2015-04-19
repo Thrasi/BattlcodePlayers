@@ -11,6 +11,7 @@ import static T103.BaseBot.isOccupied;
 import static T103.BaseBot.isNormal;
 import static T103.BaseBot.directions;
 import static T103.BaseBot.tryBuild;
+import static T103.BaseBot.trySpawn;
 import static T103.BaseBot.theirHQ;
 import static T103.BaseBot.getAllDirectionsTowards;
 
@@ -106,6 +107,27 @@ public class BuildingStrategies {
 			}
 		}
 		return false;
+	}
+	
+	public static boolean trySpawnEmpty(RobotType type) throws GameActionException {
+		MapLocation current = rc.getLocation();
+		int bestScore = Integer.MIN_VALUE;
+		Direction best = null;
+		for (Direction dir : directions) {
+			MapLocation loc = current.add(dir);
+			if (!isNormal(loc) || isOccupied(loc)) {		// Cannot spawn here
+				continue;
+			}
+			int score = emptyScore(loc);
+			if (score > bestScore) {
+				bestScore = score;
+				best = dir;
+			}
+		}
+		if (best == null) {
+			return false;
+		}
+		return trySpawn(best, type);
 	}
 	
 	/**

@@ -21,6 +21,11 @@ public class Supplier extends BaseBot {
 	public void execute() throws GameActionException {
         int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART);
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
+        
+        while (queueStart < queueEnd && !isAlive(rc.readBroadcast(queueStart))) {
+        	queueStart++;
+        }
+        
         if (rc.isCoreReady()) {
             if (queueStart != queueEnd && rc.getSupplyLevel() > 1000) {
                 RobotInfo[] allies = getAllAllies();
@@ -44,6 +49,7 @@ public class Supplier extends BaseBot {
                     }
                 }
             }
+
             if (rc.getSupplyLevel() <= 1000) {
             	boolean moved = tryMoveTo( BaseBot.myHQ );
                 if (!moved) {

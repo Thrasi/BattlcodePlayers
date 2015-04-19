@@ -20,6 +20,7 @@ public class Soldier extends BaseBot {
 	public void execute() throws GameActionException {
 		tryShootMissilesOrWeakest();
 		
+		
 		if (isSet(Channels.SWARMSETFLOOD + swarmIdx)) {
 			tryMoveFlood(rc.readBroadcast(Channels.SWARMFLOODIDX + swarmIdx));
 		} else
