@@ -4,6 +4,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 /**
  * 
@@ -22,7 +23,14 @@ public class Supplier extends BaseBot {
         int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART);
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
         
-        while (queueStart < queueEnd && !isAlive(rc.readBroadcast(queueStart))) {
+        // TODO this wont work when queue end goes overflow
+        while (queueStart != queueEnd
+        		&&
+        		(!isAlive(rc.readBroadcast(queueStart))
+        				||
+        				rc.senseRobot(rc.readBroadcast(queueStart)).supplyLevel > 1000
+        				)
+        		) {
         	queueStart++;
         }
         
@@ -34,10 +42,21 @@ public class Supplier extends BaseBot {
 
                 for (int i=0; i<allies.length; ++i) {
                     if (allies[i].ID == target) {
+                    	double mySupplies = rc.getSupplyLevel();
                         if (rc.getLocation().distanceSquaredTo(allies[i].location) 
-                        		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
-                            rc.transferSupplies(10000, allies[i].location);
-                            rc.broadcast(Channels.SUPPLYQSTART, queueStart+1);
+                        		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED
+                        		&& mySupplies > 500) {
+                        	
+                        	int toTransfer = Math.min(5000, (int) (mySupplies-500));
+//                        	if (allies[i].type == RobotType.TANK) {
+//                        		toTransfer = Math.min(10000, (int) (mySupplies-500));
+//                        	}
+                            rc.transferSupplies(toTransfer, allies[i].location);
+                            queueStart++;
+                            if (queueStart == Channels.SUPPLYQEND) {
+                            	queueStart = Channels.SUPPLYQSTART;
+                            }
+                            rc.broadcast(Channels.SUPPLYQSTART, queueStart);
                         }
                         else {
                             boolean moved = tryMoveTo( allies[i].location );

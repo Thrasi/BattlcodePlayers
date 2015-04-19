@@ -40,13 +40,14 @@ public class Channels {
 				SWARMSETFLOOD = 170,
 				SWARMFLOODIDX = 190,
 				SWARMPRIMARY = 210,
+				SWARMCOUNTTANK = 230,
+				// also drone, soldier, basher
 				
 			// TOWERS
-				TOWERID = 230,
-				TOWERDANGERLEVEL = 236,
-				TOWERUNDERATTACK = 242,
+				TOWERID = 270,
+				TOWERDANGERLEVEL = 276,
+				TOWERUNDERATTACK = 282,
 				
-		
 			// SUPPLY QUEUE:
 				SUPPLIERID = 296, 
 				numSUPPLIERS = 297,
@@ -81,6 +82,12 @@ public class Channels {
 				MAPCORNER2Y = 910,
 				
 				MAPSIZECLASS = 911,
+				
+			// BUILD QUEUE:
+				BUILDQSTART = 6000,
+				BUILDQEND = 6001,
+				BUILDQLO = 6002,
+				BUILDQHI = 6099,
 				
 			// FLOODING
 				FLOODREQUEST = 19000,

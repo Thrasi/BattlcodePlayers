@@ -16,7 +16,7 @@ public class Barracks extends BaseBot {
 		if (rc.readBroadcast(Channels.numBASHERS) < 10) {
 			trySpawn(RobotType.BASHER);
 		} else {
-			trySpawn(RobotType.SOLDIER);
+			//trySpawn(RobotType.SOLDIER);
 		}
 		rc.yield();
 	}

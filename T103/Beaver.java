@@ -15,7 +15,9 @@ public class Beaver extends BaseBot {
 	private static int maxBARRACKS;
 	private static int maxTANKFACTORY;
 	private static int maxHELIPAD;
-
+	private static int maxAERO;
+	private static int maxMINFACT;
+	
 	private static boolean movedOnce = false;
 	
 	public Beaver(RobotController rc) throws GameActionException {
@@ -26,6 +28,8 @@ public class Beaver extends BaseBot {
 		maxBARRACKS = HQ.maxBARRACKSC[mapClass];
 		maxTANKFACTORY = HQ.maxTANKFACTORIESC[mapClass];
 		maxHELIPAD = HQ.maxHELIPADC[mapClass];
+		maxAERO = HQ.maxAEROC[mapClass];
+		maxMINFACT = HQ.maxMINFACTORYC[mapClass];
 	}
 	
 	
@@ -35,25 +39,7 @@ public class Beaver extends BaseBot {
 		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
 			//cornerBeaver();
 		}
-		/*while (true) {
-			//tryPrimitiveMoveTo(theirHQ);
-			System.out.println("start " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
-			Pair<Direction[], Integer> d = Movement.bugPlanning(theirHQ, true);
-			System.out.println("end " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
-//			StringBuilder sb = new StringBuilder();
-//			for (int i = 0; i < d.length; i++) {
-//				sb.append(d[i]).append(" ; ");
-//			}
-//			rc.setIndicatorString(0, d.length + "");
-//			rc.setIndicatorString(1, sb.toString());
-			for (int i = 0; i < d.y;) {
-				if (tryMove(d.x[i])) {
-					i++;
-				}
-				rc.yield();
-			}
-			//System.out.println("end " + Clock.getBytecodeNum() + " " + Clock.getRoundNum());
-		}*/
+		
 		
 		if (!movedOnce) {
 			movedOnce = tryMove(rc.getLocation().directionTo(myHQ).opposite());
@@ -61,20 +47,30 @@ public class Beaver extends BaseBot {
 		
 		
 		boolean hasBuilt = false;
-		
-		if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
-			hasBuilt = BuildingStrategies.tryBuildTowards(myHQ, RobotType.MINERFACTORY);
-		}
-		else if (rc.readBroadcast(Channels.numHELIPAD) < maxHELIPAD) {
+		/*
+		if (rc.readBroadcast(Channels.numMINERFACTORY) < maxMINFACT) {
+			hasBuilt = BuildingStrategies.tryBuildEmpty(RobotType.MINERFACTORY);
+		} else if (rc.readBroadcast(Channels.numHELIPAD) < maxHELIPAD) {
 			hasBuilt = tryBuild(RobotType.HELIPAD);
 		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < maxTECH) {
 			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
-		}
-		else if (rc.readBroadcast(Channels.numBARRACKS) < maxBARRACKS) {
+		} else if (rc.readBroadcast(Channels.numAEROSPACELAB) < maxAERO) {
+			hasBuilt = tryBuild(RobotType.AEROSPACELAB);
+		} else if (rc.readBroadcast(Channels.numBARRACKS) < maxBARRACKS) {
 			hasBuilt = BuildingStrategies.tryBuildTowards(theirHQ, RobotType.BARRACKS);
-		}
-		else if (rc.readBroadcast(Channels.numTANKFACTORY) < maxTANKFACTORY) {
+		} else if (rc.readBroadcast(Channels.numTANKFACTORY) < maxTANKFACTORY) {
 			hasBuilt = BuildingStrategies.tryBuildTowards(theirHQ, RobotType.TANKFACTORY);
+		}
+		*/
+		int queueStart = rc.readBroadcast(Channels.BUILDQSTART);
+		int queueEnd = rc.readBroadcast(Channels.BUILDQEND);
+		if (queueStart < queueEnd) {
+			int typeID = rc.readBroadcast(queueStart);
+			hasBuilt = tryBuild(HQ.TYPES[typeID]);
+			if (hasBuilt) {
+				queueStart++;
+			}
+			rc.broadcast(Channels.BUILDQSTART, queueStart);
 		}
 		
 		// If you don't build anything we want the beaver to move.
@@ -110,7 +106,7 @@ public class Beaver extends BaseBot {
 			tryMoveTo(spot);
 			rc.yield();
 		}
-		while (rc.readBroadcast(Channels.numHELIPAD) < 1) {
+		while (rc.readBroadcast(Channels.numHELIPAD) < maxHELIPAD) {
 			tryBuild(RobotType.HELIPAD);
 			rc.yield();
 		}

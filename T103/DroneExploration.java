@@ -51,9 +51,8 @@ public class DroneExploration {
 			}
 			
 			// Otherwise use bug navigation to move
-			Pair<Direction[], Integer> ds = Movement.bugPlanning(loc, false, 4);
-			int size = ds.y;
-			Direction[] dirs = ds.x;
+			Direction[] dirs = Movement.bugPlanning(loc, false, 4);
+			int size = dirs.length;
 			for (int i = 0; i < size;) {
 				if (tryMove(dirs[i])) {
 					i++;

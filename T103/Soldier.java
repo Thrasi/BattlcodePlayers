@@ -15,6 +15,7 @@ public class Soldier extends BaseBot {
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		swarmIdx = rc.readBroadcast(Channels.SWARMIDXSOLDIER);
+		rc.setIndicatorString(0, swarmIdx+"");
 	}
 
 	@Override
@@ -44,13 +45,13 @@ public class Soldier extends BaseBot {
 						rc.readBroadcast(Channels.SWARMFIRSTX + swarmIdx),
 						rc.readBroadcast(Channels.SWARMFIRSTY + swarmIdx)
 				); 
-				//tryMoveTo();
-				Pair<Direction[], Integer> dir = Movement.bugPlanning(loc, true, 8);
-				if (dir.y > 0) {
-					tryMove(dir.x[0]);
-				} else {
-					tryMoveTo(loc);
-				}
+				tryMoveTo(loc);
+//				Direction[] dir = Movement.bugPlanning(loc, true, 8);
+//				if (dir.length < 0) {
+//					tryMove(dir[0]);
+//				} else {
+//					tryMoveTo(loc);
+//				}
 		}
 		
 		isSupplyLow = addToQueue(isSupplyLow);
