@@ -1,17 +1,61 @@
 package T103;
 
+import java.util.Arrays;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
 import static T103.BaseBot.rc;
+import static T103.BaseBot.tryMove;
 import static T103.BaseBot.isOccupied;
-import static T103.Utility.Pair;
 
 public class Movement {
 
 	// Depth for bug nav search
 	//private static final int DEPTH = 8;
+	
+	private static MapLocation target = null;
+	private static int minDist = Integer.MAX_VALUE;
+	private static MapLocation start = null;
+	
+	public static void setTarget(MapLocation loc) {
+		if (!loc.equals(target)) {
+			target = loc;
+			minDist = Integer.MAX_VALUE;
+			start = rc.getLocation();
+		}
+	}
+	
+	public static boolean tryBugMove() throws GameActionException {
+		MapLocation current = rc.getLocation();
+		Direction desired = current.directionTo(target);
+		rc.setIndicatorString(0, desired+"");
+		MapLocation next = current.add(desired);
+		TerrainTile tile = rc.senseTerrainTile(next);
+		int dist = next.distanceSquaredTo(target);
+		rc.setIndicatorString(1, minDist + " " + dist);
+		if (!isOccupied(next) && isNormalOrUnknown(tile) && dist < minDist) {
+			// On the desired move, exit
+			
+			boolean moved = tryMove(desired);
+			if (moved) {
+				minDist = dist;
+			}
+			return moved;
+		}
+		
+		// Rotate left until you find something useful
+		for (int i = 0; i < 7; i++) {
+			desired = desired.rotateLeft();
+			next = current.add(desired);
+			tile = rc.senseTerrainTile(next);
+			if (isOccupied(next) || !isNormalOrUnknown(tile)) {
+				continue;
+			}
+			return tryMove(desired);
+		}
+		return false;
+	}
 	
 	/**
 	 * Bug search algorithm.
@@ -20,7 +64,7 @@ public class Movement {
 	 * @return pair with an array of moves and number of moves
 	 * @throws GameActionException incorrect locations
 	 */
-	public static Pair<Direction[], Integer> bugPlanning(
+	public static Direction[] bugPlanning(
 			MapLocation target, boolean avoidObst, int depth) throws GameActionException {
 		
 		int d = 0;										// Current depth
@@ -35,7 +79,7 @@ public class Movement {
 			d++;
 			
 			if (current.equals(target)) {
-				return new Pair<>(moves, idx);
+				return Arrays.copyOf(moves, idx);
 			}
 			
 			Direction desired = current.directionTo(target);
@@ -49,7 +93,7 @@ public class Movement {
 				
 				moves[idx] = desired;
 				idx++;
-				return new Pair<>(moves, idx);
+				return Arrays.copyOf(moves, idx);
 			}
 			
 			// Rotate left until you find something useful
@@ -69,7 +113,7 @@ public class Movement {
 				break;
 			}
 		}
-		return new Pair<>(moves, idx);
+		return Arrays.copyOf(moves, idx);
 	}
 	
 	/**

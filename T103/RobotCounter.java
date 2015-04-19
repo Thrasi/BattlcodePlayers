@@ -76,6 +76,16 @@ public class RobotCounter {
 		rc.broadcast(Channels.numTECHNOLOGYINSTITUTE, numTech);
 	}
 	
+	
+//	public static Map<RobotType, Integer> countChannels = new HashMap<>();
+//	static {
+//		int i = 2;
+//		for (RobotType type : RobotType.values()) {
+//			countChannels.put(type, i);
+//			i++;
+//		}
+//	}
+	
 	/**
 	 * !!!! DONT USE THIS. ITS NOT ALIGNED PROPERLY WITH CHANNELS !!!!
 	 * Another function to count robots.

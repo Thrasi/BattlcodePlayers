@@ -11,22 +11,9 @@ package T103;
 
 import battlecode.common.*;
 
-import java.util.*;
-
 public class RobotPlayer {
 	
 	private static RobotController rc;
-	
-	
-	
-	public static Map<RobotType, Integer> countChannels = new HashMap<>();
-	static {
-		int i = 2;
-		for (RobotType type : RobotType.values()) {
-			countChannels.put(type, i);
-			i++;
-		}
-	}
 	
 
 	// MAXIMUM AMOUNT OF UNITS OF A SPECIFIC TYPE:
@@ -60,7 +47,15 @@ public class RobotPlayer {
 				myself = new Computer(rc);
 			} else if (type == RobotType.DRONE) {
 				try {
-					if (rc.getType() == RobotType.DRONE && needsSupplier(rc)) {
+					boolean isAlive = true;
+					try {
+						rc.senseRobot(rc.readBroadcast(Channels.SUPPLIERID));
+					} catch (GameActionException e) {
+						isAlive = false;
+					}
+					if (rc.getType() == RobotType.DRONE
+							&& (needsSupplier(rc) || !isAlive)) {
+						
 						myself = new Supplier(rc);
 						rc.broadcast(Channels.numSUPPLIERS, rc.readBroadcast(Channels.numSUPPLIERS) + 1);
 					    rc.broadcast(Channels.SUPPLIERID, rc.getID());

@@ -50,6 +50,7 @@ public class Miner extends BaseBot {
 				tryMoveTo(oreLoc);
 			}
 		}
+		isSupplyLow = addToQueue(isSupplyLow);
 		rc.yield();
 	}
 

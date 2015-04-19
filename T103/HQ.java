@@ -20,11 +20,15 @@ public class HQ extends BaseBot {
 	
 	public static final int[] maxMINERSC = {15, 15, 20};
 	public static final int[] maxSUPPLYDEPOTSC = {2, 8, 12};
-	public static final int[] maxTECHC = {0, 1, 1};
-	public static final int[] maxEXPLC = {0, 4, 4};
-	public static final int[] maxTANKFACTORIESC = {1, 4, 6};
-	public static final int[] maxBARRACKSC = {5, 4, 6};
-	public static final int[] maxHELIPADC = {1, 1, 1};
+	public static final int[] maxTECHC = {0, 0, 0};
+	public static final int[] maxEXPLC = {0, 0, 0};
+	public static final int[] maxTANKFACTORIESC = {3, 4, 6};
+	public static final int[] maxBARRACKSC = {2, 4, 6};
+	public static final int[] maxHELIPADC = {0, 1, 1};
+	public static final int[] maxAEROC = {0, 0, 0};
+	public static final int[] maxMINFACTORYC = {1, 1, 1};
+	
+	private static final int maxBEAVERS = 3;
 	
 	
 	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();
@@ -35,11 +39,40 @@ public class HQ extends BaseBot {
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(1000, 4000));
 		hqSupplies.put(RobotType.TANK, new Tuple(500, 5000));
 	}
+	
+	public static final RobotType[] TYPES = new RobotType[21];		// 21 unit types
+	static {
+		int i = 0;
+		for (RobotType type : RobotType.values()) {
+			TYPES[i] = type;
+			i++;
+		}
+	}
+	
+	private static final RobotType[] buildQueue = {RobotType.MINERFACTORY,
+		RobotType.HELIPAD, RobotType.BARRACKS, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
+		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT};
 
+	
+	/**
+	 * Constructor!!!!
+	 * @param rc
+	 * @throws GameActionException
+	 */
 	public HQ(RobotController rc) throws GameActionException {
 		super(rc);
 		rc.broadcast(Channels.SUPPLYQSTART, Channels.LOWERSUPPLYBOUND);
 		rc.broadcast(Channels.SUPPLYQEND, Channels.LOWERSUPPLYBOUND);
+		rc.broadcast(Channels.BUILDQSTART, Channels.BUILDQLO);
+		rc.broadcast(Channels.BUILDQEND, Channels.BUILDQLO);
+		
+		for (RobotType type : buildQueue) {
+			addToBuildQueue(type);
+		}
+		
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		MapLocation[] q = new MapLocation[enemyTowers.length+1];
 		for (int i = 0; i < enemyTowers.length; i++) {
@@ -48,7 +81,6 @@ public class HQ extends BaseBot {
 		q[0] = theirHQ;
 		MapInfo.setQueue(q);
 		MapInfo.requestFlood(0);
-		
 		MapLocation[] myTowers = rc.senseTowerLocations();
 		for (int i = 0; i < myTowers.length; i++) {
 			RobotInfo tower = rc.senseRobotAtLocation(myTowers[i]);
@@ -116,13 +148,13 @@ public class HQ extends BaseBot {
 		}
 		*/
 		
-		if (Clock.getRoundNum() < 600) {
+		if (Clock.getRoundNum() < 800) {
 			// Set rally
 			MapLocation[] myTowers = rc.senseTowerLocations();
 //			if (myTowers.length > 0) {
-//				rc.broadcast(Channels.SWARMFIRSTX, myTowers[0].x);
-//				rc.broadcast(Channels.SWARMFIRSTY, myTowers[0].y);
-//				set(Channels.SWARMSET);
+				rc.broadcast(Channels.SWARMFIRSTX, myTowers[0].x);
+				rc.broadcast(Channels.SWARMFIRSTY, myTowers[0].y);
+				set(Channels.SWARMSET);
 //			} else {
 				Direction dir = myHQ.directionTo(theirHQ);
 				int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
@@ -136,6 +168,10 @@ public class HQ extends BaseBot {
 			rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
 			rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
 		}
+		if (MapInfo.isActive(0)) {
+			rc.broadcast(Channels.SWARMFLOODIDX, 0);
+			set(Channels.SWARMSETFLOOD);
+		}
 		
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();
@@ -143,8 +179,7 @@ public class HQ extends BaseBot {
 		
 		
 		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
-		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
-		if (rc.readBroadcast(Channels.numBEAVERS) < 3) {
+		if (rc.readBroadcast(Channels.numBEAVERS) < maxBEAVERS) {
 			BuildingStrategies.trySpawnEmpty(RobotType.BEAVER);//trySpawn(RobotType.BEAVER);
 		}
 		if (rc.readBroadcast(Channels.CORNERBEAVER) == 0 && beaverCount > 0) {

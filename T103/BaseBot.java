@@ -308,6 +308,20 @@ public class BaseBot {
 		}
 		return false;
 	}
+	
+	public static boolean tryPrimitiveMoveTo(Direction dir) throws GameActionException {
+		if (tryMove(dir)) {
+			return true;
+		}
+		if (tryMove(dir.rotateLeft())) {
+			return true;
+		}
+		if (tryMove(dir.rotateRight())) {
+			return true;
+		}
+		return false;
+	}
+	
 
 	/**
 	 * Tries to spawn robot no matter what in any direction.
@@ -517,7 +531,7 @@ public class BaseBot {
 	public static boolean tryMoveFlood(int idx) throws GameActionException {
 		MapLocation curr = rc.getLocation();
 		Direction direction = MapInfo.get(idx, curr.x, curr.y);
-		return tryMove(direction);
+		return tryPrimitiveMoveTo(direction);
 	}
 	
 	public static void tryMoveAway() throws GameActionException {
@@ -571,12 +585,12 @@ public class BaseBot {
 	 * target.
 	 */
 	public boolean tryShootMissilesOrWeakest() throws GameActionException {
-		RobotInfo[] nearbyEnemies = getNearbyEnemies();
+		RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, theirTeam);
 		boolean weaponFired = false;
 		if (nearbyEnemies.length > 0) {
 			
 			// Weakest
-			double minHealth = Integer.MAX_VALUE;
+			double minHealth = Double.MAX_VALUE;
 			RobotInfo weakestRobot = null;
 			
 			// Missile
@@ -638,6 +652,17 @@ public class BaseBot {
             queueEnd = Channels.LOWERSUPPLYBOUND;
         }
         rc.broadcast(Channels.SUPPLYQEND, queueEnd);
+	}
+	
+	public void addToBuildQueue(RobotType type) throws GameActionException {
+		int queueEnd = rc.readBroadcast(Channels.BUILDQEND);
+		rc.broadcast(queueEnd, type.ordinal());
+		
+		queueEnd++;
+		if (queueEnd >= Channels.BUILDQHI) {
+			queueEnd = Channels.BUILDQLO;
+		}
+		rc.broadcast(Channels.BUILDQEND, queueEnd);
 	}
 
 	public void trySupplyTower() throws GameActionException {

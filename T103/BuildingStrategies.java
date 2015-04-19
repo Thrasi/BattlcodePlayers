@@ -136,6 +136,11 @@ public class BuildingStrategies {
 		return false;
 	}
 	
+	/**
+	 * Spawns into a location with most empty spaces around.
+	 * @param type type to spawn
+	 * @return true if spawned, false otherwise
+	 */
 	public static boolean trySpawnEmpty(RobotType type) throws GameActionException {
 		MapLocation current = rc.getLocation();
 		int bestScore = Integer.MIN_VALUE;
@@ -155,6 +160,32 @@ public class BuildingStrategies {
 			return false;
 		}
 		return trySpawn(best, type);
+	}
+	
+	/**
+	 * Builds into a location with most empty spaces around.
+	 * @param type type to build
+	 * @return true if built, false otherwise
+	 */
+	public static boolean tryBuildEmpty(RobotType type) throws GameActionException {
+		MapLocation current = rc.getLocation();
+		int bestScore = Integer.MIN_VALUE;
+		Direction best = null;
+		for (Direction dir : directions) {
+			MapLocation loc = current.add(dir);
+			if (!isNormal(loc) || isOccupied(loc)) {		// Cannot build here
+				continue;
+			}
+			int score = emptyScore(loc);
+			if (score > bestScore) {
+				bestScore = score;
+				best = dir;
+			}
+		}
+		if (best == null) {
+			return false;
+		}
+		return tryBuild(best, type);
 	}
 	
 	/**

@@ -24,14 +24,14 @@ public class Tank extends BaseBot {
 			return;
 		}
 		
-		int primaryID = rc.readBroadcast(Channels.SWARMPRIMARY + swarmIdx);
-		if (primaryID != -1) {
-			try {
-				tryMoveTo(rc.senseRobot(primaryID).location);
-			} catch (GameActionException e) {
-				
-			}
-		}
+//		int primaryID = rc.readBroadcast(Channels.SWARMPRIMARY + swarmIdx);
+//		if (primaryID != -1) {
+//			try {
+//				tryMoveTo(rc.senseRobot(primaryID).location);
+//			} catch (GameActionException e) {
+//				
+//			}
+//		}
 
 		if (Channels.isSet(Channels.SWARMSET + swarmIdx)) {
 			tryMoveTo(new MapLocation(

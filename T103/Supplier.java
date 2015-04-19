@@ -22,7 +22,14 @@ public class Supplier extends BaseBot {
         int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART);
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
         
-        while (queueStart < queueEnd && !isAlive(rc.readBroadcast(queueStart))) {
+        // TODO this wont work when queue end goes overflow
+        while (queueStart < queueEnd
+        		&&
+        		(!isAlive(rc.readBroadcast(queueStart))
+        				||
+        				rc.senseRobot(rc.readBroadcast(queueStart)).supplyLevel > 1000
+        				)
+        		) {
         	queueStart++;
         }
         
@@ -34,9 +41,11 @@ public class Supplier extends BaseBot {
 
                 for (int i=0; i<allies.length; ++i) {
                     if (allies[i].ID == target) {
+                    	double mySupplies = rc.getSupplyLevel();
                         if (rc.getLocation().distanceSquaredTo(allies[i].location) 
-                        		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
-                            rc.transferSupplies(10000, allies[i].location);
+                        		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED
+                        		&& mySupplies > 500) {
+                            rc.transferSupplies(Math.min(5000, (int) (mySupplies-500)), allies[i].location);
                             rc.broadcast(Channels.SUPPLYQSTART, queueStart+1);
                         }
                         else {
