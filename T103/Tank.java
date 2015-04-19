@@ -17,7 +17,11 @@ public class Tank extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
+
 		tryShootMissilesOrWeakest();
+		if ( getEnemiesInAttackingRange().length > 0 ) {
+			return;
+		}
 		tryMoveToEnemy();
 
 		if (Channels.isSet(Channels.SWARMSET + swarmIdx)) {

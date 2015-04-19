@@ -507,10 +507,12 @@ public class BaseBot {
 		int minDist = Integer.MAX_VALUE;
 		MapLocation loc = null;
 		for (RobotInfo ri : enemies) {
-			int dist = rc.getLocation().distanceSquaredTo(ri.location);
-			if (dist < minDist) {
-				minDist = dist;
-				loc = ri.location;
+			if ( ri.type != RobotType.MISSILE) {
+				int dist = rc.getLocation().distanceSquaredTo(ri.location);
+				if (dist < minDist) {
+					minDist = dist;
+					loc = ri.location;
+				}
 			}
 		}
 		if (loc == null) {
@@ -568,60 +570,16 @@ public class BaseBot {
 		rc.attackLocation(toAttack);
 	}
 	
-	public void attackOnSight() throws GameActionException {
-		RobotInfo[] nearbyEnemies = getNearbyEnemies();
-		if (nearbyEnemies.length > 0) {
-			
-			// Weakest
-			double minHealth = Integer.MAX_VALUE;
-			RobotInfo weakestRobot = null;
-			
-			// Missile
-			double minDist = Double.MAX_VALUE;
-			RobotInfo closestMissile = null;
-			
-			// Find weakest robot and closest missile
-			for (RobotInfo info : nearbyEnemies) {
-				if (info.type == RobotType.MISSILE) {
-					if (rc.getLocation().distanceSquaredTo(info.location) 
-							< minDist) {
-						closestMissile = info;
-						minDist = info.health;
-					}
-				}
-				else if (info.health < minHealth) {
-					weakestRobot = info;
-					minHealth = info.health;
-				}
-			}
-			
-			// Shoot!
-			boolean didShoot;
-			if (closestMissile != null) {
-				didShoot = tryAttack(closestMissile.location);
-			}
-			didShoot = tryAttack(weakestRobot.location);
-			
-			// move into range of closest enemy
-			if ( !didShoot ) {
-				RobotInfo nearestEnemy = getNearestNearByEnemy();
-				double dist = nearestEnemy.location.distanceSquaredTo(rc.getLocation());
-				if ( nearestEnemy.type != RobotType.MISSILE 
-						&& dist > rc.getType().attackRadiusSquared ) {
-					
-					tryMoveTo(nearestEnemy.location);
-				}
-			}
-		}
-	}
+	
 
 	/**
 	 * Shoots the weakest enemy in range. Finds all enemies in sensing range and tries to attack the
 	 * one with lowest health.  If there are missiles in range the closest of them becomes a priotity
 	 * target.
 	 */
-	public void tryShootMissilesOrWeakest() throws GameActionException {
+	public boolean tryShootMissilesOrWeakest() throws GameActionException {
 		RobotInfo[] nearbyEnemies = getNearbyEnemies();
+		boolean weaponFired = false;
 		if (nearbyEnemies.length > 0) {
 			
 			// Weakest
@@ -640,16 +598,17 @@ public class BaseBot {
 						minDist = info.health;
 					}
 				}
-				else if (info.health < minHealth) {
+				else if (info.health/info.type.maxHealth < minHealth) {
 					weakestRobot = info;
 					minHealth = info.health;
 				}
 			}
 			if (closestMissile != null) {
-				tryAttack(closestMissile.location);
+				weaponFired = tryAttack(closestMissile.location);
 			}
-			tryAttack(weakestRobot.location);
+			weaponFired = tryAttack(weakestRobot.location);
 		}
+		return weaponFired;
 	}
 	
 	/**
