@@ -48,9 +48,9 @@ public class Supplier extends BaseBot {
                         break;
                     }
                 }
-            }
+            } else {
 
-            if (rc.getSupplyLevel() <= 1000) {
+            //if (rc.getSupplyLevel() <= 1000) {
             	boolean moved = tryMoveTo( BaseBot.myHQ );
                 if (!moved) {
                     // do something? or nothing
