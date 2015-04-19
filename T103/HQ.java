@@ -114,46 +114,85 @@ public class HQ extends BaseBot {
 	boolean printMap = false;
 	int reqFlood = 1;
 	int rCount = 0;
+	static boolean[] tankDone = new boolean[10];
 	
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
 		
-		for (int i = 0; i < 20; i++) {
-			if (Channels.isSet(Channels.SWARMSET+i)) {
-				MapLocation loc = new MapLocation(
-						rc.readBroadcast(Channels.SWARMFIRSTX+i),
-						rc.readBroadcast(Channels.SWARMFIRSTY+i)
-				);
-				int id = findTarget(loc);
-				rc.broadcast(Channels.SWARMPRIMARY+i, id);
-			}
+//		for (int i = 0; i < 20; i++) {
+//			if (Channels.isSet(Channels.SWARMSET+i)) {
+//				MapLocation loc = new MapLocation(
+//						rc.readBroadcast(Channels.SWARMFIRSTX+i),
+//						rc.readBroadcast(Channels.SWARMFIRSTY+i)
+//				);
+//				int id = findTarget(loc);
+//				rc.broadcast(Channels.SWARMPRIMARY+i, id);
+//			}
+//		}
+		
+		int idx = 0;
+		MapLocation[] myTowers = rc.senseTowerLocations();
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+			rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
+			Channels.set(Channels.SWARMSET + idx);
+		} else if (!tankDone[idx]) {
+			tankDone[0] = true;
+			//rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
+			Channels.set(Channels.SWARMSET + idx);
 		}
 		
-		/*
-		if (rc.readBroadcast(Channels.numTANKS) <= 4) {
-			rc.broadcast(Channels.SWARMIDXTANK, 0);
-			//rc.broadcast(Channels.SWARMFIRSTX + 1, myTowers[2].x);
-			//rc.broadcast(Channels.SWARMFIRSTY + 1, myTowers[2].y);
-			Channels.set(Channels.SWARMSET + 0);
-		} else if (rc.readBroadcast(Channels.numTANKS) <= 8) {
-			rc.broadcast(Channels.SWARMIDXTANK, 1);
-			MapLocation[] en = rc.senseEnemyTowerLocations();
-			rc.broadcast(Channels.SWARMFIRSTX + 0, en[0].x);
-			rc.broadcast(Channels.SWARMFIRSTY + 0, en[0].y);
-			Channels.set(Channels.SWARMSET + 1);
-		} else {
-			rc.broadcast(Channels.SWARMIDXTANK, 2);
-			MapLocation[] en = rc.senseEnemyTowerLocations();
-			rc.broadcast(Channels.SWARMFIRSTX + 1, en[0].x);
-			rc.broadcast(Channels.SWARMFIRSTY + 1, en[0].y);
-			Channels.set(Channels.SWARMSET + 2);
+		idx++;
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+			rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
+			Channels.set(Channels.SWARMSET + idx);
+		} else if (!tankDone[idx]) {
+			tankDone[0] = true;
+			//rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
+			Channels.set(Channels.SWARMSET + idx);
 		}
-		*/
+		
+		idx++;
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+			rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
+			Channels.set(Channels.SWARMSET + idx);
+		} else if (!tankDone[idx]) {
+			tankDone[0] = true;
+			//rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
+			Channels.set(Channels.SWARMSET + idx);
+		}
+		
+		idx++;
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+			rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
+			Channels.set(Channels.SWARMSET + idx);
+		} else if (!tankDone[idx]) {
+			tankDone[0] = true;
+			//rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
+			Channels.set(Channels.SWARMSET + idx);
+		}
+		
 		
 		
 		if (Clock.getRoundNum() < 1500) {
 			// Set rally
-			MapLocation[] myTowers = rc.senseTowerLocations();
+			myTowers = rc.senseTowerLocations();
 //			if (myTowers.length > 0) {
 				rc.broadcast(Channels.SWARMFIRSTX, myTowers[0].x);
 				rc.broadcast(Channels.SWARMFIRSTY, myTowers[0].y);
