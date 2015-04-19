@@ -4,6 +4,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 /**
  * 
@@ -23,7 +24,7 @@ public class Supplier extends BaseBot {
         int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
         
         // TODO this wont work when queue end goes overflow
-        while (queueStart < queueEnd
+        while (queueStart != queueEnd
         		&&
         		(!isAlive(rc.readBroadcast(queueStart))
         				||
@@ -45,8 +46,17 @@ public class Supplier extends BaseBot {
                         if (rc.getLocation().distanceSquaredTo(allies[i].location) 
                         		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED
                         		&& mySupplies > 500) {
-                            rc.transferSupplies(Math.min(5000, (int) (mySupplies-500)), allies[i].location);
-                            rc.broadcast(Channels.SUPPLYQSTART, queueStart+1);
+                        	
+                        	int toTransfer = Math.min(5000, (int) (mySupplies-500));
+//                        	if (allies[i].type == RobotType.TANK) {
+//                        		toTransfer = Math.min(10000, (int) (mySupplies-500));
+//                        	}
+                            rc.transferSupplies(toTransfer, allies[i].location);
+                            queueStart++;
+                            if (queueStart == Channels.SUPPLYQEND) {
+                            	queueStart = Channels.SUPPLYQSTART;
+                            }
+                            rc.broadcast(Channels.SUPPLYQSTART, queueStart);
                         }
                         else {
                             boolean moved = tryMoveTo( allies[i].location );
