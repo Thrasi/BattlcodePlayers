@@ -456,20 +456,13 @@ public class BaseBot {
 	}
 	
 	public static int findTarget(MapLocation location) {
-		MapLocation[] locAround = {location.add(Direction.EAST, 4),
-				location.add(Direction.WEST, 4), location.add(Direction.NORTH, 4),
-				location.add(Direction.SOUTH, 4)};
-		
 		double minHealth = Double.MAX_VALUE;
 		int bestID = -1;
-		for (MapLocation loc : locAround) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(loc, 24, theirTeam);
-			for (RobotInfo ri : enemies) {
-				double health = ((double) ri.health) / ri.type.maxHealth;
-				if (health < minHealth) {
-					minHealth = health;
-					bestID = ri.ID;
-				}
+		for (RobotInfo ri : rc.senseNearbyRobots(location, 50, theirTeam)) {
+			double health = ((double) ri.health) / ri.type.maxHealth;
+			if (health < minHealth) {
+				minHealth = health;
+				bestID = ri.ID;
 			}
 		}
 		return bestID;

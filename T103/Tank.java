@@ -20,9 +20,18 @@ public class Tank extends BaseBot {
 
 		tryShootMissilesOrWeakest();
 		if ( getEnemiesInAttackingRange().length > 0 ) {
+			rc.yield();
 			return;
 		}
-		tryMoveToEnemy();
+		
+		int primaryID = rc.readBroadcast(Channels.SWARMPRIMARY + swarmIdx);
+		if (primaryID != -1) {
+			try {
+				tryMoveTo(rc.senseRobot(primaryID).location);
+			} catch (GameActionException e) {
+				
+			}
+		}
 
 		if (Channels.isSet(Channels.SWARMSET + swarmIdx)) {
 			tryMoveTo(new MapLocation(
