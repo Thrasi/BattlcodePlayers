@@ -235,9 +235,5 @@ public class Drone extends BaseBot {
 		rc.broadcast(Channels.TOPLEFTY, tly);
 		rc.broadcast(Channels.MAPSET, 1);
 	}
-	
-	
-
-	
 
 }
