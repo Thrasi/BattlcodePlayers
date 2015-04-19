@@ -33,7 +33,7 @@ public class Beaver extends BaseBot {
 	@Override
 	public void execute() throws GameActionException {
 		if (rc.getID() == rc.readBroadcast(Channels.CORNERBEAVER)) {
-			cornerBeaver();
+			//cornerBeaver();
 		}
 		/*while (true) {
 			//tryPrimitiveMoveTo(theirHQ);
