@@ -550,7 +550,6 @@ public class BaseBot {
 			}
 		}
 		tryMove(loc.directionTo(rc.getLocation()));
-		//rc.yield();
 	}
 	
 	
@@ -677,6 +676,29 @@ public class BaseBot {
 				return;
 			}
 		}
+	}
+	
+	public static MapLocation friendlyTowerInDanger() throws GameActionException {
+		int dangerLevel = 0;
+		int dangerId = -1;
+		for (int i = 0; i < 6; i++) {
+			int id = rc.readBroadcast(Channels.TOWERID+i);
+			if (!isAlive(id)) {
+				continue;
+			}
+			if (Channels.isSet(Channels.TOWERUNDERATTACK+i)) {
+				return rc.senseRobot(id).location;
+			}
+			int dng = rc.readBroadcast(Channels.TOWERDANGERLEVEL+i);
+			if (dng > dangerLevel) {
+				dangerLevel = dng;
+				dangerId = id;
+			}
+		}
+		if (dangerId == -1) {
+			return null;
+		}
+		return rc.senseRobot(dangerId).location;
 	}
 	
 	/**

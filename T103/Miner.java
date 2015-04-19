@@ -41,7 +41,7 @@ public class Miner extends BaseBot {
 			oreLoc = null;
 			tryMine();
 		} else {
-			Pair<MapLocation, Double> data = Mining.closestOrebfs();
+			Pair<MapLocation, Double> data = Mining.closestOre();
 			oreLoc = data.x;
 			minOre = data.y;
 			if (oreLoc == null) {

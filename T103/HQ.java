@@ -20,13 +20,14 @@ public class HQ extends BaseBot {
 	
 	public static final int[] maxMINERSC = {15, 15, 20};
 	public static final int[] maxSUPPLYDEPOTSC = {2, 8, 12};
-	public static final int[] maxTECHC = {0, 0, 0};
+	public static final int[] maxTECHC = {0, 1, 1};
 	public static final int[] maxEXPLC = {0, 0, 0};
 	public static final int[] maxTANKFACTORIESC = {3, 4, 6};
 	public static final int[] maxBARRACKSC = {2, 4, 6};
 	public static final int[] maxHELIPADC = {0, 1, 1};
 	public static final int[] maxAEROC = {0, 0, 0};
 	public static final int[] maxMINFACTORYC = {1, 1, 1};
+	public static final int[] maxDRONES = {1, 4, 6};
 	
 	private static final int maxBEAVERS = 3;
 	
@@ -35,7 +36,7 @@ public class HQ extends BaseBot {
 	static {
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 3000));
-		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 15000));
+		hqSupplies.put(RobotType.DRONE, new Tuple(20000, 25000));
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(1000, 4000));
 		hqSupplies.put(RobotType.TANK, new Tuple(500, 5000));
 	}
@@ -55,6 +56,8 @@ public class HQ extends BaseBot {
 		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
 		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT};
 
 	
@@ -90,10 +93,10 @@ public class HQ extends BaseBot {
 		
 		rc.broadcast(Channels.expDRONECOUNT, maxEXPLC[mapClass]);
 		
-		rc.broadcast(Channels.SWARMIDXTANK, 0);
-		rc.broadcast(Channels.SWARMFIRSTX + 0, myTowers[2].x);
-		rc.broadcast(Channels.SWARMFIRSTY + 0, myTowers[2].y);
-		Channels.set(Channels.SWARMSET + 0);
+//		rc.broadcast(Channels.SWARMIDXTANK, 0);
+//		rc.broadcast(Channels.SWARMFIRSTX + 0, myTowers[2].x);
+//		rc.broadcast(Channels.SWARMFIRSTY + 0, myTowers[2].y);
+//		Channels.set(Channels.SWARMSET + 0);
 	}
 
 
@@ -130,10 +133,36 @@ public class HQ extends BaseBot {
 //			}
 //		}
 		
+		
+		MapLocation towerInDanger = friendlyTowerInDanger();
 		int idx = 0;
 		MapLocation[] myTowers = rc.senseTowerLocations();
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+		rc.setIndicatorString(0, towerInDanger + " " + rc.readBroadcast(Channels.SWARMCOUNTTANK));
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 20) {
+			rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[0].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[0].y);
+			Channels.set(Channels.SWARMSET + idx);
+		} else {
+			Direction dir = myHQ.directionTo(theirHQ);
+			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
+			MapLocation rally = myHQ.add(dir, dist);
+			rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
+			Channels.set(Channels.SWARMSET + idx);
+		}
+		/*if (!tankDone[idx]) {
+			tankDone[0] = true;
+			//rc.broadcast(Channels.SWARMIDXTANK, idx);
+			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
+			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
+			Channels.set(Channels.SWARMSET + idx);
+		}*/
+		/*
+		idx++;
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 12) {
 			rc.broadcast(Channels.SWARMIDXTANK, idx);
 			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
 			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
@@ -147,7 +176,7 @@ public class HQ extends BaseBot {
 		}
 		
 		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 12) {
 			rc.broadcast(Channels.SWARMIDXTANK, idx);
 			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
 			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
@@ -161,7 +190,7 @@ public class HQ extends BaseBot {
 		}
 		
 		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
+		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 12) {
 			rc.broadcast(Channels.SWARMIDXTANK, idx);
 			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
 			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
@@ -173,23 +202,9 @@ public class HQ extends BaseBot {
 			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
 			Channels.set(Channels.SWARMSET + idx);
 		}
+		*/
 		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK) <= 6) {
-			rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, myTowers[2].x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, myTowers[2].y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[0] = true;
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
-			Channels.set(Channels.SWARMSET + idx);
-		}
-		
-		
-		
+		/*
 		if (Clock.getRoundNum() < 1500) {
 			// Set rally
 			myTowers = rc.senseTowerLocations();
@@ -212,6 +227,7 @@ public class HQ extends BaseBot {
 			rc.broadcast(Channels.SWARMFIRSTX+1, theirHQ.x);
 			rc.broadcast(Channels.SWARMFIRSTY+1, theirHQ.y);
 		}
+		*/
 		if (MapInfo.isActive(0)) {
 			rc.broadcast(Channels.SWARMFLOODIDX, 0);
 			set(Channels.SWARMSETFLOOD);
@@ -241,6 +257,9 @@ public class HQ extends BaseBot {
 			}
 		}
 		
+		
+		
+		//Channels.reset(Channels.SWARMCOUNTTANK);
 		//transferToSupplier();
 		
 		rc.yield();

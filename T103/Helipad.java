@@ -8,14 +8,17 @@ public class Helipad extends BaseBot {
 
 	private static int EXPLCOUNT;
 	
+	private static int maxDRONE;
+	
 	public Helipad(RobotController rc) {
 		super(rc);
 		EXPLCOUNT = HQ.maxEXPLC[mapClass];
+		maxDRONE = HQ.maxDRONES[mapClass];
 	}
 
 	@Override
 	public void execute() throws GameActionException {
-		if (rc.readBroadcast(Channels.numDRONE) < EXPLCOUNT + 1) { 	// +1 for supplier
+		if (rc.readBroadcast(Channels.numDRONE) < EXPLCOUNT + maxDRONE) {
 			trySpawn(RobotType.DRONE);
 		}
 		rc.yield();

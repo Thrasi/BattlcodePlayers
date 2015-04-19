@@ -6,7 +6,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
-
+import battlecode.common.TerrainTile;
 import static T103.MapInfo.isHorizontalSym;
 import static T103.MapInfo.isRotationSym;
 import static T103.MapInfo.isVerticalSym;
@@ -39,7 +39,8 @@ public class Drone extends BaseBot {
 		
 		int count = HQ.maxEXPLC[mapClass];
 		for (int i = 0; i < count; i++) {
-			if (rc.readBroadcast(Channels.expDRONE + i) == 0) {
+			int prevId = rc.readBroadcast(Channels.expDRONE + i);
+			if (prevId == 0 || !isAlive(prevId)) {
 				rc.broadcast(Channels.expDRONE + i, rc.getID());
 				explore = i+1;
 				break;
@@ -189,7 +190,8 @@ public class Drone extends BaseBot {
 	 */
 	private void explore(MapLocation loc) throws GameActionException {
 		while (true) {
-			if (rc.getLocation().distanceSquaredTo(loc) < EXPLORE_DIST) {
+			if (rc.getLocation().distanceSquaredTo(loc) < EXPLORE_DIST
+					|| rc.senseTerrainTile(loc) != TerrainTile.UNKNOWN) {
 				return;
 			}
 			trySupplyTower();
@@ -214,6 +216,9 @@ public class Drone extends BaseBot {
 	 * @throws GameActionException
 	 */
 	public void exploreRotational() throws GameActionException {
+		if (Channels.isSet(Channels.MAPSET)) {
+			return;
+		}
 		Direction dir = myHQ.directionTo(theirHQ).opposite();
 		
 		// Calculating parameters (size and top left corner)

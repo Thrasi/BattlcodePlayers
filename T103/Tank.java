@@ -18,6 +18,7 @@ public class Tank extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
+		
 
 		tryShootMissilesOrWeakest();
 		if ( getEnemiesInAttackingRange().length > 0 ) {
@@ -35,10 +36,11 @@ public class Tank extends BaseBot {
 //		}
 
 		if (Channels.isSet(Channels.SWARMSET + swarmIdx)) {
-			tryMoveTo(new MapLocation(
+			MapLocation loc = new MapLocation(
 					rc.readBroadcast(Channels.SWARMFIRSTX + swarmIdx),
 					rc.readBroadcast(Channels.SWARMFIRSTY + swarmIdx)
-			));
+			);
+			tryMoveTo(loc);
 		}
 		
 		isSupplyLow = addToQueue(isSupplyLow);
