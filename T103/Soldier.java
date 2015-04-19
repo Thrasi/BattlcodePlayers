@@ -38,6 +38,10 @@ public class Soldier extends BaseBot {
 		
 		isSupplyLow = addToQueue(isSupplyLow);
 		
+	}
+	
+	@Override
+	public void endOfTurn() {
 		rc.yield();
 	}
 
