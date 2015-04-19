@@ -18,7 +18,7 @@ import static T103.Channels.set;
 
 public class HQ extends BaseBot {
 	
-	public static final int[] maxMINERSC = {15, 15, 20};
+	public static final int[] maxMINERSC = {15, 15, 25};
 	public static final int[] maxSUPPLYDEPOTSC = {2, 8, 12};
 	public static final int[] maxTECHC = {0, 1, 1};
 	public static final int[] maxEXPLC = {0, 0, 0};
@@ -56,6 +56,8 @@ public class HQ extends BaseBot {
 		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
 		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT};

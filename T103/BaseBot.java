@@ -746,7 +746,7 @@ public class BaseBot {
 	private boolean isInSupplyChain(RobotType type) {
 		return (!type.isBuilding
 					&& type != RobotType.DRONE
-					&& type != RobotType.MINER
+					//&& type != RobotType.MINER
 					&& healthPercent() > 0.2)
 				|| type == RobotType.TOWER;
 	}

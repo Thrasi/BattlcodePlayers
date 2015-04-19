@@ -28,6 +28,7 @@ public class Supplier extends BaseBot {
 	        int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART);
 	        int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
 	        
+	        rc.setIndicatorString(0, queueStart + " " + queueEnd);
 	        // TODO this wont work when queue end goes overflow
 	        while (queueStart != queueEnd
 	        		&&
@@ -37,7 +38,11 @@ public class Supplier extends BaseBot {
 	        				)
 	        		) {
 	        	queueStart++;
+	        	 if (queueStart == Channels.UPPERSUPPLYBOUND) {
+                	queueStart = Channels.LOWERSUPPLYBOUND;
+                }
 	        }
+	        rc.setIndicatorString(1, queueStart + " " + queueEnd);
 	        
 	        if (queueStart != queueEnd && rc.getSupplyLevel() > 1000) {
 	            
@@ -66,8 +71,8 @@ public class Supplier extends BaseBot {
 	            }
 	            
 	            queueStart++;
-                if (queueStart == Channels.SUPPLYQEND) {
-                	queueStart = Channels.SUPPLYQSTART;
+                if (queueStart == Channels.UPPERSUPPLYBOUND) {
+                	queueStart = Channels.LOWERSUPPLYBOUND;
                 }
                 rc.broadcast(Channels.SUPPLYQSTART, queueStart);
 	        }
