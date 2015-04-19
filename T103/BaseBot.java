@@ -543,7 +543,7 @@ public class BaseBot {
 						minDist = info.health;
 					}
 				}
-				else if (info.health < minHealth) {
+				else if (info.health/info.type.maxHealth < minHealth) {
 					weakestRobot = info;
 					minHealth = info.health;
 				}
@@ -562,7 +562,7 @@ public class BaseBot {
 				double dist = nearestEnemy.location.distanceSquaredTo(rc.getLocation());
 				if ( nearestEnemy.type != RobotType.MISSILE 
 						&& dist > rc.getType().attackRadiusSquared ) {
-					
+					System.out.println("move into range");
 					tryMoveTo(nearestEnemy.location);
 				}
 			}
@@ -574,8 +574,9 @@ public class BaseBot {
 	 * one with lowest health.  If there are missiles in range the closest of them becomes a priotity
 	 * target.
 	 */
-	public void tryShootMissilesOrWeakest() throws GameActionException {
+	public boolean tryShootMissilesOrWeakest() throws GameActionException {
 		RobotInfo[] nearbyEnemies = getNearbyEnemies();
+		boolean weaponFired = false;
 		if (nearbyEnemies.length > 0) {
 			
 			// Weakest
@@ -594,16 +595,17 @@ public class BaseBot {
 						minDist = info.health;
 					}
 				}
-				else if (info.health < minHealth) {
+				else if (info.health/info.type.maxHealth < minHealth) {
 					weakestRobot = info;
 					minHealth = info.health;
 				}
 			}
 			if (closestMissile != null) {
-				tryAttack(closestMissile.location);
+				weaponFired = tryAttack(closestMissile.location);
 			}
-			tryAttack(weakestRobot.location);
+			weaponFired = tryAttack(weakestRobot.location);
 		}
+		return weaponFired;
 	}
 	
 	/**

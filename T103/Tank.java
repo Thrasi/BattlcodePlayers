@@ -25,7 +25,11 @@ public class Tank extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
-		tryShootMissilesOrWeakest();
+		boolean weaponFired = tryShootMissilesOrWeakest();
+		
+		if ( getEnemiesInAttackingRange().length > 0) {
+			return;
+		}
 		
 		if (firstWave && Clock.getRoundNum() > 600) {
 			MapLocation[] otherTowers = rc.senseEnemyTowerLocations();
