@@ -455,6 +455,19 @@ public class BaseBot {
 		}
 	}
 	
+	public static int findTarget(MapLocation location) {
+		double minHealth = Double.MAX_VALUE;
+		int bestID = -1;
+		for (RobotInfo ri : rc.senseNearbyRobots(location, 50, theirTeam)) {
+			double health = ((double) ri.health) / ri.type.maxHealth;
+			if (health < minHealth) {
+				minHealth = health;
+				bestID = ri.ID;
+			}
+		}
+		return bestID;
+	}
+	
 	/**
 	 * Check whether a location is taken by a robot.
 	 * @param loc location to check
@@ -653,7 +666,7 @@ public class BaseBot {
 	 * robots have the same amount of supplies.
 	 */
 	public void transferSuppliesTolowest() throws GameActionException {
-		if (Clock.getRoundNum() % 10 != 0 || !isInSupplyChain(rc.getType())) {
+		if (Clock.getRoundNum() % 3 != 0 || !isInSupplyChain(rc.getType())) {
 			return;
 		}
 
@@ -668,6 +681,9 @@ public class BaseBot {
 				transferAmount = (rc.getSupplyLevel() - lowestSupply) / 2;
 				supplyTarget = ri.location;
 			}
+			if (healthPercent() < 0.2) {
+				transferAmount = rc.getSupplyLevel() * 0.9;
+			}
 		}
 
 		if (supplyTarget != null) {
@@ -675,9 +691,17 @@ public class BaseBot {
 			rc.transferSupplies((int) transferAmount, supplyTarget);
 		}
 	}
+	
+	public static double healthPercent() {
+		return rc.getHealth() / rc.getType().maxHealth;
+	}
 
 	private boolean isInSupplyChain(RobotType type) {
-		return (!type.isBuilding && type != RobotType.DRONE && type != RobotType.MINER) || type == RobotType.TOWER;
+		return (!type.isBuilding
+					&& type != RobotType.DRONE
+					&& type != RobotType.MINER
+					&& healthPercent() > 0.2)
+				|| type == RobotType.TOWER;
 	}
 
 }

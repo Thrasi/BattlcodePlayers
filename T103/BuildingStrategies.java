@@ -58,6 +58,33 @@ public class BuildingStrategies {
 		}
 		return best;
 	}
+	
+	/**
+	 * Finds good open spot for building.
+	 * @return location
+	 */
+	public static MapLocation openSpotForBuilding() {
+		MapLocation current = rc.getLocation();
+		MapLocation[] potLoc =
+				MapLocation.getAllMapLocationsWithinRadiusSq(current, SENSERANGE);
+
+		int bestScore = emptyScore(current);
+		MapLocation best = current;
+		for (MapLocation l : potLoc) {
+			if (!isNormal(l) || isOccupied(l)) {
+				continue;
+			}
+			int s = emptyScore(l);
+			if (s < 2) {				// Otherwise I will close myself in
+				continue;
+			}
+			if (s > bestScore) {
+				bestScore = s;
+				best = l;
+			}
+		}
+		return best;
+	}
 
 	/**
 	 * Tries to build the building in the safest possible spot around builder's location.
