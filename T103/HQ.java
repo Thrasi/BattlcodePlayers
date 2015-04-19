@@ -84,6 +84,17 @@ public class HQ extends BaseBot {
 	
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
+		
+		for (int i = 0; i < 20; i++) {
+			if (Channels.isSet(Channels.SWARMSET+i)) {
+				MapLocation loc = new MapLocation(
+						rc.readBroadcast(Channels.SWARMFIRSTX+i),
+						rc.readBroadcast(Channels.SWARMFIRSTY+i)
+				);
+				int id = findTarget(loc);
+				rc.broadcast(Channels.SWARMPRIMARY+i, id);
+			}
+		}
 		/*
 		if (rc.readBroadcast(Channels.numTANKS) <= 4) {
 			rc.broadcast(Channels.SWARMIDXTANK, 0);
@@ -126,83 +137,10 @@ public class HQ extends BaseBot {
 			rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
 		}
 		
-		/*else if (Clock.getRoundNum() > 600 && Clock.getRoundNum() < 1200) {
-			// Set rally
-			rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
-			rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
-			
-			rc.broadcast(Channels.SWARMIDXSOLDIER, 1);
-			MapLocation[] myTowers = rc.senseTowerLocations();
-			if (myTowers.length > 0) {
-				rc.broadcast(Channels.SWARMFIRSTX+1, myTowers[1].x);
-				rc.broadcast(Channels.SWARMFIRSTY+1, myTowers[1].y);
-				set(Channels.SWARMSET+1);
-			} else {
-				Direction dir = myHQ.directionTo(theirHQ);
-				int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 3);
-				
-				MapLocation rally = myHQ.add(dir, dist);
-				rc.broadcast(Channels.SWARMFIRSTX+1, rally.x);
-				rc.broadcast(Channels.SWARMFIRSTY+1, rally.y);
-				set(Channels.SWARMSET+1);
-			}
-		} else {
-			//rc.broadcast(Channels.SWARMFLOODIDX+1, 0);
-			//set(Channels.SWARMSETFLOOD + 1);
-		}*/
-		
-
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();
 		}
-//		if (isSet(Channels.expSTARTED)) {
-//			MapInfo.markExploreLocations();
-//		}
 		
-//		if (printMap && isSet(Channels.MAPBROADCASTED)) {
-//			printMap = false;
-//			System.out.println("entered here");
-//			MapInfo.printMap();
-//		}
-		
-/*		
-		if (reqFlood == 1 && !isSet(Channels.FLOODREQUEST)) {
-			MapInfo.requestFlood(0);
-			reqFlood = 2;
-			rCount = 0;
-		} else if (reqFlood == 2 && !isSet(Channels.FLOODREQUEST)) {
-			MapInfo.requestFlood(1);
-			reqFlood = 3;
-			rCount = 0;
-		} else if (reqFlood == 3 && !isSet(Channels.FLOODREQUEST)) {
-			MapInfo.requestFlood(3);
-			reqFlood = 4;
-		} else if (reqFlood == 4 && !isSet(Channels.FLOODREQUEST)) {
-			MapInfo.requestFlood(3);
-			reqFlood = 5;
-		} else if (reqFlood == 5 && !isSet(Channels.FLOODREQUEST)) {
-			MapInfo.requestFlood(1);
-			reqFlood = 6;
-		} else if (reqFlood == 6 && !isSet(Channels.FLOODREQUEST)) {
-			MapInfo.requestFlood(2);
-			reqFlood = 6;
-		}
-		*/
-/*	
-		if (MapInfo.isActive(0)) {
-			MapInfo.markFloodFromChannels(0);
-		}
-	
-		if (MapInfo.isActive(0)) {
-			MapInfo.markFloodFromChannels(0);
-		}
-		if (MapInfo.isActive(1)) {
-			MapInfo.markFloodFromChannels(1);
-		}
-		if (MapInfo.isActive(3)) {
-			MapInfo.markFloodFromChannels(3);
-		}
-	*/	
 		
 		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
 		//if (rc.readBroadcast(RobotType.BEAVER.ordinal()) < 3) {
