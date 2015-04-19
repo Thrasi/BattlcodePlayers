@@ -18,7 +18,8 @@ public class Soldier extends BaseBot {
 
 	@Override
 	public void execute() throws GameActionException {
-		tryShootMissilesOrWeakest();
+		attackOnSight();
+		//tryShootMissilesOrWeakest();
 		
 		
 		if (isSet(Channels.SWARMSETFLOOD + swarmIdx)) {
