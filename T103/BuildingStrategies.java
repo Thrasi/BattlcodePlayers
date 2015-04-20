@@ -13,6 +13,7 @@ import static T103.BaseBot.directions;
 import static T103.BaseBot.tryBuild;
 import static T103.BaseBot.trySpawn;
 import static T103.BaseBot.theirHQ;
+import static T103.BaseBot.myHQ;
 import static T103.BaseBot.getAllDirectionsTowards;
 
 
@@ -78,6 +79,8 @@ public class BuildingStrategies {
 			if (s < 2) {				// Otherwise I will close myself in
 				continue;
 			}
+			s *= s;
+			//s -= l.distanceSquaredTo(myHQ);
 			if (s > bestScore) {
 				bestScore = s;
 				best = l;
@@ -211,7 +214,7 @@ public class BuildingStrategies {
 	 * @param loc location to score
 	 * @return empty score
 	 */
-	private static int emptyScore(MapLocation loc) {
+	public static int emptyScore(MapLocation loc) {
 		int score = 0;
 		for (Direction d : directions) {
 			MapLocation a = loc.add(d);

@@ -44,6 +44,11 @@ public class Beaver extends BaseBot {
 		if (!movedOnce) {
 			movedOnce = tryMove(rc.getLocation().directionTo(myHQ).opposite());
 		}
+		// TODO is this a good strategy?
+					if (BuildingStrategies.emptyScore(rc.getLocation()) < 7) {
+						tryMoveTo(BuildingStrategies.openSpotForBuilding());
+						//rc.yield();
+					}
 		
 		
 		boolean hasBuilt = false;
@@ -66,7 +71,7 @@ public class Beaver extends BaseBot {
 		int queueEnd = rc.readBroadcast(Channels.BUILDQEND);
 		if (queueStart < queueEnd) {
 			int typeID = rc.readBroadcast(queueStart);
-			hasBuilt = tryBuild(HQ.TYPES[typeID]);
+			hasBuilt = BuildingStrategies.tryBuildEmpty(HQ.TYPES[typeID]);//tryBuild(HQ.TYPES[typeID]);
 			if (hasBuilt) {
 				queueStart++;
 			}
@@ -75,13 +80,15 @@ public class Beaver extends BaseBot {
 		
 		// If you don't build anything we want the beaver to move.
 		if ( !hasBuilt ) {
-			boolean didMine = tryMine();
-			if ( !didMine ) {
-				rc.yield();
-				if (Clock.getRoundNum() % 5 == 0) {
-					tryMove( getRandomDirection() );
-				}
-			}
+//			boolean didMine = tryMine();
+//			if ( !didMine ) {
+//				rc.yield();
+//				if (Clock.getRoundNum() % 5 == 0) {
+//					tryMove( getRandomDirection() );
+//				}
+//			}
+			
+			
 		}
 		
 		rc.yield();

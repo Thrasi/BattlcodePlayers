@@ -460,6 +460,21 @@ public class BaseBot {
 		}
 	}
 	
+	public static MapLocation closestEnemyStructure() {
+		MapLocation current = rc.getLocation();
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		int minDist = current.distanceSquaredTo(theirHQ);
+		MapLocation best = theirHQ;
+		for (MapLocation tower : enemyTowers) {
+			int dist = current.distanceSquaredTo(tower);
+			if (dist < minDist) {
+				minDist = dist;
+				best = tower;
+			}
+		}
+		return best;
+	}
+	
 	public static boolean isAlive(int id) {
 		try {
 			rc.senseRobot(id);

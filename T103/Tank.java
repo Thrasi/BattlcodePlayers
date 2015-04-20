@@ -13,7 +13,7 @@ public class Tank extends BaseBot {
 	public Tank(RobotController rc) throws GameActionException {
 		super(rc);
 		swarmIdx = rc.readBroadcast(Channels.SWARMIDXTANK);
-		rc.broadcast(Channels.SWARMCOUNTTANK, rc.readBroadcast(Channels.SWARMCOUNTTANK)+1);
+		rc.broadcast(Channels.SWARMCOUNTTANK+swarmIdx, rc.readBroadcast(Channels.SWARMCOUNTTANK+swarmIdx)+1);
 	}
 
 	@Override
