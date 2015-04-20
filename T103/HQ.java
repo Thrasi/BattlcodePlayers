@@ -17,17 +17,8 @@ import static T103.Channels.isSet;
 
 public class HQ extends BaseBot {
 	
-	public static final int[] maxMINERSC = {15, 25, 35};
-	public static final int[] maxSUPPLYDEPOTSC = {2, 8, 12};
-	public static final int[] maxTECHC = {0, 1, 1};
-	public static final int[] maxTANKFACTORIESC = {3, 4, 6};
-	public static final int[] maxBARRACKSC = {2, 4, 6};
-	public static final int[] maxHELIPADC = {0, 1, 1};
-	public static final int[] maxAEROC = {0, 0, 0};
-	public static final int[] maxMINFACTORYC = {1, 1, 1};
-
 	// Drone count
-	public static final int[] maxEXPLC = {0, 4, 4};		// Explore turn into supplier
+	public static final int[] maxEXPLC = {0, 4, 6};		// Explore turn into supplier
 	public static final int[] maxDRONES = {1, 0, 0};	// Supplier
 	
 	private static final int maxBEAVERS = 3;
@@ -37,7 +28,7 @@ public class HQ extends BaseBot {
 	static {
 		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 3000));
-		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 15000));
+		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 20000));
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(1000, 4000));
 		hqSupplies.put(RobotType.TANK, new Tuple(500, 5000));
 	}
@@ -52,14 +43,19 @@ public class HQ extends BaseBot {
 	}
 	
 	private static final RobotType[] buildQueue = {RobotType.MINERFACTORY,
-		RobotType.HELIPAD, RobotType.BARRACKS, RobotType.TANKFACTORY,
+		RobotType.HELIPAD,  
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
+		RobotType.BARRACKS,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
 		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,RobotType.TANKFACTORY,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,RobotType.TANKFACTORY };
 
@@ -137,6 +133,9 @@ public class HQ extends BaseBot {
 		
 		int ss = 30;		// Swarm size
 		for (int idx = 0; idx < 15; idx++) {
+//			if (idx == 0) {
+//				ss = 40;
+//			}
 			if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss) {
 				Direction dir = myHQ.directionTo(theirHQ);
 				int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);

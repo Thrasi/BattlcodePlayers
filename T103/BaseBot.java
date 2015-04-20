@@ -737,7 +737,7 @@ public class BaseBot {
 
 		RobotInfo[] nearbyAllies = getAlliesInRange(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED);
 
-		double lowestSupply = Integer.MAX_VALUE;//rc.getSupplyLevel();
+		double lowestSupply = Integer.MAX_VALUE;		//rc.getSupplyLevel();
 		double transferAmount = 0;
 		MapLocation supplyTarget = null;
 		for (RobotInfo ri : nearbyAllies) {

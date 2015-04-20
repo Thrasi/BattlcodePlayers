@@ -17,26 +17,11 @@ import battlecode.common.TerrainTile;
 public class Beaver extends BaseBot {
 	
 	
-	private static int maxSUPPLYDEPOTS;
-	private static int maxTECH;
-	private static int maxBARRACKS;
-	private static int maxTANKFACTORY;
-	private static int maxHELIPAD;
-	private static int maxAERO;
-	private static int maxMINFACT;
-	
 	private static boolean movedOnce = false;
 	
 	public Beaver(RobotController rc) throws GameActionException {
 		super(rc);
 		
-		maxSUPPLYDEPOTS = HQ.maxSUPPLYDEPOTSC[mapClass];
-		maxTECH = HQ.maxTECHC[mapClass];
-		maxBARRACKS = HQ.maxBARRACKSC[mapClass];
-		maxTANKFACTORY = HQ.maxTANKFACTORIESC[mapClass];
-		maxHELIPAD = HQ.maxHELIPADC[mapClass];
-		maxAERO = HQ.maxAEROC[mapClass];
-		maxMINFACT = HQ.maxMINFACTORYC[mapClass];
 	}
 	
 	
@@ -217,7 +202,7 @@ public class Beaver extends BaseBot {
 	}
 
 
-
+/*
 	private void cornerBeaver() throws GameActionException {
 		/*int xc = (myHQ.x + theirHQ.x) / 2;
 		int yc = (myHQ.y + theirHQ.y) / 2;
@@ -226,6 +211,7 @@ public class Beaver extends BaseBot {
 			tryMoveTo(endPoint);
 			rc.yield();
 		}*/
+	/*
 		MapLocation spot = BuildingStrategies.safeSpotForBuilding();
 		while (spot == null) {
 			tryMove(getRandomDirection());
@@ -274,5 +260,5 @@ public class Beaver extends BaseBot {
 			rc.yield();
 		}
 	}
-
+*/
 }
