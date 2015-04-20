@@ -749,7 +749,6 @@ public class BaseBot {
 		}
 
 		if (supplyTarget != null) {
-			//System.out.println(rc.getSupplyLevel() + " " + lowestSupply);
 			rc.transferSupplies((int) transferAmount, supplyTarget);
 		}
 	}

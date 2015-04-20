@@ -12,9 +12,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import static T103.Utility.Tuple;
-import static T103.BaseBot.rc;
 import static T103.Channels.isSet;
-import static T103.Channels.set;
 
 
 public class HQ extends BaseBot {
@@ -87,6 +85,7 @@ public class HQ extends BaseBot {
 	 */
 	public HQ(RobotController rc) throws GameActionException {
 		super(rc);
+		
 		rc.broadcast(Channels.SUPPLYQSTART, Channels.LOWERSUPPLYBOUND);
 		rc.broadcast(Channels.SUPPLYQEND, Channels.LOWERSUPPLYBOUND);
 		rc.broadcast(Channels.BUILDQSTART, Channels.BUILDQLO);
@@ -96,12 +95,6 @@ public class HQ extends BaseBot {
 			addToBuildQueue(type);
 		}
 		
-		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-//		MapLocation[] q = new MapLocation[enemyTowers.length+1];
-//		for (int i = 0; i < enemyTowers.length; i++) {
-//			q[i+1] = enemyTowers[i];
-//		}
-//		q[0] = theirHQ;
 		MapLocation[] q = {theirHQ};
 		MapInfo.setQueue(q);
 		MapInfo.requestFlood(0);
@@ -112,11 +105,6 @@ public class HQ extends BaseBot {
 		}
 		
 		rc.broadcast(Channels.expDRONECOUNT, maxEXPLC[mapClass]);
-		
-//		rc.broadcast(Channels.SWARMIDXTANK, 0);
-//		rc.broadcast(Channels.SWARMFIRSTX + 0, myTowers[2].x);
-//		rc.broadcast(Channels.SWARMFIRSTY + 0, myTowers[2].y);
-//		Channels.set(Channels.SWARMSET + 0);
 	}
 
 
@@ -134,516 +122,60 @@ public class HQ extends BaseBot {
 		}
 	}
 	
-	boolean printMap = false;
-	int reqFlood = 1;
-	int rCount = 0;
-	static boolean[] tankDone = new boolean[10];
+
+	boolean tankDone[] = new boolean[20];
 	boolean reconstructed = false;
+	
+	int idx = 0;
 	
 	public void execute() throws GameActionException {
 		RobotCounter.countRobots();
 		
-//		for (int i = 0; i < 20; i++) {
-//			if (Channels.isSet(Channels.SWARMSET+i)) {
-//				MapLocation loc = new MapLocation(
-//						rc.readBroadcast(Channels.SWARMFIRSTX+i),
-//						rc.readBroadcast(Channels.SWARMFIRSTY+i)
-//				);
-//				int id = findTarget(loc);
-//				rc.broadcast(Channels.SWARMPRIMARY+i, id);
-//			}
-//		}
-		
-		
-//		MapLocation towerInDanger = friendlyTowerInDanger();
-//		int idx = 0;
-//		MapLocation[] myTowers = rc.senseTowerLocations();
-//		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-//		rc.setIndicatorString(0, towerInDanger + " " + rc.readBroadcast(Channels.SWARMCOUNTTANK));
-//		if (rc.readBroadcast(Channels.SWARMCOUNTTANK + idx) < 5) {
-//			Direction dir = myHQ.directionTo(theirHQ);
-//			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-//			MapLocation rally = myHQ.add(dir, dist);
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		} else if (!tankDone[idx]) {	// if (rc.readBroadcast(Channels.SWARMCOUNTTANK + idx) >= 30) {
-//			tankDone[idx] = true;
-////			Direction dir = myHQ.directionTo(theirHQ);
-////			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-////			MapLocation rally = myHQ.add(dir, dist);
-////			rc.broadcast(Channels.SWARMIDXTANK, idx);
-////			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-////			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-////			Channels.set(Channels.SWARMSET + idx);
-////			if (enemyTowers.length > 0) {
-////				rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[enemyTowers.length-1].x);
-////				rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[enemyTowers.length-1].y);
-////			} else {
-//			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-//				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-//				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-////			}
-//		}
-//		/*if (!tankDone[idx]) {
-//			tankDone[0] = true;
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, enemyTowers[0].x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, enemyTowers[0].y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		}*/
-//		
-//		idx++;
-//		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < 30) {
-//			Direction dir = myHQ.directionTo(theirHQ);
-//			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-//			MapLocation rally = myHQ.add(dir, dist);
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		} else if (!tankDone[idx]) {
-//			tankDone[idx] = true;
-//			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		}
-//		
-//		idx++;
-//		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < 30) {
-//			Direction dir = myHQ.directionTo(theirHQ);
-//			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-//			MapLocation rally = myHQ.add(dir, dist);
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		} else if (!tankDone[idx]) {
-//			tankDone[idx] = true;
-//			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		}
-//		
-//		idx++;
-//		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < 30) {
-//			Direction dir = myHQ.directionTo(theirHQ);
-//			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-//			MapLocation rally = myHQ.add(dir, dist);
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		} else if (!tankDone[idx]) {
-//			tankDone[idx] = true;
-//			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		}
-//		
-//		idx++;
-//		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < 20) {
-//			Direction dir = myHQ.directionTo(theirHQ);
-//			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-//			MapLocation rally = myHQ.add(dir, dist);
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		} else if (!tankDone[idx]) {
-//			tankDone[idx] = true;
-//			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		}
-//		
-//		idx++;
-//		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < 20) {
-//			Direction dir = myHQ.directionTo(theirHQ);
-//			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-//			MapLocation rally = myHQ.add(dir, dist);
-//			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		} else if (!tankDone[idx]) {
-//			tankDone[idx] = true;
-//			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-//			rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-//			rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-//			Channels.set(Channels.SWARMSET + idx);
-//		}
-		/*
-		int ss = 80;
-		int idx = 0;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-
-		
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTBASHER+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXBASHER, idx+1);
-		}
-		*/
-		
-		int ss = 30;
-		int idx = 0;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-		}
-
-		
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-		}
-		
-		idx++;
-		if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss
-				) {
-			Direction dir = myHQ.directionTo(theirHQ);
-			int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-			MapLocation rally = myHQ.add(dir, dist);
-			//rc.broadcast(Channels.SWARMIDXTANK, idx);
-			rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
-			rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
-			Channels.set(Channels.SWARMSET + idx);
-		} else if (!tankDone[idx]) {
-			tankDone[idx] = true;
-			if (MapInfo.isActive(0)) {
-				rc.broadcast(Channels.SWARMFLOODIDX, 0);
-				Channels.set(Channels.SWARMSETFLOOD+idx);
-			} else {
-				rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
-				rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
-				Channels.set(Channels.SWARMSET + idx);
-			}
-			rc.broadcast(Channels.SWARMIDXTANK, idx+1);
-		}
-		/*
-		if (Clock.getRoundNum() < 1500) {
-			// Set rally
-			myTowers = rc.senseTowerLocations();
-//			if (myTowers.length > 0) {
-				rc.broadcast(Channels.SWARMFIRSTX, myTowers[0].x);
-				rc.broadcast(Channels.SWARMFIRSTY, myTowers[0].y);
-				set(Channels.SWARMSET);
-//			} else {
+		int ss = 30;		// Swarm size
+		for (int idx = 0; idx < 15; idx++) {
+			if (rc.readBroadcast(Channels.SWARMCOUNTTANK+idx) < ss) {
 				Direction dir = myHQ.directionTo(theirHQ);
 				int dist = (int) (Math.sqrt(myHQ.distanceSquaredTo(theirHQ)) / 5);
-				
 				MapLocation rally = myHQ.add(dir, dist);
-				rc.broadcast(Channels.SWARMFIRSTX, rally.x);
-				rc.broadcast(Channels.SWARMFIRSTY, rally.y);
-				set(Channels.SWARMSET);
-//			}
-		} else {
-			rc.broadcast(Channels.SWARMFIRSTX, theirHQ.x);
-			rc.broadcast(Channels.SWARMFIRSTY, theirHQ.y);
-			rc.broadcast(Channels.SWARMFIRSTX+1, theirHQ.x);
-			rc.broadcast(Channels.SWARMFIRSTY+1, theirHQ.y);
+				rc.broadcast(Channels.SWARMFIRSTX + idx, rally.x);
+				rc.broadcast(Channels.SWARMFIRSTY + idx, rally.y);
+				Channels.set(Channels.SWARMSET + idx);
+			} else if (!tankDone[idx]) {
+				tankDone[idx] = true;
+				if (MapInfo.isActive(0)) {
+					rc.broadcast(Channels.SWARMFLOODIDX, 0);
+					Channels.set(Channels.SWARMSETFLOOD+idx);
+				} else {
+					rc.broadcast(Channels.SWARMFIRSTX + idx, theirHQ.x);
+					rc.broadcast(Channels.SWARMFIRSTY + idx, theirHQ.y);
+					Channels.set(Channels.SWARMSET + idx);
+				}
+				rc.broadcast(Channels.SWARMIDXTANK, idx+1);
+			}
+
 		}
-		*/
 		
 		
-//		if (MapInfo.isActive(0)) {
-//			for (int i = 0; i < 20; i++) {
-//				rc.broadcast(Channels.SWARMFLOODIDX+i, 0);
-//				set(Channels.SWARMSETFLOOD+i);
-//			}
-//		}
+		if (Clock.getRoundNum() > 1700) {
+			for (int i = 0; i < 20; i++) {
+				if (MapInfo.isActive(0)) {
+					rc.broadcast(Channels.SWARMFLOODIDX, 0);
+					Channels.set(Channels.SWARMSETFLOOD + i);
+				} else {
+					rc.broadcast(Channels.SWARMFIRSTX + i, theirHQ.x);
+					rc.broadcast(Channels.SWARMFIRSTY + i, theirHQ.y);
+					Channels.set(Channels.SWARMSET + i);
+				}
+				rc.broadcast(Channels.SWARMIDXTANK, i+1);
+			}
+		}
+		
 		
 		if (rc.readBroadcast(Channels.MAPSET) == 1 && rc.readBroadcast(Channels.expSTARTED) == 0) {
 			MapInfo.decideExploringPoints();
 		}
 		
-		if (!reconstructed && allDone()) {
+		if (!reconstructed && (allDone() || Clock.getRoundNum() > 600)) {
 			MapInfo.reconstructMap();
 			MapInfo.floodAndServe();
 			MapInfo.serve();
@@ -652,14 +184,13 @@ public class HQ extends BaseBot {
 		
 		
 		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
-		if (rc.readBroadcast(Channels.numBEAVERS) < maxBEAVERS) {
-			BuildingStrategies.trySpawnEmpty(RobotType.BEAVER);//trySpawn(RobotType.BEAVER);
+		if (beaverCount < maxBEAVERS) {
+			BuildingStrategies.trySpawnEmpty(RobotType.BEAVER);
 		}
 		if (rc.readBroadcast(Channels.CORNERBEAVER) == 0 && beaverCount > 0) {
 			RobotInfo[] robots = rc.senseNearbyRobots(2, myTeam);
 			RobotInfo firstBeaver = null;
 			for (RobotInfo ri : robots) {
-				//System.out.println(ri);
 				if (ri.type == RobotType.BEAVER) {
 					firstBeaver = ri;
 					break;
@@ -673,11 +204,14 @@ public class HQ extends BaseBot {
 		
 		
 		//Channels.reset(Channels.SWARMCOUNTTANK);
-		//transferToSupplier();
-		
 		rc.yield();
 	}
 	
+	/** 
+	 * Checks if all exploration drones have finished.
+	 * @return true if they have, false otherwise
+	 * @throws GameActionException
+	 */
 	private static boolean allDone() throws GameActionException {
 		int count = rc.readBroadcast(Channels.expDRONECOUNT);
 		for (int i = count-1; i >= 0; i--) {
@@ -687,34 +221,6 @@ public class HQ extends BaseBot {
 		}
 		return true;
 	}
-	
-
-
-	/**
-	 * If the supplier is within transfer range we transfer supplies to it.
-	 * @throws GameActionException
-	 */
-	public void transferToSupplier() throws GameActionException {
-		/*RobotInfo[] allies = rc.senseNearbyRobots(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, 
-				myTeam);
-		
-		int idToLook = rc.readBroadcast(Channels.SUPPLIERID);
-
-		for (int i=0; i<allies.length; ++i) {
-			RobotInfo k = allies[i];
-
-			if (k.ID == idToLook) {
-				rc.transferSupplies(100000, allies[i].location);
-			}
-		}*/
-		int idToLook = rc.readBroadcast(Channels.SUPPLIERID);
-		RobotInfo supplier = getRobot(idToLook); 
-		if (supplier != null && rc.getLocation().distanceSquaredTo(supplier.location)
-				<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
-			rc.transferSupplies((int) (rc.getSupplyLevel() / 2), supplier.location);
-		}
-	}
-
 	
 
 }
