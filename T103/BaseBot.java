@@ -647,8 +647,9 @@ public class BaseBot {
 			}
 			if (closestMissile != null) {
 				weaponFired = tryAttack(closestMissile.location);
+			} else if (weakestRobot != null) {
+				weaponFired = tryAttack(weakestRobot.location);
 			}
-			weaponFired = tryAttack(weakestRobot.location);
 		}
 		return weaponFired;
 	}
