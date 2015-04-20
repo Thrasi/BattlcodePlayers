@@ -46,27 +46,27 @@ public class RobotPlayer {
 			} else if (type == RobotType.COMPUTER) {
 				myself = new Computer(rc);
 			} else if (type == RobotType.DRONE) {
-				try {
-					boolean isAlive = true;
-					try {
-						rc.senseRobot(rc.readBroadcast(Channels.SUPPLIERID));
-					} catch (GameActionException e) {
-						isAlive = false;
-					}
-					if (rc.getType() == RobotType.DRONE
-							&& (needsSupplier(rc) || !isAlive)) {
-						
-						myself = new Supplier(rc);
-						rc.broadcast(Channels.numSUPPLIERS, rc.readBroadcast(Channels.numSUPPLIERS) + 1);
-					    rc.broadcast(Channels.SUPPLIERID, rc.getID());
-					} else {
-						myself = new Drone(rc);
-					}
-				} catch (GameActionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+//				try {
+//					boolean isAlive = true;
+//					try {
+//						rc.senseRobot(rc.readBroadcast(Channels.SUPPLIERID));
+//					} catch (GameActionException e) {
+//						isAlive = false;
+//					}
+//					if (rc.getType() == RobotType.DRONE
+//							&& (needsSupplier(rc) || !isAlive)) {
+//						
+//						myself = new Supplier(rc);
+//						rc.broadcast(Channels.numSUPPLIERS, rc.readBroadcast(Channels.numSUPPLIERS) + 1);
+//					    rc.broadcast(Channels.SUPPLIERID, rc.getID());
+//					} else {
+//						myself = new Drone(rc);
+//					}
+//				} catch (GameActionException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+				myself = new Supplier(rc);
 			} else if (type == RobotType.HELIPAD) {
 				myself = new Helipad(rc);
 			} else if (type == RobotType.LAUNCHER) {
