@@ -1,10 +1,13 @@
 package T103;
 
 import T103.Utility.Pair;
+import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public class Miner extends BaseBot {
 
@@ -39,6 +42,33 @@ public class Miner extends BaseBot {
 //		}
 		
 		tryShootMissilesOrWeakest();
+		
+		RobotInfo[] allies = getAlliesInRange(2);
+		int nonMiners = 0;
+		int miners = 0;
+		for (RobotInfo ri : allies) {
+			if (ri.type != RobotType.MINER && !ri.type.isBuilding) {
+				nonMiners++;
+			} else if (ri.type == RobotType.MINER){
+				miners++;
+			}
+		}
+		if (nonMiners>=2 && Clock.getRoundNum() > 600  || (miners >=4 && Clock.getRoundNum() > 600) )  {
+//			tryMoveTo(oreLoc);
+			tryMove(myHQ.directionTo(rc.getLocation()));
+//			Pair<MapLocation, Double> data = Mining.closestOre();
+//			oreLoc = data.x;
+//			minOre = data.y;
+//			if (oreLoc == null) {
+//				tryMoveTo(rc.getLocation().add(getRandomDirection()));
+//			} else {
+//				//Movement.setTarget(oreLoc);;
+//				//Movement.tryBugMove();
+//				tryMoveTo(oreLoc);
+//			}
+		}
+		
+		
 		if (rc.senseOre(rc.getLocation()) > minOre) {
 			oreLoc = null;
 			tryMine();
