@@ -59,10 +59,13 @@ public class HQ extends BaseBot {
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-//		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-//		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-//		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.TANKFACTORY, RobotType.TANKFACTORY
+		RobotType.TANKFACTORY, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 	};
 
 	/*
