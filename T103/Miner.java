@@ -47,6 +47,8 @@ public class Miner extends BaseBot {
 			if (oreLoc == null) {
 				tryMoveTo(rc.getLocation().add(getRandomDirection()));
 			} else {
+				//Movement.setTarget(oreLoc);;
+				//Movement.tryBugMove();
 				tryMoveTo(oreLoc);
 			}
 		}

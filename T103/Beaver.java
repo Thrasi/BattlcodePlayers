@@ -1,18 +1,11 @@
 package T103;
 
-import static T103.BaseBot.directions;
-import static T103.BaseBot.isNormal;
-import static T103.BaseBot.isOccupied;
-import static T103.BaseBot.rc;
-import static T103.BaseBot.tryBuild;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode.common.TerrainTile;
 
 public class Beaver extends BaseBot {
 	
@@ -53,44 +46,15 @@ public class Beaver extends BaseBot {
 		
 		
 		boolean hasBuilt = false;
-		/*
-		if (rc.readBroadcast(Channels.numMINERFACTORY) < maxMINFACT) {
-			hasBuilt = BuildingStrategies.tryBuildEmpty(RobotType.MINERFACTORY);
-		} else if (rc.readBroadcast(Channels.numHELIPAD) < maxHELIPAD) {
-			hasBuilt = tryBuild(RobotType.HELIPAD);
-		} else if (rc.readBroadcast(Channels.numTECHNOLOGYINSTITUTE) < maxTECH) {
-			hasBuilt = tryBuild(RobotType.TECHNOLOGYINSTITUTE);
-		} else if (rc.readBroadcast(Channels.numAEROSPACELAB) < maxAERO) {
-			hasBuilt = tryBuild(RobotType.AEROSPACELAB);
-		} else if (rc.readBroadcast(Channels.numBARRACKS) < maxBARRACKS) {
-			hasBuilt = BuildingStrategies.tryBuildTowards(theirHQ, RobotType.BARRACKS);
-		} else if (rc.readBroadcast(Channels.numTANKFACTORY) < maxTANKFACTORY) {
-			hasBuilt = BuildingStrategies.tryBuildTowards(theirHQ, RobotType.TANKFACTORY);
-		}
-		*/
 		int queueStart = rc.readBroadcast(Channels.BUILDQSTART);
 		int queueEnd = rc.readBroadcast(Channels.BUILDQEND);
 		if (queueStart < queueEnd) {
 			int typeID = rc.readBroadcast(queueStart);
 			hasBuilt = tryBuildOnGrid(HQ.TYPES[typeID]);
-					//BuildingStrategies.tryBuildEmpty(HQ.TYPES[typeID]);//tryBuild(HQ.TYPES[typeID]);
 			if (hasBuilt) {
 				queueStart++;
 			}
 			rc.broadcast(Channels.BUILDQSTART, queueStart);
-		}
-		
-		// If you don't build anything we want the beaver to move.
-		if ( !hasBuilt ) {
-//			boolean didMine = tryMine();
-//			if ( !didMine ) {
-//				rc.yield();
-//				if (Clock.getRoundNum() % 5 == 0) {
-//					tryMove( getRandomDirection() );
-//				}
-//			}
-			
-			
 		}
 		
 		rc.yield();
@@ -201,64 +165,4 @@ public class Beaver extends BaseBot {
 
 	}
 
-
-/*
-	private void cornerBeaver() throws GameActionException {
-		/*int xc = (myHQ.x + theirHQ.x) / 2;
-		int yc = (myHQ.y + theirHQ.y) / 2;
-		MapLocation endPoint = myHQ.add(myHQ.directionTo(theirHQ).opposite(), 3);
-		for (int i = 0; i < 5; i++) {
-			tryMoveTo(endPoint);
-			rc.yield();
-		}*/
-	/*
-		MapLocation spot = BuildingStrategies.safeSpotForBuilding();
-		while (spot == null) {
-			tryMove(getRandomDirection());
-			rc.yield();
-			spot = BuildingStrategies.safeSpotForBuilding();
-		}
-		while (!rc.getLocation().equals(spot)) {
-			tryMoveTo(spot);
-			rc.yield();
-		}
-		while (rc.readBroadcast(Channels.numHELIPAD) < maxHELIPAD) {
-			tryBuild(RobotType.HELIPAD);
-			rc.yield();
-		}
-		
-		if (rc.readBroadcast(Channels.numCOMPUTER) < 1) {
-			//tryBuild(RobotType.TECHNOLOGYINSTITUTE);
-		}
-		while (rc.readBroadcast(Channels.numSUPPLYDEPOT) < maxSUPPLYDEPOTS) {
-			if (rc.readBroadcast(Channels.numMINERFACTORY) < 1) {
-				continue;
-			}
-			//Direction dirBuilt = tryBuildDir(RobotType.SUPPLYDEPOT);
-			//TODO see if this works well
-			Direction dirBuilt = BuildingStrategies.tryBuildSafe(RobotType.SUPPLYDEPOT);
-			if (dirBuilt != null) {
-				MapLocation newBuild = rc.getLocation().add(dirBuilt);
-				while (rc.isBuildingSomething()) {
-					rc.yield();
-				}
-				spot = BuildingStrategies.safeSpotForBuilding();
-				
-				while (spot == null || spot.equals(newBuild)) {
-					tryMove(getRandomDirection());
-					spot = BuildingStrategies.safeSpotForBuilding();
-					rc.yield();
-				}
-				while (!rc.getLocation().equals(spot)) {
-					rc.setIndicatorString(1, "Occupied " + spot + " " + isOccupied(spot));
-					rc.setIndicatorString(0, tryPrimitiveMoveTo(spot) + " " + spot);
-					rc.yield();
-				}
-			}
-		}
-		while (true) {
-			rc.yield();
-		}
-	}
-*/
 }

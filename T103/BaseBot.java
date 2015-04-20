@@ -547,7 +547,27 @@ public class BaseBot {
 	public static boolean tryMoveFlood(int idx) throws GameActionException {
 		MapLocation curr = rc.getLocation();
 		Direction direction = MapInfo.get(idx, curr.x, curr.y);
-		return tryPrimitiveMoveTo(direction);
+		//return tryMoveTo(loc);
+		return tryMoveTo(direction);
+	}
+	
+	public static boolean tryMoveTo(Direction dir) throws GameActionException {
+		if (tryMove(dir)) {
+			return true;
+		}
+		if (tryMove(dir.rotateLeft())) {
+			return true;
+		}
+		if (tryMove(dir.rotateRight())) {
+			return true;
+		}
+		if (tryMove(dir.rotateLeft().rotateLeft())) {
+			return true;
+		}
+		if (tryMove(dir.rotateRight().rotateRight())) {
+			return true;
+		}
+		return false;
 	}
 	
 	public static void tryMoveAway() throws GameActionException {

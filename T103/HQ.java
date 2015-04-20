@@ -17,6 +17,8 @@ import static T103.Channels.isSet;
 
 public class HQ extends BaseBot {
 	
+	public static final int[] maxMINERSC = {20, 35, 35};
+	
 	// Drone count
 	public static final int[] maxEXPLC = {0, 4, 6};		// Explore turn into supplier
 	public static final int[] maxDRONES = {1, 0, 0};	// Supplier
@@ -26,9 +28,9 @@ public class HQ extends BaseBot {
 	
 	private static final Map<RobotType, Tuple> hqSupplies = new HashMap<>();
 	static {
-		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 1000));
+		hqSupplies.put(RobotType.BEAVER, new Tuple(100, 500));
 		hqSupplies.put(RobotType.MINER, new Tuple(200, 3000));
-		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 20000));
+		hqSupplies.put(RobotType.DRONE, new Tuple(10000, 15000));
 		hqSupplies.put(RobotType.SOLDIER, new Tuple(1000, 4000));
 		hqSupplies.put(RobotType.TANK, new Tuple(500, 5000));
 	}
@@ -43,12 +45,12 @@ public class HQ extends BaseBot {
 	}
 	
 	private static final RobotType[] buildQueue = {RobotType.MINERFACTORY,
-		RobotType.HELIPAD,  
+		RobotType.HELIPAD,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
+		RobotType.BARRACKS,RobotType.TANKFACTORY,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
-		RobotType.BARRACKS,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
 		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
@@ -186,24 +188,27 @@ public class HQ extends BaseBot {
 		}
 		
 		
-		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
-		if (beaverCount < maxBEAVERS) {
-			BuildingStrategies.trySpawnEmpty(RobotType.BEAVER);
+		if (rc.readBroadcast(Channels.numBEAVERS) < maxBEAVERS) {
+			trySpawn(RobotType.BEAVER);
 		}
-		if (rc.readBroadcast(Channels.CORNERBEAVER) == 0 && beaverCount > 0) {
-			RobotInfo[] robots = rc.senseNearbyRobots(2, myTeam);
-			RobotInfo firstBeaver = null;
-			for (RobotInfo ri : robots) {
-				if (ri.type == RobotType.BEAVER) {
-					firstBeaver = ri;
-					break;
-				}
-			}
-			if (firstBeaver != null) {
-				rc.broadcast(Channels.CORNERBEAVER, firstBeaver.ID);
-			}
-		}
-		
+//		int beaverCount = rc.readBroadcast(Channels.numBEAVERS); 
+//		if (beaverCount < maxBEAVERS) {
+//			BuildingStrategies.trySpawnEmpty(RobotType.BEAVER);
+//		}
+//		if (rc.readBroadcast(Channels.CORNERBEAVER) == 0 && beaverCount > 0) {
+//			RobotInfo[] robots = rc.senseNearbyRobots(2, myTeam);
+//			RobotInfo firstBeaver = null;
+//			for (RobotInfo ri : robots) {
+//				if (ri.type == RobotType.BEAVER) {
+//					firstBeaver = ri;
+//					break;
+//				}
+//			}
+//			if (firstBeaver != null) {
+//				rc.broadcast(Channels.CORNERBEAVER, firstBeaver.ID);
+//			}
+//		}
+//		
 		
 		
 		//Channels.reset(Channels.SWARMCOUNTTANK);
