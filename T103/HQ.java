@@ -48,18 +48,22 @@ public class HQ extends BaseBot {
 		RobotType.HELIPAD,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
-		RobotType.BARRACKS,RobotType.TANKFACTORY,
+		RobotType.BARRACKS,    RobotType.TANKFACTORY,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
-		RobotType.TANKFACTORY, RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, RobotType.TANKFACTORY,
+		RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.TANKFACTORY, RobotType.TANKFACTORY,
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,RobotType.TANKFACTORY };
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT, 
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+//		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+//		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+//		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
+		RobotType.TANKFACTORY, RobotType.TANKFACTORY
+	};
 
 	/*
 	private static final RobotType[] buildQueue = {RobotType.MINERFACTORY,
