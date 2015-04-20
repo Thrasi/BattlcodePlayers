@@ -113,7 +113,6 @@ public class HQ extends BaseBot {
 		
 		rc.broadcast(Channels.expDRONECOUNT, maxEXPLC[mapClass]);
 		
-		System.out.println(theirHQ.distanceSquaredTo(myHQ));
 	}
 
 

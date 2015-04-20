@@ -151,7 +151,6 @@ public class Beaver extends BaseBot {
 				continue;
 			}
 			int s = gridScore2(l);
-			rc.setIndicatorString(0, s+"");
 			if (s == 0) {
 				continue;
 			}

@@ -29,11 +29,9 @@ public class Movement {
 	public static boolean tryBugMove() throws GameActionException {
 		MapLocation current = rc.getLocation();
 		Direction desired = current.directionTo(target);
-		rc.setIndicatorString(0, desired+"");
 		MapLocation next = current.add(desired);
 		TerrainTile tile = rc.senseTerrainTile(next);
 		int dist = next.distanceSquaredTo(target);
-		rc.setIndicatorString(1, minDist + " " + dist);
 		if (!isOccupied(next) && isNormalOrUnknown(tile) && dist < minDist) {
 			// On the desired move, exit
 			

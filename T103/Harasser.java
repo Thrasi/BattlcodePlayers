@@ -1,7 +1,5 @@
 package T103;
 
-import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
-
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;

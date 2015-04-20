@@ -501,8 +501,8 @@ public class MapInfo {
 			floodLastUsed = Channels.FLOODLASTUSED3;
 		}
 
-		System.out.println("Started serve "
-				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+//		System.out.println("Started serve "
+//				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 
 		int[] flood = floods[idx];
 		int size = flood.length;
@@ -515,8 +515,8 @@ public class MapInfo {
 		set(floodActive);								// Enable reading flood
 		reset(Channels.FLOODREQUEST);					// Can set new request
 		
-		System.out.println("Finished serve "
-				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
+//		System.out.println("Finished serve "
+//				+ Clock.getBytecodeNum() + " " + Clock.getRoundNum());
 	}
 
 	/**
