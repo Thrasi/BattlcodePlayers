@@ -37,6 +37,8 @@ public class Miner extends BaseBot {
 //				rc.yield();
 //			}
 //		}
+		
+		tryShootMissilesOrWeakest();
 		if (rc.senseOre(rc.getLocation()) > minOre) {
 			oreLoc = null;
 			tryMine();
