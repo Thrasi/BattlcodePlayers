@@ -28,6 +28,8 @@ public class Drone extends BaseBot {
 	
 	private boolean visitedHQ = false;
 	
+	private static Supplier mesupply = null;
+	
 	
 	/**
 	 * Decide if the drone is supposed to explore or do something else
@@ -91,14 +93,12 @@ public class Drone extends BaseBot {
 			// role is to do afterwards
 			supply = explore;	// Become supplier
 			explore = -1;
+			
+			mesupply = new Supplier(rc);
 		}
 		
-		//tryMoveAway();
-		while (true) {
-			if (supply != -1) {
-				
-			}
-			rc.yield();
+		if (mesupply != null) {
+			mesupply.execute();
 		}
 		
 		//rc.yield();

@@ -45,7 +45,7 @@ public class Beaver extends BaseBot {
 			movedOnce = tryMove(rc.getLocation().directionTo(myHQ).opposite());
 		}
 		// TODO is this a good strategy?
-					if (BuildingStrategies.emptyScore(rc.getLocation()) < 7) {
+					if (BuildingStrategies.emptyScore(rc.getLocation()) < 6) {
 						tryMoveTo(BuildingStrategies.openSpotForBuilding());
 						//rc.yield();
 					}

@@ -13,11 +13,12 @@ public class Barracks extends BaseBot {
 	
 	@Override
 	public void execute() throws GameActionException {
-		if (rc.readBroadcast(Channels.numBASHERS) < 10) {
-			trySpawn(RobotType.BASHER);
-		} else {
-			//trySpawn(RobotType.SOLDIER);
-		}
+//		if (rc.readBroadcast(Channels.numBASHERS) < 10) {
+//			trySpawn(RobotType.BASHER);
+//		} else {
+//			trySpawn(RobotType.SOLDIER);
+//		}
+		//trySpawn(RobotType.BASHER);
 		rc.yield();
 	}
 

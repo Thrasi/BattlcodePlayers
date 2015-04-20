@@ -1,5 +1,6 @@
 package T103;
 
+import static T103.Channels.isSet;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -35,12 +36,14 @@ public class Tank extends BaseBot {
 //			}
 //		}
 
-		if (Channels.isSet(Channels.SWARMSET + swarmIdx)) {
-			MapLocation loc = new MapLocation(
+		if (isSet(Channels.SWARMSETFLOOD + swarmIdx)) {
+			tryMoveFlood(rc.readBroadcast(Channels.SWARMFLOODIDX + swarmIdx));
+		} else
+			if (isSet(Channels.SWARMSET + swarmIdx)) {
+			tryMoveTo(new MapLocation(
 					rc.readBroadcast(Channels.SWARMFIRSTX + swarmIdx),
 					rc.readBroadcast(Channels.SWARMFIRSTY + swarmIdx)
-			);
-			tryMoveTo(loc);
+			));
 		}
 		
 		isSupplyLow = addToQueue(isSupplyLow);

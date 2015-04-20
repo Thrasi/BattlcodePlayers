@@ -15,7 +15,7 @@ public class Soldier extends BaseBot {
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		swarmIdx = rc.readBroadcast(Channels.SWARMIDXSOLDIER);
-		rc.setIndicatorString(0, swarmIdx+"");
+		rc.broadcast(Channels.SWARMCOUNTSOLDIER+swarmIdx, rc.readBroadcast(Channels.SWARMCOUNTSOLDIER+swarmIdx)+1);
 	}
 
 	@Override
@@ -26,6 +26,7 @@ public class Soldier extends BaseBot {
 			rc.yield();
 			return;
 		}
+		tryMoveToEnemy();
 		
 //		int primaryID = rc.readBroadcast(Channels.SWARMPRIMARY + swarmIdx);
 //		if (primaryID != -1) {

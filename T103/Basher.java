@@ -13,6 +13,7 @@ public class Basher extends BaseBot {
 	public Basher(RobotController rc) throws GameActionException {
 		super(rc);
 		swarmIdx = rc.readBroadcast(Channels.SWARMIDXBASHER);
+		rc.broadcast(Channels.SWARMCOUNTBASHER+swarmIdx, rc.readBroadcast(Channels.SWARMCOUNTBASHER+swarmIdx)+1);
 	}
 	
 	public void execute() throws GameActionException {

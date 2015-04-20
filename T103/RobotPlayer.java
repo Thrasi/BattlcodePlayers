@@ -66,7 +66,8 @@ public class RobotPlayer {
 //					// TODO Auto-generated catch block
 //					e.printStackTrace();
 //				}
-				myself = new Supplier(rc);
+				//myself = new Supplier(rc);
+				myself = new Drone(rc);
 			} else if (type == RobotType.HELIPAD) {
 				myself = new Helipad(rc);
 			} else if (type == RobotType.LAUNCHER) {

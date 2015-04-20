@@ -41,6 +41,8 @@ public class Channels {
 				SWARMFLOODIDX = 190,
 				SWARMPRIMARY = 210,
 				SWARMCOUNTTANK = 230,
+				SWARMCOUNTSOLDIER = 250,
+				SWARMCOUNTBASHER = 10000,
 				// also drone, soldier, basher
 				
 			// TOWERS
