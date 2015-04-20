@@ -6,6 +6,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.TerrainTile;
 
 public class Beaver extends BaseBot {
 	
@@ -101,8 +102,11 @@ public class Beaver extends BaseBot {
 
 	private static int gridScore(MapLocation loc) throws GameActionException {
 		RobotInfo ri = rc.senseRobotAtLocation(loc);
+		TerrainTile tile = rc.senseTerrainTile(loc);
 		if ((Math.abs(loc.x-myHQ.x) + Math.abs(loc.y-myHQ.y)) % 2 == 1
-				|| (ri != null && ri.type.isBuilding)) {
+				|| (ri != null && ri.type.isBuilding)
+				|| tile != TerrainTile.NORMAL
+				) {
 			return 0;
 		}
 		return 1;
@@ -118,8 +122,10 @@ public class Beaver extends BaseBot {
 		} catch (GameActionException e) {
 			return 0;		// TODO ???
 		}
+		TerrainTile tile = rc.senseTerrainTile(loc);
 		if ((Math.abs(loc.x-myHQ.x) + Math.abs(loc.y-myHQ.y)) % 2 == 0
-				|| (ri != null && ri.ID != rc.getID())) {
+				|| (ri != null && ri.ID != rc.getID())
+				|| tile != TerrainTile.NORMAL) {
 			return 0;
 		}
 		int count = 0;
@@ -129,7 +135,8 @@ public class Beaver extends BaseBot {
 			} catch (GameActionException e) {
 				return 0;	// TODO OR 1 ??????????????????????????????
 			}
-			if (ri != null && ri.type.isBuilding) {
+			tile = rc.senseTerrainTile(loc.add(d));
+			if ((ri != null && ri.type.isBuilding) || tile != TerrainTile.NORMAL) {
 				count++;
 			}
 		}
