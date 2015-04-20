@@ -20,13 +20,15 @@ public class HQ extends BaseBot {
 	public static final int[] maxMINERSC = {15, 25, 35};
 	public static final int[] maxSUPPLYDEPOTSC = {2, 8, 12};
 	public static final int[] maxTECHC = {0, 1, 1};
-	public static final int[] maxEXPLC = {0, 4, 4};
 	public static final int[] maxTANKFACTORIESC = {3, 4, 6};
 	public static final int[] maxBARRACKSC = {2, 4, 6};
 	public static final int[] maxHELIPADC = {0, 1, 1};
 	public static final int[] maxAEROC = {0, 0, 0};
 	public static final int[] maxMINFACTORYC = {1, 1, 1};
-	public static final int[] maxDRONES = {1, 0, 0};
+
+	// Drone count
+	public static final int[] maxEXPLC = {0, 4, 4};		// Explore turn into supplier
+	public static final int[] maxDRONES = {1, 0, 0};	// Supplier
 	
 	private static final int maxBEAVERS = 3;
 	
@@ -59,7 +61,7 @@ public class HQ extends BaseBot {
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,RobotType.TANKFACTORY,
 		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,
-		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT};
+		RobotType.SUPPLYDEPOT, RobotType.SUPPLYDEPOT,RobotType.TANKFACTORY };
 
 	/*
 	private static final RobotType[] buildQueue = {RobotType.MINERFACTORY,
@@ -105,6 +107,8 @@ public class HQ extends BaseBot {
 		}
 		
 		rc.broadcast(Channels.expDRONECOUNT, maxEXPLC[mapClass]);
+		
+		System.out.println(theirHQ.distanceSquaredTo(myHQ));
 	}
 
 

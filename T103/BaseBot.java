@@ -14,6 +14,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
+import battlecode.world.Robot;
 
 public class BaseBot {
 
@@ -488,7 +489,7 @@ public class BaseBot {
 		double minHealth = Double.MAX_VALUE;
 		int bestID = -1;
 		for (RobotInfo ri : rc.senseNearbyRobots(location, 50, theirTeam)) {
-			double health = ((double) ri.health) / ri.type.maxHealth;
+			double health = ri.health / ri.type.maxHealth;
 			if (health < minHealth) {
 				minHealth = health;
 				bestID = ri.ID;
@@ -722,34 +723,38 @@ public class BaseBot {
 	public void moveAround() {
 
 	}
+	
+	private static double HPP = 0.2;
 
 	/**
 	 * Sends supply to the ally robot in range which has lowest supply. After transfer is done, both
 	 * robots have the same amount of supplies.
 	 */
 	public void transferSuppliesTolowest() throws GameActionException {
-		if (Clock.getRoundNum() % 3 != 0 || !isInSupplyChain(rc.getType())) {
+		if (Clock.getRoundNum() % 3 != 0 && healthPercent() >= HPP) {
 			return;
 		}
 
 		RobotInfo[] nearbyAllies = getAlliesInRange(GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED);
 
-		double lowestSupply = rc.getSupplyLevel();
+		double lowestSupply = Integer.MAX_VALUE;//rc.getSupplyLevel();
 		double transferAmount = 0;
 		MapLocation supplyTarget = null;
 		for (RobotInfo ri : nearbyAllies) {
-			if (ri.supplyLevel < lowestSupply && isInSupplyChain(ri.type)) {
+			if (ri.supplyLevel < lowestSupply && isInSupplyChain(ri)) {
 				lowestSupply = ri.supplyLevel;
-				transferAmount = (rc.getSupplyLevel() - lowestSupply) / 2;
 				supplyTarget = ri.location;
-			}
-			if (healthPercent() < 0.2) {
-				transferAmount = rc.getSupplyLevel() * 0.9;
 			}
 		}
 
 		if (supplyTarget != null) {
-			rc.transferSupplies((int) transferAmount, supplyTarget);
+			if (healthPercent() < HPP) {
+				transferAmount = rc.getSupplyLevel() * 0.9;
+				rc.transferSupplies((int) transferAmount, supplyTarget);
+			} else if (rc.getSupplyLevel() > lowestSupply) {
+				transferAmount = (rc.getSupplyLevel() - lowestSupply) / 2;
+				rc.transferSupplies((int) transferAmount, supplyTarget);
+			}
 		}
 	}
 	
@@ -757,11 +762,13 @@ public class BaseBot {
 		return rc.getHealth() / rc.getType().maxHealth;
 	}
 
-	private boolean isInSupplyChain(RobotType type) {
+	private boolean isInSupplyChain(RobotInfo ri) {
+		RobotType type = ri.type;
 		return (!type.isBuilding
 					&& type != RobotType.DRONE
+					&& type != RobotType.BEAVER
 					//&& type != RobotType.MINER
-					&& healthPercent() > 0.2)
+					&& ri.health / type.maxHealth > HPP)
 				|| type == RobotType.TOWER;
 	}
 
