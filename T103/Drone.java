@@ -10,6 +10,7 @@ import battlecode.common.TerrainTile;
 import static T103.MapInfo.isHorizontalSym;
 import static T103.MapInfo.isRotationSym;
 import static T103.MapInfo.isVerticalSym;
+import static T103.Channels.isSet;
 import static T103.DroneExploration.exploreCorner;
 
 public class Drone extends BaseBot {
@@ -39,14 +40,18 @@ public class Drone extends BaseBot {
 	public Drone(RobotController rc) throws GameActionException {
 		super(rc);
 		
-		int count = HQ.maxEXPLC[mapClass];
-		for (int i = 0; i < count; i++) {
-			int prevId = rc.readBroadcast(Channels.expDRONE + i);
-			if (prevId == 0 || !isAlive(prevId)) {
-				rc.broadcast(Channels.expDRONE + i, rc.getID());
-				explore = i+1;
-				break;
+		if (!allDone()) {
+			int count = HQ.maxEXPLC[mapClass];
+			for (int i = 0; i < count; i++) {
+				int prevId = rc.readBroadcast(Channels.expDRONE + i);
+				if (prevId == 0 || !isAlive(prevId)) {
+					rc.broadcast(Channels.expDRONE + i, rc.getID());
+					explore = i+1;
+					break;
+				}
 			}
+		} else {
+			mesupply = new Supplier(rc);
 		}
 	}
 
@@ -238,6 +243,21 @@ public class Drone extends BaseBot {
 		rc.broadcast(Channels.TOPLEFTX, tlx);
 		rc.broadcast(Channels.TOPLEFTY, tly);
 		rc.broadcast(Channels.MAPSET, 1);
+	}
+	
+	/** 
+	 * Checks if all exploration drones have finished.
+	 * @return true if they have, false otherwise
+	 * @throws GameActionException
+	 */
+	private static boolean allDone() throws GameActionException {
+		int count = rc.readBroadcast(Channels.expDRONECOUNT);
+		for (int i = count-1; i >= 0; i--) {
+			if (!isSet(Channels.expDRONEDONE + i)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

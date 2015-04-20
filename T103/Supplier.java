@@ -15,6 +15,9 @@ public class Supplier extends BaseBot {
 	
 	private static int currentTarget = -1;
 	
+	// TODO fix when drones fly into range of attackers
+	
+	
 	public Supplier(RobotController rc) {
 		super(rc);
 	}
@@ -28,42 +31,32 @@ public class Supplier extends BaseBot {
 	        int queueStart = rc.readBroadcast(Channels.SUPPLYQSTART);
 	        int queueEnd = rc.readBroadcast(Channels.SUPPLYQEND);
 	        
-	        rc.setIndicatorString(0, queueStart + " " + queueEnd);
-	        // TODO this wont work when queue end goes overflow
-	        while (queueStart != queueEnd
-	        		&&
-	        		(!isAlive(rc.readBroadcast(queueStart))
-	        				||
-	        				rc.senseRobot(rc.readBroadcast(queueStart)).supplyLevel > 1000
-	        				)
-	        		) {
+	        int skipId = rc.readBroadcast(queueStart);
+	        while (queueStart != queueEnd && (!isAlive(skipId) || rc.senseRobot(skipId).supplyLevel > 1000)) {
 	        	queueStart++;
-	        	 if (queueStart == Channels.UPPERSUPPLYBOUND) {
-                	queueStart = Channels.LOWERSUPPLYBOUND;
-                }
+	        	if (queueStart == Channels.UPPERSUPPLYBOUND) {
+	        		queueStart = Channels.LOWERSUPPLYBOUND;
+	        	}
+	        	skipId = rc.readBroadcast(queueStart);
 	        }
-	        rc.setIndicatorString(1, queueStart + " " + queueEnd);
+	        
 	        
 	        if (queueStart != queueEnd && rc.getSupplyLevel() > 1000) {
-	            
 	            int target = rc.readBroadcast(queueStart);
-	            
 	            RobotInfo ally = rc.senseRobot(target);
-	
 	        	double mySupplies = rc.getSupplyLevel();
-	            if (rc.getLocation().distanceSquaredTo(ally.location) 
+
+	        	if (rc.getLocation().distanceSquaredTo(ally.location) 
 	            		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED
 	            		&& mySupplies > 500) {
 	            	
 	            	int toTransfer = Math.min(4000, (int) (mySupplies-500));
-	//                        	if (allies[i].type == RobotType.TANK) {
-	//                        		toTransfer = Math.min(10000, (int) (mySupplies-500));
-	//                        	}
+//                  if (allies[i].type == RobotType.TANK) {
+//                  	toTransfer = Math.min(10000, (int) (mySupplies-500));
+//                  }
 	                rc.transferSupplies(toTransfer, ally.location);
-	                
-	            }
-	            else {
-	            	currentTarget = ally.ID;	//TODO move queue
+	            } else {
+	            	currentTarget = ally.ID;
 	                boolean moved = tryMoveTo( ally.location );
 	                if (!moved) {
 	                    // do something? or nothing
@@ -79,22 +72,20 @@ public class Supplier extends BaseBot {
 		} else {
 			if (isAlive(currentTarget)) {
 				if (rc.getSupplyLevel() > 1000) {
-					
 					RobotInfo curr = rc.senseRobot(currentTarget);
-		            
 		        	double mySupplies = rc.getSupplyLevel();
-		            if (rc.getLocation().distanceSquaredTo(curr.location) 
+
+		        	if (rc.getLocation().distanceSquaredTo(curr.location) 
 		            		<= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED
 		            		&& mySupplies > 500) {
 		            	
 		            	int toTransfer = Math.min(4000, (int) (mySupplies-500));
-		//                        	if (allies[i].type == RobotType.TANK) {
-		//                        		toTransfer = Math.min(10000, (int) (mySupplies-500));
-		//                        	}
+//                    	if (allies[i].type == RobotType.TANK) {
+//                    		toTransfer = Math.min(10000, (int) (mySupplies-500));
+//                     	}
 		                rc.transferSupplies(toTransfer, curr.location);
 		                currentTarget = -1;
-		            }
-		            else {
+		            } else {
 		                boolean moved = tryMoveTo( curr.location );
 		                if (!moved) {
 		                    // do something? or nothing
@@ -107,7 +98,6 @@ public class Supplier extends BaseBot {
 
 		}
 
-        
         
         if (rc.getSupplyLevel() <= 1000) {
         	boolean moved = tryMoveTo( BaseBot.myHQ );

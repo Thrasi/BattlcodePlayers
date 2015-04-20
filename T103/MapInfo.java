@@ -253,17 +253,14 @@ public class MapInfo {
 	public static Direction get(int idx, int x, int y) throws GameActionException {
 		int first = getActiveFirst(idx);
 		readParameters();
-		if (first == Channels.FLOODACTIVEINDEX1) {
-			rc.broadcast(Channels.FLOODLASTUSED1, Clock.getRoundNum());
-		} else if (first == Channels.FLOODACTIVEINDEX2) {
-			rc.broadcast(Channels.FLOODLASTUSED2, Clock.getRoundNum());
-		} else {
-			rc.broadcast(Channels.FLOODLASTUSED3, Clock.getRoundNum());
-		}
-		rc.setIndicatorString(0, first+"");
-		rc.setIndicatorString(1, (y-ytl) + " " + (x-xtl));
-		int a = first + (y - ytl) * width + x - xtl;
-		rc.setIndicatorString(2, a+"");
+		// TODO not used here
+//		if (first == Channels.FLOODACTIVEINDEX1) {
+//			rc.broadcast(Channels.FLOODLASTUSED1, Clock.getRoundNum());
+//		} else if (first == Channels.FLOODACTIVEINDEX2) {
+//			rc.broadcast(Channels.FLOODLASTUSED2, Clock.getRoundNum());
+//		} else {
+//			rc.broadcast(Channels.FLOODLASTUSED3, Clock.getRoundNum());
+//		}
 		return moves[rc.readBroadcast(first + (y - ytl) * width + x - xtl)];
 	}
 	
